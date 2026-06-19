@@ -78,7 +78,7 @@ export default function SendMoney() {
 
       {/* Amount */}
       <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
-        <AmountDisplay amount={amount} exceeded={exceeded} available={AVAILABLE} animStyle={animStyle} />
+        <AmountDisplay amount={amount} exceeded={exceeded} animStyle={animStyle} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Image source="sf:creditcard" tintColor="#9A9A9A" style={{ width: 18, height: 14 }} />
           <Text style={{ color: '#9A9A9A', fontSize: 15, fontFamily: font.regular }}>
