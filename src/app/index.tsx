@@ -50,8 +50,8 @@ export default function SendMoney() {
       </Stack.Toolbar>
 
       {/* Recipient card */}
-      <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6, marginBottom: 6 }}>
+      <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: '#F5F5F5', borderRadius: 20, borderCurve: 'continuous', padding: 12, gap: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 }}>
           <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Recipient Name/Bank</Text>
           <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Bank Account</Text>
         </View>
@@ -61,10 +61,9 @@ export default function SendMoney() {
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: '#fff',
-            borderRadius: 16,
+            borderRadius: 12,
             borderCurve: 'continuous',
-            padding: 16,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+            padding: 14,
           }}>
           <View style={{ gap: 2 }}>
             <Text style={{ fontSize: 16, fontFamily: font.bold, color: '#111' }}>Aliko Mohammed Dangote</Text>
