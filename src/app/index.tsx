@@ -1,11 +1,12 @@
 import { Image } from 'expo-image';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ANIM_LABELS, AmountDisplay, type AnimStyle } from '@/components/amount-display';
 import { ContinueButton } from '@/components/continue-button';
-import { applyKey, splitAmount } from '@/lib/amount';
+import { applyKey } from '@/lib/amount';
 import { font } from '@/lib/fonts';
 
 const PINK = '#E946A8';
@@ -23,19 +24,29 @@ function HeaderPill() {
 
 export default function SendMoney() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const [amount, setAmount] = useState('100.25');
-  const { dollars, cents } = splitAmount(amount);
+  const [animStyle, setAnimStyle] = useState<AnimStyle>('pulse');
   const exceeded = parseFloat(amount || '0') > AVAILABLE;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff', paddingBottom: insets.bottom }}>
       <Stack.Screen options={{ headerTitle: () => <HeaderPill />, headerBackVisible: false }} />
-      <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button icon="chevron.left" onPress={() => router.back()} />
-      </Stack.Toolbar>
+
+      {/* Toolbar: right → animation picker menu */}
       <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button icon="ellipsis" onPress={() => {}} />
+        <Stack.Toolbar.Menu icon="ellipsis">
+          <Stack.Toolbar.Menu inline title="Animation">
+            {(Object.keys(ANIM_LABELS) as AnimStyle[]).map((key) => (
+              <Stack.Toolbar.MenuAction
+                key={key}
+                icon={ANIM_LABELS[key].icon as any}
+                isOn={animStyle === key}
+                onPress={() => setAnimStyle(key)}>
+                {ANIM_LABELS[key].label}
+              </Stack.Toolbar.MenuAction>
+            ))}
+          </Stack.Toolbar.Menu>
+        </Stack.Toolbar.Menu>
       </Stack.Toolbar>
 
       {/* Recipient card */}
@@ -67,10 +78,7 @@ export default function SendMoney() {
 
       {/* Amount */}
       <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
-        <Text selectable style={{ fontSize: 64, fontFamily: font.bold, fontVariant: ['tabular-nums'] }}>
-          <Text style={{ color: '#111' }}>${dollars}</Text>
-          <Text style={{ color: '#B8B8B8' }}>{cents}</Text>
-        </Text>
+        <AmountDisplay amount={amount} exceeded={exceeded} available={AVAILABLE} animStyle={animStyle} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Image source="sf:creditcard" tintColor="#9A9A9A" style={{ width: 18, height: 14 }} />
           <Text style={{ color: '#9A9A9A', fontSize: 15, fontFamily: font.regular }}>
