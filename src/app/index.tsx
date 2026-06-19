@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,26 +10,30 @@ import { applyKey, splitAmount } from '@/lib/amount';
 const PINK = '#E946A8';
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
 
+function HeaderPill() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FCEAF5', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999 }}>
+      <Image source="sf:paperplane.fill" tintColor={PINK} style={{ width: 14, height: 14 }} />
+      <Text style={{ color: PINK, fontWeight: '600', fontSize: 15 }}>Send Money</Text>
+    </View>
+  );
+}
+
 export default function SendMoney() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [amount, setAmount] = useState('100.25');
   const { dollars, cents } = splitAmount(amount);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: insets.top, paddingBottom: insets.bottom }}>
-      {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 8 }}>
-        <Pressable hitSlop={12}>
-          <Image source="sf:arrow.left" tintColor="#111" style={{ width: 22, height: 22 }} />
-        </Pressable>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FCEAF5', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999 }}>
-          <Image source="sf:paperplane.fill" tintColor={PINK} style={{ width: 14, height: 14 }} />
-          <Text style={{ color: PINK, fontWeight: '600', fontSize: 15 }}>Send Money</Text>
-        </View>
-        <Pressable hitSlop={12}>
-          <Image source="sf:ellipsis" tintColor="#111" style={{ width: 22, height: 22 }} />
-        </Pressable>
-      </View>
+    <View style={{ flex: 1, backgroundColor: '#fff', paddingBottom: insets.bottom }}>
+      <Stack.Screen options={{ headerTitle: () => <HeaderPill />, headerBackVisible: false }} />
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button icon="chevron.left" onPress={() => router.back()} />
+      </Stack.Toolbar>
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button icon="ellipsis" onPress={() => {}} />
+      </Stack.Toolbar>
 
       {/* Recipient card */}
       <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
