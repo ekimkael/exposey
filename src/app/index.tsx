@@ -89,7 +89,7 @@ export default function SendMoney() {
               justifyContent: 'center',
               opacity: pressed ? 0.4 : 1,
             })}>
-            <View style={{ width: '88%', height: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#F4F4F4' }}>
+            <View style={{ width: '88%', height: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 999, backgroundColor: '#F4F4F4' }}>
               {k === 'del' ? (
                 <Image source="sf:delete.left" tintColor="#111" style={{ width: 24, height: 22 }} />
               ) : (
