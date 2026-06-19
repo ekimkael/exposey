@@ -1,62 +1,59 @@
-# rn.ui — mobile UI reproductions 👋
+# rn.ui
 
-[Expo](https://expo.dev) SDK 56 project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A collection of mobile UI reproductions built with **Expo SDK 56**.
 
-**Convention:** `main` keeps the untouched base template. Each mobile interface to reproduce lives on its own branch (e.g. `feat/send-money-screen`).
+## How this repo works
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Untouched Expo template — the baseline |
+| `feat/<name>` | One UI reproduction per branch |
+
+To start a new reproduction: branch off `main`, keep it isolated.
 
 ## Screens
 
-- **Send Money** — see [docs/send-money.md](docs/send-money.md) for architecture, state, animations, and how to run the native features.
+| Branch | Screen | Native features |
+|--------|--------|----------------|
+| `feat/send-money-screen` | Send Money (wallet transfer) | SwiftUI/Compose button, iOS toolbar menu |
 
-## Get started
+Full architecture notes: [docs/send-money.md](docs/send-money.md)
 
-1. Install dependencies
+## Tech stack
 
-   ```bash
-   npm install
-   ```
+| | |
+|--|--|
+| Runtime | Expo SDK 56, React Native 0.85.3 |
+| Navigation | expo-router 56.2.11 (file-based) |
+| Animations | React Native Reanimated v4 |
+| Native UI | `@expo/ui` — SwiftUI Host/Button (iOS), Jetpack Compose (Android) |
+| Typography | [Open Runde](https://github.com/aurelijusb/open-runde) — open-source SF Pro Rounded alternative |
+| Haptics | expo-haptics |
+| Theming | React context — light / dark / system |
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run
 
 ```bash
-npm run reset-project
+npm install
+npx expo start        # Expo Go — works for layout, fonts, keypad, animations
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Two features require a custom dev build (not available in Expo Go):
 
-### Other setup steps
+- **Native Continue button** — SwiftUI `borderedProminent` (iOS) / Compose `Button` (Android)
+- **Header toolbar menu** — `Stack.Toolbar` with animation + theme pickers (iOS)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx expo run:ios      # or: npx expo run:android
+```
 
-## Learn more
+## Theming
 
-To learn more about developing your project with Expo, look at the following resources:
+Light, dark, and system modes are supported. The active mode is picked from the header menu (iOS) and is **in-memory only** — it resets on each launch. To persist it, add storage in `src/theme/theme-context.tsx`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Adding a new screen
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. `git checkout -b feat/<screen-name> main`
+2. Replace `src/app/index.tsx` with the reproduction
+3. Add components under `src/components/`, pure logic under `src/lib/`
+4. Document it in `docs/<screen-name>.md` and add a row to the table above
