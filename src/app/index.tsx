@@ -1,129 +1,63 @@
-import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ANIM_LABELS, AmountDisplay, type AnimStyle } from '@/components/amount-display';
+import { AmountDisplay, type AnimationStyle } from '@/components/amount-display';
+import { AmountKeypad } from '@/components/amount-keypad';
+import { AvailableBalance } from '@/components/available-balance';
 import { ContinueButton } from '@/components/continue-button';
+import { ErrorBanner } from '@/components/error-banner';
+import { RecipientCard, type Recipient } from '@/components/recipient-card';
+import { AnimationMenu, HeaderPill } from '@/components/send-money-header';
 import { applyKey } from '@/lib/amount';
-import { font } from '@/lib/fonts';
+import { colors } from '@/theme/tokens';
 
-const PINK = '#E946A8';
-const AVAILABLE = 500.65;
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
+/** Mock transfer recipient — replace with real data when wiring a backend. */
+const RECIPIENT: Recipient = {
+  name: 'Aliko Mohammed Dangote',
+  bank: 'Grey Finance',
+  accountNumber: '2893902383',
+};
 
-function HeaderPill() {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FCEAF5', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999 }}>
-      <Image source="sf:paperplane.fill" tintColor={PINK} style={{ width: 14, height: 14 }} />
-      <Text style={{ color: PINK, fontFamily: font.semibold, fontSize: 15 }}>Send Money</Text>
-    </View>
-  );
-}
+/** Mock available balance (dollars). Transfers above this are blocked. */
+const AVAILABLE_BALANCE = 500.65;
 
-export default function SendMoney() {
+const BALANCE_EXCEEDED_MESSAGE = 'Montant supérieur au solde disponible';
+
+/**
+ * Send Money screen.
+ *
+ * Composition only — each section is its own component. Holds the two pieces of
+ * screen state: the raw `amount` string and the selected entry `animationStyle`.
+ * Entering a value above {@link AVAILABLE_BALANCE} locks the keypad (except
+ * backspace) and triggers the error feedback on {@link AmountDisplay}.
+ */
+export default function SendMoneyScreen() {
   const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('100.25');
-  const [animStyle, setAnimStyle] = useState<AnimStyle>('pulse');
-  const exceeded = parseFloat(amount || '0') > AVAILABLE;
+  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('pulse');
+
+  const isBalanceExceeded = parseFloat(amount || '0') > AVAILABLE_BALANCE;
+
+  const handleKeyPress = (key: string) => setAmount((current) => applyKey(current, key));
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff', paddingBottom: insets.bottom }}>
+    <View style={{ flex: 1, backgroundColor: colors.surface, paddingBottom: insets.bottom }}>
       <Stack.Screen options={{ headerTitle: () => <HeaderPill />, headerBackVisible: false }} />
+      <AnimationMenu value={animationStyle} onChange={setAnimationStyle} />
 
-      {/* Toolbar: right → animation picker menu */}
-      <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Menu icon="ellipsis">
-          <Stack.Toolbar.Menu inline title="Animation">
-            {(Object.keys(ANIM_LABELS) as AnimStyle[]).map((key) => (
-              <Stack.Toolbar.MenuAction
-                key={key}
-                icon={ANIM_LABELS[key].icon as any}
-                isOn={animStyle === key}
-                onPress={() => setAnimStyle(key)}>
-                {ANIM_LABELS[key].label}
-              </Stack.Toolbar.MenuAction>
-            ))}
-          </Stack.Toolbar.Menu>
-        </Stack.Toolbar.Menu>
-      </Stack.Toolbar>
+      <RecipientCard recipient={RECIPIENT} />
 
-      {/* Recipient card */}
-      <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: '#F5F5F5', borderRadius: 20, borderCurve: 'continuous', padding: 8, gap: 8 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 }}>
-          <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Recipient Name/Bank</Text>
-          <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Bank Account</Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-            borderRadius: 12,
-            borderCurve: 'continuous',
-            padding: 14,
-          }}>
-          <View style={{ gap: 2 }}>
-            <Text style={{ fontSize: 16, fontFamily: font.semibold, color: '#111' }}>Aliko Mohammed Dangote</Text>
-            <Text style={{ fontSize: 14, color: '#9A9A9A', fontFamily: font.regular }}>Grey Finance</Text>
-          </View>
-          <Text selectable style={{ fontSize: 15, color: '#444', fontFamily: font.regular, fontVariant: ['tabular-nums'] }}>
-            2893902383
-          </Text>
-        </View>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <AmountDisplay amount={amount} exceeded={isBalanceExceeded} animationStyle={animationStyle} />
+        <AvailableBalance amount={AVAILABLE_BALANCE} />
       </View>
 
-      {/* Amount */}
-      <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
-        <AmountDisplay amount={amount} exceeded={exceeded} animStyle={animStyle} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Image source="sf:creditcard" tintColor="#9A9A9A" style={{ width: 18, height: 14 }} />
-          <Text style={{ color: '#9A9A9A', fontSize: 15, fontFamily: font.regular }}>
-            Available: <Text style={{ color: '#111', fontFamily: font.bold }}>${AVAILABLE.toFixed(2)}</Text>
-          </Text>
-        </View>
-      </View>
+      {isBalanceExceeded && <ErrorBanner message={BALANCE_EXCEEDED_MESSAGE} />}
 
-      {/* Error message */}
-      {exceeded && (
-        <View style={{ marginHorizontal: 20, marginBottom: 8, backgroundColor: '#FFF0F0', borderRadius: 12, borderCurve: 'continuous', paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Image source="sf:exclamationmark.circle.fill" tintColor="#E0312A" style={{ width: 16, height: 16 }} />
-          <Text style={{ color: '#E0312A', fontSize: 13, fontFamily: font.medium }}>
-            Montant supérieur au solde disponible
-          </Text>
-        </View>
-      )}
+      <AmountKeypad onKeyPress={handleKeyPress} locked={isBalanceExceeded} />
 
-      {/* Keypad */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
-        {KEYS.map((k) => (
-          <Pressable
-            key={k}
-            onPress={() => {
-              if (exceeded && k !== 'del') return;
-              setAmount((v) => applyKey(v, k));
-            }}
-            style={({ pressed }) => ({
-              width: '33.333%',
-              height: 70,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: exceeded && k !== 'del' ? 0.35 : pressed ? 0.4 : 1,
-            })}>
-            <View style={{ width: '88%', height: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 999, backgroundColor: '#F4F4F4' }}>
-              {k === 'del' ? (
-                <Image source="sf:delete.left" tintColor="#111" style={{ width: 24, height: 22 }} />
-              ) : (
-                <Text style={{ fontSize: 26, fontFamily: font.medium, color: '#111' }}>{k}</Text>
-              )}
-            </View>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Continue */}
       <View style={{ alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
         <ContinueButton />
       </View>

@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { Text, View, type TextStyle } from 'react-native';
+import type { SFSymbol } from 'sf-symbols-typescript';
 import Animated, {
   FadeInDown,
   FadeOutUp,
@@ -10,115 +13,148 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
-import { Text, View, type TextStyle } from 'react-native';
 
-import { font } from '@/lib/fonts';
 import { splitAmount } from '@/lib/amount';
+import { font } from '@/lib/fonts';
+import { colors } from '@/theme/tokens';
 
-// 'color' + 'shake' removed — now always-on error feedback regardless of mode
-export type AnimStyle = 'pulse' | 'flip' | 'fade';
+/**
+ * Entry animation applied to the amount on each keystroke. The user picks one
+ * from the header menu. The error feedback (red colour + shake) is independent
+ * of this choice and always fires when the balance is exceeded.
+ */
+export type AnimationStyle = 'pulse' | 'flip' | 'fade';
 
-export const ANIM_LABELS: Record<AnimStyle, { label: string; icon: string }> = {
+/** Menu metadata for each animation style (label + SF Symbol shown in the picker). */
+export const ANIMATION_OPTIONS: Record<AnimationStyle, { label: string; icon: SFSymbol }> = {
   pulse: { label: 'Scale Pulse', icon: 'waveform' },
-  flip:  { label: 'Flip',        icon: 'arrow.up.arrow.down' },
-  fade:  { label: 'Fondu',       icon: 'eye' },
+  flip: { label: 'Flip', icon: 'arrow.up.arrow.down' },
+  fade: { label: 'Fondu', icon: 'eye' },
 };
 
-const T: TextStyle = {
+// --- Animation tuning -------------------------------------------------------
+/** Peak scale of the pulse bounce. */
+const PULSE_PEAK_SCALE = 1.08;
+const PULSE_RISE_MS = 70;
+/** Horizontal offsets (px) the shake steps through, ending back at 0. */
+const SHAKE_OFFSETS = [-10, 10, -8, 8, 0];
+const SHAKE_STEP_MS = 45;
+/** Cross-fade duration for the black↔red error colour transition. */
+const ERROR_COLOR_MS = 250;
+/** Per-digit fade duration in the `fade` style. */
+const DIGIT_FADE_MS = 140;
+/** Slide duration for the `flip` style. */
+const FLIP_SLIDE_MS = 200;
+/** Fixed height of the flip viewport so digits are clipped to their own bounds. */
+const FLIP_CLIP_HEIGHT = 60;
+
+/** Shared typography for every glyph of the amount. */
+const amountTextStyle: TextStyle = {
   fontSize: 46,
+  lineHeight: 56,
   fontFamily: font.semibold,
   fontVariant: ['tabular-nums'],
-  lineHeight: 56,
 };
 
-export function AmountDisplay({
-  amount,
-  exceeded,
-  animStyle,
-}: {
+export interface AmountDisplayProps {
+  /** Raw amount string (see `lib/amount.ts`). */
   amount: string;
+  /** Whether the amount exceeds the available balance (drives red + shake). */
   exceeded: boolean;
-  animStyle: AnimStyle;
-}) {
+  /** Which entry animation to play. */
+  animationStyle: AnimationStyle;
+}
+
+/**
+ * The large `$100.25` amount with selectable entry animations and built-in
+ * error feedback.
+ *
+ * Dollars render in {@link colors.text} (or {@link colors.danger} when
+ * `exceeded`); the cents stay muted. All Reanimated hooks are declared
+ * unconditionally before the per-style branches, so the rules of hooks hold
+ * regardless of which `animationStyle` is active.
+ */
+export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDisplayProps) {
   const { dollars, cents } = splitAmount(amount);
 
-  const scale      = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const errorColor = useSharedValue(0); // 0 = black, 1 = red — always driven by exceeded
+  const scale = useSharedValue(1);
+  const shakeOffset = useSharedValue(0);
+  const errorProgress = useSharedValue(0); // 0 = normal colour, 1 = danger colour
 
-  // pulse: bounce on each keystroke
+  // Pulse: bounce the whole amount on every keystroke.
   useEffect(() => {
-    if (animStyle !== 'pulse') return;
+    if (animationStyle !== 'pulse') return;
     scale.value = withSequence(
-      withTiming(1.08, { duration: 70 }),
+      withTiming(PULSE_PEAK_SCALE, { duration: PULSE_RISE_MS }),
       withSpring(1, { damping: 8, stiffness: 200 }),
     );
-  }, [amount, animStyle]);
+  }, [amount, animationStyle]);
 
-  // shake + red: always trigger on exceeded, regardless of animStyle
+  // Error feedback: cross-fade to red and shake whenever the balance is exceeded.
+  // Independent of animationStyle by design.
   useEffect(() => {
-    errorColor.value = withTiming(exceeded ? 1 : 0, { duration: 250 });
+    errorProgress.value = withTiming(exceeded ? 1 : 0, { duration: ERROR_COLOR_MS });
     if (!exceeded) return;
-    translateX.value = withSequence(
-      withTiming(-10, { duration: 45 }),
-      withTiming(10,  { duration: 45 }),
-      withTiming(-8,  { duration: 45 }),
-      withTiming(8,   { duration: 45 }),
-      withTiming(0,   { duration: 45 }),
+    shakeOffset.value = withSequence(
+      ...SHAKE_OFFSETS.map((offset) => withTiming(offset, { duration: SHAKE_STEP_MS })),
     );
   }, [exceeded]);
 
   const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: translateX.value }] }));
-
-  // ponytail: no PlatformColors — reanimated worklets require static color strings
-  const errorDollarStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(errorColor.value, [0, 1], ['#111111', '#E0312A']),
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeOffset.value }] }));
+  const dollarsColorStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(errorProgress.value, [0, 1], [colors.text, colors.danger]),
   }));
 
-  // --- Fade per digit ---
-  if (animStyle === 'fade') {
+  const centsStyle: TextStyle = { ...amountTextStyle, color: colors.amountCents };
+
+  if (animationStyle === 'fade') {
     return (
       <Animated.View style={[{ flexDirection: 'row', alignItems: 'baseline' }, shakeStyle]}>
-        <Animated.Text style={[T, errorDollarStyle]}>$</Animated.Text>
-        {dollars.split('').map((ch, i) => (
-          <Animated.View key={`d${i}${ch}`} entering={FadeInDown.duration(140)} exiting={FadeOutUp.duration(140)}>
-            <Animated.Text style={[T, errorDollarStyle]}>{ch}</Animated.Text>
+        <Animated.Text style={[amountTextStyle, dollarsColorStyle]}>$</Animated.Text>
+        {dollars.split('').map((digit, index) => (
+          <Animated.View
+            key={`dollar-${index}-${digit}`}
+            entering={FadeInDown.duration(DIGIT_FADE_MS)}
+            exiting={FadeOutUp.duration(DIGIT_FADE_MS)}>
+            <Animated.Text style={[amountTextStyle, dollarsColorStyle]}>{digit}</Animated.Text>
           </Animated.View>
         ))}
-        {cents.split('').map((ch, i) => (
-          <Animated.View key={`c${i}${ch}`} entering={FadeInDown.duration(140)} exiting={FadeOutUp.duration(140)}>
-            <Text style={[T, { color: '#B8B8B8' }]}>{ch}</Text>
+        {cents.split('').map((char, index) => (
+          <Animated.View
+            key={`cent-${index}-${char}`}
+            entering={FadeInDown.duration(DIGIT_FADE_MS)}
+            exiting={FadeOutUp.duration(DIGIT_FADE_MS)}>
+            <Text style={centsStyle}>{char}</Text>
           </Animated.View>
         ))}
       </Animated.View>
     );
   }
 
-  // --- Flip (slot machine) — clipped to its own bounds ---
-  if (animStyle === 'flip') {
+  if (animationStyle === 'flip') {
     return (
       <Animated.View style={shakeStyle}>
-        <View style={{ height: 60, overflow: 'hidden', justifyContent: 'center' }}>
+        <View style={{ height: FLIP_CLIP_HEIGHT, overflow: 'hidden', justifyContent: 'center' }}>
+          {/* Remounting on `amount` change triggers the slide in/out within the clipped viewport. */}
           <Animated.View
             key={amount}
-            entering={SlideInDown.duration(200)}
-            exiting={SlideOutUp.duration(200)}
+            entering={SlideInDown.duration(FLIP_SLIDE_MS)}
+            exiting={SlideOutUp.duration(FLIP_SLIDE_MS)}
             style={{ flexDirection: 'row' }}>
-            <Animated.Text selectable style={[T, errorDollarStyle]}>${dollars}</Animated.Text>
-            <Text style={[T, { color: '#B8B8B8' }]}>{cents}</Text>
+            <Animated.Text selectable style={[amountTextStyle, dollarsColorStyle]}>${dollars}</Animated.Text>
+            <Text style={centsStyle}>{cents}</Text>
           </Animated.View>
         </View>
       </Animated.View>
     );
   }
 
-  // --- Pulse (default) ---
+  // Default: pulse.
   return (
     <Animated.View style={[{ flexDirection: 'row' }, pulseStyle, shakeStyle]}>
-      <Animated.Text selectable style={[T, errorDollarStyle]}>${dollars}</Animated.Text>
-      <Text style={[T, { color: '#B8B8B8' }]}>{cents}</Text>
+      <Animated.Text selectable style={[amountTextStyle, dollarsColorStyle]}>${dollars}</Animated.Text>
+      <Text style={centsStyle}>{cents}</Text>
     </Animated.View>
   );
 }

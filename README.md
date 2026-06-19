@@ -4,6 +4,10 @@
 
 **Convention:** `main` keeps the untouched base template. Each mobile interface to reproduce lives on its own branch (e.g. `feat/send-money-screen`).
 
+## Screens
+
+- **Send Money** — see [docs/send-money.md](docs/send-money.md) for architecture, state, animations, and how to run the native features.
+
 ## Get started
 
 1. Install dependencies
