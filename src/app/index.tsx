@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ContinueButton } from '@/components/continue-button';
 import { applyKey, splitAmount } from '@/lib/amount';
 
 const PINK = '#E946A8';
@@ -96,16 +97,7 @@ export default function SendMoney() {
 
       {/* Continue */}
       <View style={{ alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
-        <Pressable
-          style={({ pressed }) => ({
-            backgroundColor: '#111',
-            paddingHorizontal: 48,
-            paddingVertical: 16,
-            borderRadius: 999,
-            opacity: pressed ? 0.8 : 1,
-          })}>
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Continue</Text>
-        </Pressable>
+        <ContinueButton />
       </View>
     </View>
   );
