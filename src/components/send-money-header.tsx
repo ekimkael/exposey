@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { Text, View } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
-import { ANIMATION_OPTIONS, type AnimationStyle } from '@/components/amount-display';
+import { ANIMATION_OPTIONS, type AnimationStyle } from '@/lib/animations';
 import { font } from '@/lib/fonts';
 import { useTheme, type ThemeMode } from '@/theme/theme-context';
 

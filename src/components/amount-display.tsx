@@ -1,7 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import { Text, View, type TextStyle } from 'react-native';
-import type { SFSymbol } from 'sf-symbols-typescript';
 import Animated, {
   FadeInDown,
   FadeOutUp,
@@ -15,23 +14,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { type AnimationStyle } from '@/lib/animations';
 import { splitAmount } from '@/lib/amount';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
-
-/**
- * Entry animation applied to the amount on each keystroke. The user picks one
- * from the header menu. The error feedback (red colour + shake) is independent
- * of this choice and always fires when the balance is exceeded.
- */
-export type AnimationStyle = 'pulse' | 'flip' | 'fade';
-
-/** Menu metadata for each animation style (label + SF Symbol shown in the picker). */
-export const ANIMATION_OPTIONS: Record<AnimationStyle, { label: string; icon: SFSymbol }> = {
-  pulse: { label: 'Scale Pulse', icon: 'waveform' },
-  flip: { label: 'Flip', icon: 'arrow.up.arrow.down' },
-  fade: { label: 'Fondu', icon: 'eye' },
-};
 
 // --- Animation tuning -------------------------------------------------------
 /** Peak scale of the pulse bounce. */
@@ -90,7 +76,7 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
       withTiming(PULSE_PEAK_SCALE, { duration: PULSE_RISE_MS }),
       withSpring(1, { damping: 8, stiffness: 200 }),
     );
-  }, [amount, animationStyle]);
+  }, [amount, animationStyle, scale]);
 
   // Error feedback: cross-fade to red, shake, and buzz whenever the balance is
   // exceeded. Runs only on the `exceeded` transition (the keypad is locked
@@ -105,7 +91,7 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
     if (process.env.EXPO_OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [exceeded]);
+  }, [exceeded, errorProgress, shakeOffset]);
 
   const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeOffset.value }] }));

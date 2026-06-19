@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AmountDisplay, type AnimationStyle } from '@/components/amount-display';
+import { AmountDisplay } from '@/components/amount-display';
+import { type AnimationStyle } from '@/lib/animations';
 import { AmountKeypad } from '@/components/amount-keypad';
 import { AvailableBalance } from '@/components/available-balance';
 import { ContinueButton } from '@/components/continue-button';
