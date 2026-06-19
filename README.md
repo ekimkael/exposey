@@ -1,53 +1,53 @@
 # Send Money — rn.ui
 
-Reproduction fidèle d'un écran "Send Money" de wallet mobile (transfert d'argent entre comptes).
+A faithful reproduction of a mobile wallet "Send Money" screen (peer-to-peer transfer).
 
-## À propos du projet
+## About the project
 
-**rn.ui** est un dépôt de reproductions d'interfaces mobiles construit avec Expo SDK 56.
+**rn.ui** is a collection of mobile UI reproductions built with Expo SDK 56.
 
-| Branche | Contenu |
-|---------|---------|
-| `main` | Template Expo 56 vierge — la base |
-| `feat/<nom>` | Une reproduction d'écran par branche |
+| Branch | Content |
+|--------|---------|
+| `main` | Blank Expo 56 template — the baseline |
+| `feat/<name>` | One screen reproduction per branch |
 
-Cette branche (`feat/send-money-screen`) contient la reproduction de l'écran Send Money.
+This branch (`feat/send-money-screen`) contains the Send Money screen reproduction.
 
-## Ce qui a été reproduit
+## What was reproduced
 
-Un écran de transfert d'argent avec :
+A money transfer screen with:
 
-- **Carte destinataire** — nom, banque, numéro de compte
-- **Saisie du montant** — clavier numérique custom, affichage deux tons (dollars / centimes)
-- **3 animations de saisie** interchangeables via le menu : Scale Pulse, Flip (slot machine), Fondu
-- **Feedback d'erreur** — rouge + shake + haptic quand le montant dépasse le solde disponible, clavier bloqué
-- **Solde disponible** — affiché avec icône carte de crédit
-- **Bouton Continue natif** — SwiftUI `borderedProminent` sur iOS, Jetpack Compose `Button` sur Android
-- **Menu toolbar iOS** — animation picker + theme picker dans la barre de navigation
-- **Thème light / dark / system** — suit l'OS ou se force depuis le menu
+- **Recipient card** — name, bank, account number
+- **Amount input** — custom numeric keypad, two-tone display (dollars / cents)
+- **3 entry animations** switchable from the menu: Scale Pulse, Flip (slot machine), Fade
+- **Error feedback** — red color + shake + haptic when amount exceeds available balance, keypad locked
+- **Available balance** — displayed with a credit card icon
+- **Native Continue button** — SwiftUI `borderedProminent` on iOS, Jetpack Compose `Button` on Android
+- **iOS toolbar menu** — animation picker + theme picker in the navigation bar
+- **Light / dark / system theme** — follows the OS or forced from the menu
 
-## Stack technique
+## Tech stack
 
 | | |
 |--|--|
 | Runtime | Expo SDK 56, React Native 0.85.3 |
 | Navigation | expo-router 56.2.11 |
 | Animations | React Native Reanimated v4 |
-| UI natif | `@expo/ui` — SwiftUI (iOS), Jetpack Compose (Android) |
-| Typographie | Open Runde (SF Pro Rounded open-source) |
+| Native UI | `@expo/ui` — SwiftUI (iOS), Jetpack Compose (Android) |
+| Typography | Open Runde (open-source SF Pro Rounded alternative) |
 | Haptics | expo-haptics |
 | Theming | React context — light / dark / system |
 
-## Prérequis
+## Prerequisites
 
 - Node.js ≥ 18
-- npm ou yarn
-- [Expo Go](https://expo.dev/go) (iOS / Android) pour le mode JS-only
-- Xcode (iOS simulator) ou Android Studio pour le dev build natif
+- npm or yarn
+- [Expo Go](https://expo.dev/go) (iOS / Android) for JS-only mode
+- Xcode (iOS simulator) or Android Studio for the native dev build
 
-## Lancer le projet en local
+## Run locally
 
-### 1. Cloner et installer
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/ekimkael/rn.ui.git
@@ -56,24 +56,24 @@ git checkout feat/send-money-screen
 npm install
 ```
 
-### 2. Démarrer (Expo Go — recommandé pour commencer)
+### 2. Start (Expo Go — recommended to start)
 
 ```bash
 npx expo start
 ```
 
-Scanner le QR code avec l'app Expo Go. Toutes les fonctionnalités JS sont disponibles : layout, polices, clavier, animations, feedback d'erreur, thèmes.
+Scan the QR code with the Expo Go app. All JS features are available: layout, fonts, keypad, animations, error feedback, themes.
 
-### 3. Dev build — pour les fonctionnalités natives
+### 3. Dev build — for native features
 
-Le bouton Continue natif et le menu toolbar iOS nécessitent un **custom dev build** (pas disponible dans Expo Go) :
+The native Continue button and the iOS toolbar menu require a **custom dev build** (not available in Expo Go):
 
 ```bash
 npx expo run:ios        # iOS simulator
 npx expo run:android    # Android emulator
 ```
 
-> Xcode doit être installé pour `run:ios`, Android Studio pour `run:android`.
+> Xcode must be installed for `run:ios`, Android Studio for `run:android`.
 
 ### 4. Web
 
@@ -81,11 +81,11 @@ npx expo run:android    # Android emulator
 npx expo start --web
 ```
 
-Le bouton Continue tombe sur le fallback `Pressable` RN. Le toolbar menu iOS n'apparaît pas.
+The Continue button falls back to a RN `Pressable`. The iOS toolbar menu does not appear.
 
-## Lancer les tests
+## Run tests
 
-`lib/amount.test.ts` est un self-check sans dépendances. Requiert Node 24+ (strip types natif) :
+`lib/amount.test.ts` is a dependency-free assert self-check. Requires Node 24+ (native type stripping):
 
 ```bash
 cd src/lib
@@ -93,7 +93,7 @@ sed 's#\./amount#./amount.ts#' amount.test.ts > _amt.test.mts \
   && node --experimental-strip-types _amt.test.mts; rm -f _amt.test.mts
 ```
 
-Affiche `ok` en cas de succès.
+Prints `ok` on success.
 
 ## Lint
 
@@ -105,86 +105,86 @@ npm run lint
 
 ## Architecture
 
-La route est composition-only ; chaque section est un composant isolé et présentationnel. L'état vit dans l'écran et descend via props.
+The route is composition-only; every section is an isolated, presentational component. State lives in the screen and flows down via props.
 
 ```
 src/
   app/
-    _layout.tsx              Charge Open Runde, définit le Stack + ThemeProvider
-    index.tsx                SendMoneyScreen — composition + état
+    _layout.tsx              Loads Open Runde fonts, defines the Stack + ThemeProvider
+    index.tsx                SendMoneyScreen — composition + state
   components/
-    send-money-header.tsx    HeaderPill (titre nav) + HeaderMenu (menus animation + thème, iOS)
-    recipient-card.tsx       Bloc destinataire
-    amount-display.tsx       Montant animé + feedback erreur + ANIMATION_OPTIONS
-    available-balance.tsx    Ligne "Available: $…"
-    error-banner.tsx         Bannière "solde dépassé"
-    amount-keypad.tsx        Clavier numérique (présentationnel)
-    continue-button.tsx      CTA natif par plateforme (SwiftUI / Compose / web)
+    send-money-header.tsx    HeaderPill (nav title) + HeaderMenu (animation + theme pickers, iOS)
+    recipient-card.tsx       Recipient details block
+    amount-display.tsx       Animated amount + error feedback + ANIMATION_OPTIONS
+    available-balance.tsx    "Available: $…" hint row
+    error-banner.tsx         Inline "balance exceeded" banner
+    amount-keypad.tsx        Numeric keypad (presentational)
+    continue-button.tsx      Native CTA per platform (SwiftUI / Compose / web)
   lib/
-    amount.ts                applyKey / splitAmount — logique de saisie monétaire pure
-    amount.test.ts           Self-check assert (voir "Tests")
-    fonts.ts                 Constantes famille Open Runde
+    amount.ts                applyKey / splitAmount — pure money-entry logic
+    amount.test.ts           Assert self-check (see "Run tests")
+    fonts.ts                 Open Runde family-name constants
   theme/
-    tokens.ts                Palettes light + dark (ThemeColors)
+    tokens.ts                Light + dark colour palettes (ThemeColors)
     theme-context.tsx        ThemeProvider + useTheme()
   assets/fonts/              OpenRunde-{Regular,Medium,Semibold,Bold}.otf
 ```
 
-## État
+## State
 
-`SendMoneyScreen` contient exactement deux états :
+`SendMoneyScreen` holds exactly two pieces of state:
 
-| État | Type | Signification |
-|------|------|---------------|
-| `amount` | `string` | Montant brut tapé, commence à `"0"` |
-| `animationStyle` | `AnimationStyle` | Animation choisie dans le menu |
+| State | Type | Meaning |
+|-------|------|---------|
+| `amount` | `string` | Raw typed amount, starts at `"0"` |
+| `animationStyle` | `AnimationStyle` | Entry animation chosen from the menu |
 
-La préférence de thème (`system`/`light`/`dark`) vit dans `ThemeProvider`, pas dans l'écran.
+Theme preference (`system`/`light`/`dark`) lives in `ThemeProvider`, not in the screen.
 
-Dérivé : `isBalanceExceeded = parseFloat(amount) > AVAILABLE_BALANCE`. Quand vrai, le clavier se bloque (sauf backspace) et `AmountDisplay` déclenche le feedback d'erreur.
+Derived: `isBalanceExceeded = parseFloat(amount) > AVAILABLE_BALANCE`. When true, the keypad locks (except backspace) and `AmountDisplay` triggers the error feedback.
 
-## Saisie du montant (`lib/amount.ts`)
+## Money entry (`lib/amount.ts`)
 
-Le montant est une **chaîne brute**, pas un nombre — l'affichage correspond exactement aux touches (`"0."`, point final, etc.) sans arrondi flottant.
+The amount is a **raw string**, not a number — the display matches keystrokes exactly (`"0."`, trailing dot, etc.) without float rounding.
 
-- `applyKey(value, key)` — applique une pression (`0`–`9`, `.`, ou `DELETE_KEY`). Règles : un seul point décimal, max 2 chiffres après la virgule, pas de zéro initial.
-- `splitAmount(value)` — découpe en `{ dollars, cents }` pour l'affichage deux tons.
+- `applyKey(value, key)` — applies one press (`0`–`9`, `.`, or `DELETE_KEY`). Rules: single decimal point, max 2 cents digits, no leading zero.
+- `splitAmount(value)` — splits into `{ dollars, cents }` for the two-tone display.
 
 ## Animations (`amount-display.tsx`)
 
-Construit avec **Reanimated v4**. Deux préoccupations indépendantes :
+Built with **Reanimated v4**. Two independent concerns:
 
-1. **Animation de saisie** — choisie par l'utilisateur (`pulse` | `flip` | `fade`) :
-   - `pulse` : le montant entier scale `1 → 1.08 → 1` à chaque touche.
-   - `flip` : slide slot-machine, clippé dans un viewport hauteur fixe (remount sur `amount`).
-   - `fade` : chaque chiffre fade in/out indépendamment (remount par caractère via `key`).
-2. **Feedback d'erreur** — toujours actif, indépendant de l'animation : quand `exceeded` passe à vrai, les dollars cross-fadent noir↔rouge, le montant shake, et un buzz haptic se déclenche (natif uniquement).
+1. **Entry animation** — user-selected (`pulse` | `flip` | `fade`):
+   - `pulse`: the whole amount scales `1 → 1.08 → 1` on each keystroke.
+   - `flip`: slot-machine slide, clipped inside a fixed-height viewport (remount on `amount`).
+   - `fade`: each digit fades in/out independently (remount per character via `key`).
+2. **Error feedback** — always on, independent of the entry animation: when `exceeded` flips to true the dollars cross-fade black↔red, the amount shakes, and a haptic buzz fires (native only).
 
-Tous les hooks Reanimated sont déclarés inconditionnellement avant les branches de style, respectant les règles des hooks.
+All Reanimated hooks are declared unconditionally before the per-style branches, so the rules of hooks are never violated.
 
-Pour ajouter une animation : étendre `AnimationStyle`, ajouter une entrée dans `ANIMATION_OPTIONS` (label + SF Symbol), et ajouter une branche dans `AmountDisplay`. Le menu se construit lui-même depuis `ANIMATION_OPTIONS`.
+To add an animation: extend `AnimationStyle`, add an entry to `ANIMATION_OPTIONS` (label + SF Symbol), and add a branch in `AmountDisplay`. The header menu renders itself from `ANIMATION_OPTIONS` — no other change needed.
 
-## Thème (`theme/`)
+## Theming (`theme/`)
 
-Light, dark et system sont supportés.
+Light, dark, and system modes are supported.
 
-- `tokens.ts` exporte deux palettes (`lightColors`, `darkColors`) partageant les clés `ThemeColors`. Ne jamais importer une palette directement.
-- `theme-context.tsx` fournit `ThemeProvider` et le hook `useTheme()`, retournant `{ colors, mode, setMode, scheme }`. `mode` est la préférence (`system | light | dark`) ; `scheme` est la valeur résolue `light | dark`.
-- La barre de navigation et la status bar suivent `scheme` (voir `ThemedStack` dans `_layout.tsx`).
-- La préférence est **en mémoire uniquement** — non persistée entre les lancements. Pour persister, ajouter du storage dans `ThemeProvider`.
+- `tokens.ts` exports two palettes (`lightColors`, `darkColors`) sharing the `ThemeColors` keys. Never import a palette directly.
+- `theme-context.tsx` provides `ThemeProvider` and the `useTheme()` hook, returning `{ colors, mode, setMode, scheme }`. `mode` is the user preference (`system | light | dark`); `scheme` is the resolved `light | dark`.
+- The navigation bar and status bar follow `scheme` (see `ThemedStack` in `_layout.tsx`).
+- Preference is **in-memory only** — not persisted across launches. To persist, add storage in `ThemeProvider`.
 
-Pour ajouter une couleur : ajouter la clé dans `ThemeColors` et dans LES DEUX palettes.
+To add a colour: add the key to `ThemeColors` and to BOTH palettes.
 
-## Conventions de style
+## Styling conventions
 
-- Les couleurs viennent de `useTheme().colors` — jamais de valeur hex inline.
-- Polices : styler avec `fontFamily: font.*` (PAS `fontWeight`) ; chaque graisse Open Runde est une famille enregistrée séparément.
-- Les styles Reanimated doivent utiliser des chaînes hex statiques (pas `PlatformColor`) ; les valeurs de palette sont des chaînes simples, elles fonctionnent dans les worklets.
-- Coins arrondis : `borderCurve: 'continuous'`, sauf capsules (`borderRadius: 999`).
+- Colours come from `useTheme().colors` — never inline a hex value.
+- Fonts: style with `fontFamily: font.*` (NOT `fontWeight`); each Open Runde weight is a separate registered family.
+- Reanimated styles must use static hex strings (no `PlatformColor`); palette values are plain strings so they work inside worklets.
+- Rounded corners use `borderCurve: 'continuous'`, except capsules (`borderRadius: 999`).
 
-## Notes plateforme
+## Platform notes
 
-- `HeaderMenu` (`Stack.Toolbar`) est **iOS uniquement** ; ne rend rien sur Android/web. La pill de titre apparaît partout.
-- `ContinueButton` switche d'implémentation via `process.env.EXPO_OS` (constante Metro). Les variantes natives utilisent la police système ; seul le fallback web utilise Open Runde.
-- Le bouton retour est intentionnellement retiré (`headerBackVisible: false`).
-- Les `require()` de `@expo/ui` sont lazies (à l'intérieur des blocs `if`) : `@expo/ui/swift-ui` est un module natif iOS qui planterait au chargement sur Android si importé au top-level.
+- `HeaderMenu` (`Stack.Toolbar`) is **iOS-only**; it renders nothing on Android/web. The nav title pill shows everywhere.
+- `ContinueButton` switches implementation via `process.env.EXPO_OS` (Metro build-time constant). Native variants use the system font; only the web fallback uses Open Runde.
+- The back button is intentionally removed (`headerBackVisible: false`).
+- `@expo/ui` imports are lazy `require()` inside `if` blocks: `@expo/ui/swift-ui` is a native iOS module that would throw at load time on Android if imported at the top level.
