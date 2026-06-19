@@ -9,6 +9,7 @@ import { applyKey, splitAmount } from '@/lib/amount';
 import { font } from '@/lib/fonts';
 
 const PINK = '#E946A8';
+const AVAILABLE = 500.65;
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
 
 function HeaderPill() {
@@ -25,6 +26,7 @@ export default function SendMoney() {
   const router = useRouter();
   const [amount, setAmount] = useState('100.25');
   const { dollars, cents } = splitAmount(amount);
+  const exceeded = parseFloat(amount || '0') > AVAILABLE;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff', paddingBottom: insets.bottom }}>
@@ -70,25 +72,39 @@ export default function SendMoney() {
           <Text style={{ color: '#B8B8B8' }}>{cents}</Text>
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Image source="sf:envelope" tintColor="#9A9A9A" style={{ width: 15, height: 15 }} />
+          <Image source="sf:creditcard" tintColor="#9A9A9A" style={{ width: 18, height: 14 }} />
           <Text style={{ color: '#9A9A9A', fontSize: 15, fontFamily: font.regular }}>
-            Available: <Text style={{ color: '#111', fontFamily: font.bold }}>$500.65</Text>
+            Available: <Text style={{ color: '#111', fontFamily: font.bold }}>${AVAILABLE.toFixed(2)}</Text>
           </Text>
         </View>
       </View>
 
+      {/* Error message */}
+      {exceeded && (
+        <View style={{ marginHorizontal: 20, marginBottom: 8, backgroundColor: '#FFF0F0', borderRadius: 12, borderCurve: 'continuous', paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Image source="sf:exclamationmark.circle.fill" tintColor="#E0312A" style={{ width: 16, height: 16 }} />
+          <Text style={{ color: '#E0312A', fontSize: 13, fontFamily: font.medium }}>
+            Montant supérieur au solde disponible
+          </Text>
+        </View>
+      )}
+
       {/* Keypad */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, opacity: exceeded ? 0.35 : 1 }}>
         {KEYS.map((k) => (
           <Pressable
             key={k}
-            onPress={() => setAmount((v) => applyKey(v, k))}
+            onPress={() => {
+              // always allow del to unblock
+              if (exceeded && k !== 'del') return;
+              setAmount((v) => applyKey(v, k));
+            }}
             style={({ pressed }) => ({
               width: '33.333%',
               height: 70,
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: pressed ? 0.4 : 1,
+              opacity: pressed && (!exceeded || k === 'del') ? 0.4 : 1,
             })}>
             <View style={{ width: '88%', height: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 999, backgroundColor: '#F4F4F4' }}>
               {k === 'del' ? (
