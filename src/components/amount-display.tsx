@@ -26,10 +26,10 @@ export const ANIM_LABELS: Record<AnimStyle, { label: string; icon: string }> = {
 };
 
 const T: TextStyle = {
-  fontSize: 64,
+  fontSize: 52,
   fontFamily: font.bold,
   fontVariant: ['tabular-nums'],
-  lineHeight: 76,
+  lineHeight: 62,
 };
 
 export function AmountDisplay({
@@ -100,7 +100,7 @@ export function AmountDisplay({
   if (animStyle === 'flip') {
     return (
       <Animated.View style={shakeStyle}>
-        <View style={{ height: 80, overflow: 'hidden', justifyContent: 'center' }}>
+        <View style={{ height: 66, overflow: 'hidden', justifyContent: 'center' }}>
           <Animated.View
             key={amount}
             entering={SlideInDown.duration(200)}
