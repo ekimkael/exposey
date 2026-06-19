@@ -27,7 +27,7 @@ export const ANIM_LABELS: Record<AnimStyle, { label: string; icon: string }> = {
 
 const T: TextStyle = {
   fontSize: 46,
-  fontFamily: font.bold,
+  fontFamily: font.semibold,
   fontVariant: ['tabular-nums'],
   lineHeight: 56,
 };
