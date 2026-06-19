@@ -50,7 +50,7 @@ export default function SendMoney() {
       </Stack.Toolbar>
 
       {/* Recipient card */}
-      <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: '#F5F5F5', borderRadius: 20, borderCurve: 'continuous', paddingHorizontal: 6, paddingVertical: 12, gap: 8 }}>
+      <View style={{ marginHorizontal: 20, marginTop: 16, backgroundColor: '#F5F5F5', borderRadius: 20, borderCurve: 'continuous', padding: 8, gap: 8 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 }}>
           <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Recipient Name/Bank</Text>
           <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Bank Account</Text>
