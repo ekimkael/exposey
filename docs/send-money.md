@@ -53,10 +53,13 @@ src/
 
 `SendMoneyScreen` holds exactly two pieces of state:
 
-| State            | Type            | Meaning                                  |
-| ---------------- | --------------- | ---------------------------------------- |
-| `amount`         | `string`        | Raw typed amount, e.g. `"100.25"`        |
-| `animationStyle` | `AnimationStyle`| Entry animation chosen from the menu     |
+| State            | Type            | Meaning                                          |
+| ---------------- | --------------- | ------------------------------------------------ |
+| `amount`         | `string`        | Raw typed amount, starts `"0"` (e.g. `"100.25"`) |
+| `animationStyle` | `AnimationStyle`| Entry animation chosen from the menu             |
+
+Theme preference (`system`/`light`/`dark`) lives in the `ThemeProvider`, not in
+the screen — see [Theming](#theming-theme).
 
 Derived: `isBalanceExceeded = parseFloat(amount) > AVAILABLE_BALANCE`. When
 true, the keypad locks (all keys except backspace) and `AmountDisplay` shows

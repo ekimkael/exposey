@@ -20,6 +20,11 @@ export interface ContinueButtonProps {
  * they do NOT render in Expo Go. Their labels use the system font — the JS
  * `font` family only applies to the web fallback. The platform modules are
  * `require`d lazily so each bundle only pulls in what it uses.
+ *
+ * The fill is `colors.text` (inverse of the background) and the label is
+ * `colors.background`. Keep both: a prominent button defaults to a white label,
+ * which is invisible on the near-white dark-mode fill — `foregroundColor`
+ * (iOS) / `contentColor` (Android) is what makes it readable.
  */
 export function ContinueButton({ onPress }: ContinueButtonProps) {
   const { colors } = useTheme();
