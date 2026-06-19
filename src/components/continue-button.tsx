@@ -26,13 +26,19 @@ export function ContinueButton({ onPress }: ContinueButtonProps) {
 
   if (process.env.EXPO_OS === 'ios') {
     const { Host, Button } = require('@expo/ui/swift-ui');
-    const { buttonStyle, controlSize, tint, frame } = require('@expo/ui/swift-ui/modifiers');
+    const { buttonStyle, controlSize, tint, foregroundColor, frame } = require('@expo/ui/swift-ui/modifiers');
     return (
       <Host matchContents>
         <Button
           label="Continue"
           onPress={onPress}
-          modifiers={[buttonStyle('borderedProminent'), controlSize('large'), tint(colors.text), frame({ minWidth: 200 })]}
+          modifiers={[
+            buttonStyle('borderedProminent'),
+            controlSize('large'),
+            tint(colors.text), // fill: inverse of background (black in light, white in dark)
+            foregroundColor(colors.background), // label: readable on the fill
+            frame({ minWidth: 200 }),
+          ]}
         />
       </Host>
     );

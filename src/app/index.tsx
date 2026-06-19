@@ -36,7 +36,7 @@ const BALANCE_EXCEEDED_MESSAGE = 'Montant supérieur au solde disponible';
 export default function SendMoneyScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const [amount, setAmount] = useState('100.25');
+  const [amount, setAmount] = useState('0');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('pulse');
 
   const isBalanceExceeded = parseFloat(amount || '0') > AVAILABLE_BALANCE;
