@@ -66,7 +66,7 @@ export default function SendMoney() {
             padding: 14,
           }}>
           <View style={{ gap: 2 }}>
-            <Text style={{ fontSize: 16, fontFamily: font.bold, color: '#111' }}>Aliko Mohammed Dangote</Text>
+            <Text style={{ fontSize: 16, fontFamily: font.semibold, color: '#111' }}>Aliko Mohammed Dangote</Text>
             <Text style={{ fontSize: 14, color: '#9A9A9A', fontFamily: font.regular }}>Grey Finance</Text>
           </View>
           <Text selectable style={{ fontSize: 15, color: '#444', fontFamily: font.regular, fontVariant: ['tabular-nums'] }}>
