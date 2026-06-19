@@ -1,5 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
+import { font } from '@/lib/fonts';
+
 // Native Continue CTA: SwiftUI button on iOS, Jetpack Compose on Android, RN fallback on web.
 // ponytail: requires a custom dev build (npx expo run:ios/android) — @expo/ui native views don't render in Expo Go or web.
 export function ContinueButton({ onPress }: { onPress?: () => void }) {
@@ -34,7 +36,7 @@ export function ContinueButton({ onPress }: { onPress?: () => void }) {
       <Pressable
         onPress={onPress}
         style={({ pressed }) => ({ backgroundColor: '#111', paddingHorizontal: 48, paddingVertical: 16, borderRadius: 999, opacity: pressed ? 0.8 : 1 })}>
-        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Continue</Text>
+        <Text style={{ color: '#fff', fontSize: 16, fontFamily: font.semibold }}>Continue</Text>
       </Pressable>
     </View>
   );

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ContinueButton } from '@/components/continue-button';
 import { applyKey, splitAmount } from '@/lib/amount';
+import { font } from '@/lib/fonts';
 
 const PINK = '#E946A8';
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
@@ -14,7 +15,7 @@ function HeaderPill() {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FCEAF5', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999 }}>
       <Image source="sf:paperplane.fill" tintColor={PINK} style={{ width: 14, height: 14 }} />
-      <Text style={{ color: PINK, fontWeight: '600', fontSize: 15 }}>Send Money</Text>
+      <Text style={{ color: PINK, fontFamily: font.semibold, fontSize: 15 }}>Send Money</Text>
     </View>
   );
 }
@@ -38,8 +39,8 @@ export default function SendMoney() {
       {/* Recipient card */}
       <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6, marginBottom: 6 }}>
-          <Text style={{ color: '#9A9A9A', fontSize: 13 }}>Recipient Name/Bank</Text>
-          <Text style={{ color: '#9A9A9A', fontSize: 13 }}>Bank Account</Text>
+          <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Recipient Name/Bank</Text>
+          <Text style={{ color: '#9A9A9A', fontSize: 13, fontFamily: font.regular }}>Bank Account</Text>
         </View>
         <View
           style={{
@@ -53,10 +54,10 @@ export default function SendMoney() {
             boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
           }}>
           <View style={{ gap: 2 }}>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: '#111' }}>Aliko Mohammed Dangote</Text>
-            <Text style={{ fontSize: 14, color: '#9A9A9A' }}>Grey Finance</Text>
+            <Text style={{ fontSize: 16, fontFamily: font.bold, color: '#111' }}>Aliko Mohammed Dangote</Text>
+            <Text style={{ fontSize: 14, color: '#9A9A9A', fontFamily: font.regular }}>Grey Finance</Text>
           </View>
-          <Text selectable style={{ fontSize: 15, color: '#444', fontVariant: ['tabular-nums'] }}>
+          <Text selectable style={{ fontSize: 15, color: '#444', fontFamily: font.regular, fontVariant: ['tabular-nums'] }}>
             2893902383
           </Text>
         </View>
@@ -64,14 +65,14 @@ export default function SendMoney() {
 
       {/* Amount */}
       <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 6 }}>
-        <Text selectable style={{ fontSize: 64, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
+        <Text selectable style={{ fontSize: 64, fontFamily: font.bold, fontVariant: ['tabular-nums'] }}>
           <Text style={{ color: '#111' }}>${dollars}</Text>
           <Text style={{ color: '#B8B8B8' }}>{cents}</Text>
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Image source="sf:envelope" tintColor="#9A9A9A" style={{ width: 15, height: 15 }} />
-          <Text style={{ color: '#9A9A9A', fontSize: 15 }}>
-            Available: <Text style={{ color: '#111', fontWeight: '700' }}>$500.65</Text>
+          <Text style={{ color: '#9A9A9A', fontSize: 15, fontFamily: font.regular }}>
+            Available: <Text style={{ color: '#111', fontFamily: font.bold }}>$500.65</Text>
           </Text>
         </View>
       </View>
@@ -93,7 +94,7 @@ export default function SendMoney() {
               {k === 'del' ? (
                 <Image source="sf:delete.left" tintColor="#111" style={{ width: 24, height: 22 }} />
               ) : (
-                <Text style={{ fontSize: 26, fontWeight: '500', color: '#111' }}>{k}</Text>
+                <Text style={{ fontSize: 26, fontFamily: font.medium, color: '#111' }}>{k}</Text>
               )}
             </View>
           </Pressable>
