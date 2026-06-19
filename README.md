@@ -1,6 +1,8 @@
-# Welcome to your Expo app 👋
+# rn.ui — mobile UI reproductions 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[Expo](https://expo.dev) SDK 56 project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
+**Convention:** `main` keeps the untouched base template. Each mobile interface to reproduce lives on its own branch (e.g. `feat/send-money-screen`).
 
 ## Get started
 
