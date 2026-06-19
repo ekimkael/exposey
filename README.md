@@ -2,6 +2,12 @@
 
 A faithful reproduction of a mobile wallet "Send Money" screen (peer-to-peer transfer).
 
+## Screenshots
+
+| Light | Light — amount | Error | Dark |
+|-------|---------------|-------|------|
+| ![Light default](assets/screenshots/light-default.png) | ![Light amount](assets/screenshots/light-amount.png) | ![Error state](assets/screenshots/light-error.png) | ![Dark mode](assets/screenshots/dark-amount.png) |
+
 ## About the project
 
 **rn.ui** is a collection of mobile UI reproductions built with Expo SDK 56.
