@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 export interface ContinueButtonProps {
   /** Tap handler. No-op by default (there is no next screen yet). */
@@ -22,6 +22,8 @@ export interface ContinueButtonProps {
  * `require`d lazily so each bundle only pulls in what it uses.
  */
 export function ContinueButton({ onPress }: ContinueButtonProps) {
+  const { colors } = useTheme();
+
   if (process.env.EXPO_OS === 'ios') {
     const { Host, Button } = require('@expo/ui/swift-ui');
     const { buttonStyle, controlSize, tint, frame } = require('@expo/ui/swift-ui/modifiers');
@@ -40,7 +42,7 @@ export function ContinueButton({ onPress }: ContinueButtonProps) {
     const { Host, Button, Text: ComposeText } = require('@expo/ui/jetpack-compose');
     return (
       <Host matchContents>
-        <Button onClick={onPress} colors={{ containerColor: colors.text, contentColor: colors.surface }}>
+        <Button onClick={onPress} colors={{ containerColor: colors.text, contentColor: colors.background }}>
           <ComposeText>Continue</ComposeText>
         </Button>
       </Host>
@@ -59,7 +61,7 @@ export function ContinueButton({ onPress }: ContinueButtonProps) {
           borderRadius: 999,
           opacity: pressed ? 0.8 : 1,
         })}>
-        <Text style={{ color: colors.surface, fontSize: 16, fontFamily: font.semibold }}>Continue</Text>
+        <Text style={{ color: colors.background, fontSize: 16, fontFamily: font.semibold }}>Continue</Text>
       </Pressable>
     </View>
   );

@@ -1,12 +1,12 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { colors } from '@/theme/tokens';
+import { ThemeProvider, useTheme } from '@/theme/theme-context';
 
 /**
- * Root layout: registers the Open Runde font weights and defines the
- * navigation stack.
+ * Root layout: registers Open Runde fonts and wires up theming.
  *
  * Rendering is held back (`return null`) until the fonts finish loading, which
  * keeps the splash screen up and avoids a flash of the system font. See
@@ -23,8 +23,30 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShadowVisible: false, headerStyle: { backgroundColor: colors.surface } }} />
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <ThemedStack />
+      </SafeAreaProvider>
+    </ThemeProvider>
+  );
+}
+
+/**
+ * The navigation stack, themed from the active palette. Kept separate so it can
+ * consume {@link useTheme} (which must run inside {@link ThemeProvider}).
+ */
+function ThemedStack() {
+  const { colors, scheme } = useTheme();
+
+  return (
+    <NavigationThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+        }}
+      />
+    </NavigationThemeProvider>
   );
 }

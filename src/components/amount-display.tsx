@@ -16,7 +16,7 @@ import Animated, {
 
 import { splitAmount } from '@/lib/amount';
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 /**
  * Entry animation applied to the amount on each keystroke. The user picks one
@@ -69,12 +69,13 @@ export interface AmountDisplayProps {
  * The large `$100.25` amount with selectable entry animations and built-in
  * error feedback.
  *
- * Dollars render in {@link colors.text} (or {@link colors.danger} when
+ * Dollars render in the theme text colour (or the danger colour when
  * `exceeded`); the cents stay muted. All Reanimated hooks are declared
  * unconditionally before the per-style branches, so the rules of hooks hold
  * regardless of which `animationStyle` is active.
  */
 export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDisplayProps) {
+  const { colors } = useTheme();
   const { dollars, cents } = splitAmount(amount);
 
   const scale = useSharedValue(1);

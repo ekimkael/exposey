@@ -1,36 +1,76 @@
 /**
  * Design tokens for the Send Money screen.
  *
- * Centralises every literal colour so screens/components never hard-code hex
- * values. Add a semantic entry here rather than inlining a new colour.
+ * Two palettes share the same keys (light & dark). Components never import a
+ * palette directly — they read the active one from `useTheme()` so the whole
+ * tree re-themes together. Add a semantic key here (in BOTH palettes) rather
+ * than inlining a colour.
  *
  * Reanimated worklets require plain string colours (no `PlatformColor`), so
- * these are intentionally static.
+ * these are intentionally static strings.
  */
-export const colors = {
-  /** Primary foreground text (near-black). */
-  text: '#111111',
-  /** Secondary/label text (grey). */
-  textMuted: '#9A9A9A',
-  /** Tertiary text, e.g. the account number. */
-  textSubtle: '#444444',
-  /** Decimal/cents portion of the amount (light grey). */
-  amountCents: '#B8B8B8',
-
-  /** App background and inner card surface. */
-  surface: '#FFFFFF',
-  /** Recipient block background (very light grey). */
-  surfaceMuted: '#F5F5F5',
+export interface ThemeColors {
+  /** App background. */
+  background: string;
+  /** Elevated card surface (recipient inner card). */
+  surface: string;
+  /** Muted block background (recipient outer block). */
+  surfaceMuted: string;
   /** Keypad key background. */
-  keypadKey: '#F4F4F4',
+  keypadKey: string;
+
+  /** Primary foreground text. */
+  text: string;
+  /** Secondary/label text. */
+  textMuted: string;
+  /** Tertiary text, e.g. the account number. */
+  textSubtle: string;
+  /** Decimal/cents portion of the amount. */
+  amountCents: string;
 
   /** Brand accent (pink) used by the header pill. */
-  accent: '#E946A8',
+  accent: string;
   /** Soft accent background behind the pill. */
-  accentSoft: '#FCEAF5',
+  accentSoft: string;
 
   /** Error foreground (amount turns this colour when balance exceeded). */
-  danger: '#E0312A',
+  danger: string;
   /** Error banner background. */
+  dangerSoft: string;
+}
+
+export const lightColors: ThemeColors = {
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceMuted: '#F5F5F5',
+  keypadKey: '#F4F4F4',
+
+  text: '#111111',
+  textMuted: '#9A9A9A',
+  textSubtle: '#444444',
+  amountCents: '#B8B8B8',
+
+  accent: '#E946A8',
+  accentSoft: '#FCEAF5',
+
+  danger: '#E0312A',
   dangerSoft: '#FFF0F0',
-} as const;
+};
+
+export const darkColors: ThemeColors = {
+  background: '#000000',
+  surface: '#2C2C2E',
+  surfaceMuted: '#1C1C1E',
+  keypadKey: '#2C2C2E',
+
+  text: '#F5F5F5',
+  textMuted: '#8A8A8E',
+  textSubtle: '#C7C7CC',
+  amountCents: '#5A5A5E',
+
+  accent: '#F472C0',
+  accentSoft: '#3A2230',
+
+  danger: '#FF6961',
+  dangerSoft: '#3A1E1E',
+};

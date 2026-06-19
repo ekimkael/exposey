@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 /**
  * Inline error banner shown above the keypad when the entered amount exceeds
@@ -11,6 +11,7 @@ import { colors } from '@/theme/tokens';
  * @param message - Human-readable error text.
  */
 export function ErrorBanner({ message }: { message: string }) {
+  const { colors } = useTheme();
   return (
     <View
       style={{

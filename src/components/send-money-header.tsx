@@ -1,10 +1,18 @@
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
 import { Text, View } from 'react-native';
+import type { SFSymbol } from 'sf-symbols-typescript';
 
 import { ANIMATION_OPTIONS, type AnimationStyle } from '@/components/amount-display';
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme, type ThemeMode } from '@/theme/theme-context';
+
+/** Theme picker entries (preference → label + SF Symbol). */
+const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: SFSymbol }[] = [
+  { mode: 'system', label: 'System', icon: 'gearshape' },
+  { mode: 'light', label: 'Light', icon: 'sun.max' },
+  { mode: 'dark', label: 'Dark', icon: 'moon' },
+];
 
 /**
  * The pink "Send Money" pill shown as the navigation bar title.
@@ -13,6 +21,7 @@ import { colors } from '@/theme/tokens';
  * options so it sits centered in the native header.
  */
 export function HeaderPill() {
+  const { colors } = useTheme();
   return (
     <View
       style={{
@@ -30,34 +39,49 @@ export function HeaderPill() {
   );
 }
 
-export interface AnimationMenuProps {
-  /** Currently selected animation style. */
-  value: AnimationStyle;
-  /** Called when the user picks a different style. */
-  onChange: (style: AnimationStyle) => void;
+export interface HeaderMenuProps {
+  /** Currently selected entry animation. */
+  animationStyle: AnimationStyle;
+  /** Called when the user picks a different animation. */
+  onAnimationChange: (style: AnimationStyle) => void;
 }
 
 /**
- * Right-side header toolbar holding the animation picker (the `…` button).
+ * Right-side header toolbar (`…`) holding two pickers: entry animation and
+ * theme. Theme state is read/written through {@link useTheme} directly, so the
+ * caller only wires the animation choice.
  *
- * iOS only — `Stack.Toolbar` renders nothing on Android/web. The whole
- * `Stack.Toolbar` subtree must live in a single component (Expo Router cannot
- * collect `Stack.Toolbar.*` children spread across components).
+ * iOS only — `Stack.Toolbar` renders nothing on Android/web. Every
+ * `Stack.Toolbar.*` element must live in this single component (Expo Router
+ * cannot collect children spread across components).
  */
-export function AnimationMenu({ value, onChange }: AnimationMenuProps) {
-  const styleKeys = Object.keys(ANIMATION_OPTIONS) as AnimationStyle[];
+export function HeaderMenu({ animationStyle, onAnimationChange }: HeaderMenuProps) {
+  const { mode, setMode } = useTheme();
+  const animationKeys = Object.keys(ANIMATION_OPTIONS) as AnimationStyle[];
 
   return (
     <Stack.Toolbar placement="right">
       <Stack.Toolbar.Menu icon="ellipsis">
         <Stack.Toolbar.Menu inline title="Animation">
-          {styleKeys.map((styleKey) => (
+          {animationKeys.map((key) => (
             <Stack.Toolbar.MenuAction
-              key={styleKey}
-              icon={ANIMATION_OPTIONS[styleKey].icon}
-              isOn={value === styleKey}
-              onPress={() => onChange(styleKey)}>
-              {ANIMATION_OPTIONS[styleKey].label}
+              key={key}
+              icon={ANIMATION_OPTIONS[key].icon}
+              isOn={animationStyle === key}
+              onPress={() => onAnimationChange(key)}>
+              {ANIMATION_OPTIONS[key].label}
+            </Stack.Toolbar.MenuAction>
+          ))}
+        </Stack.Toolbar.Menu>
+
+        <Stack.Toolbar.Menu inline title="Theme">
+          {THEME_OPTIONS.map((option) => (
+            <Stack.Toolbar.MenuAction
+              key={option.mode}
+              icon={option.icon}
+              isOn={mode === option.mode}
+              onPress={() => setMode(option.mode)}>
+              {option.label}
             </Stack.Toolbar.MenuAction>
           ))}
         </Stack.Toolbar.Menu>

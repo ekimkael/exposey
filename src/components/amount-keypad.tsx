@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { DELETE_KEY } from '@/lib/amount';
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 /** Keys rendered in the 3-column grid, in visual order. */
 const KEYPAD_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', DELETE_KEY] as const;
@@ -30,6 +30,7 @@ export interface AmountKeypadProps {
  * `onKeyPress`. The backspace key stays fully active even when `locked`.
  */
 export function AmountKeypad({ onKeyPress, locked }: AmountKeypadProps) {
+  const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
       {KEYPAD_KEYS.map((key) => {

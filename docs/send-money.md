@@ -32,7 +32,7 @@ src/
     _layout.tsx              Loads Open Runde fonts, defines the Stack
     index.tsx                SendMoneyScreen — composition + state
   components/
-    send-money-header.tsx    HeaderPill (nav title) + AnimationMenu (toolbar, iOS)
+    send-money-header.tsx    HeaderPill (nav title) + HeaderMenu (animation + theme pickers, iOS)
     recipient-card.tsx       Recipient details block
     amount-display.tsx       Animated $ amount + error feedback + ANIMATION_OPTIONS
     available-balance.tsx    "Available: $…" hint row
@@ -44,7 +44,8 @@ src/
     amount.test.ts           assert-based self-check (see "Tests")
     fonts.ts                 Open Runde family-name constants
   theme/
-    tokens.ts                Semantic colour palette (single source of truth)
+    tokens.ts                Light + dark colour palettes (ThemeColors)
+    theme-context.tsx        ThemeProvider + useTheme() — active palette & mode
   assets/fonts/              OpenRunde-{Regular,Medium,Semibold,Bold}.otf
 ```
 
@@ -90,19 +91,39 @@ To add a new entry animation: extend `AnimationStyle`, add an entry to
 `ANIMATION_OPTIONS` (label + SF Symbol), and add a branch in `AmountDisplay`.
 The header menu renders itself from `ANIMATION_OPTIONS` — no other change needed.
 
+## Theming (`theme/`)
+
+Light and dark are supported, plus a `'system'` mode that follows the OS.
+
+- `tokens.ts` exports two palettes (`lightColors`, `darkColors`) sharing the
+  `ThemeColors` keys. Never import a palette directly.
+- `theme-context.tsx` provides `ThemeProvider` (wraps the app in `_layout.tsx`)
+  and the `useTheme()` hook, returning `{ colors, mode, setMode, scheme }`.
+  `mode` is the user preference (`system | light | dark`); `scheme` is the
+  resolved `light | dark`.
+- Components read colours via `const { colors } = useTheme()` — so the whole
+  tree re-themes when `mode` changes.
+- The native navigation bar and status bar follow `scheme` (see `ThemedStack`
+  in `_layout.tsx`).
+- Preference is **in-memory only** — not persisted across launches. To persist,
+  add storage in `ThemeProvider` (initial state + `setMode`).
+
+To add a colour: add the key to `ThemeColors` and to BOTH palettes.
+
 ## Styling conventions
 
-- Colours come from `theme/tokens.ts` — never inline a hex value.
+- Colours come from `useTheme().colors` — never inline a hex value.
 - Fonts: style with `fontFamily: font.*` (NOT `fontWeight`); each Open Runde
   weight is a separate registered family.
-- Reanimated styles must use static colour strings (no `PlatformColor`).
+- Reanimated styles must use static colour strings (no `PlatformColor`); the
+  palette values are plain strings, so they work inside worklets.
 - Rounded corners use `borderCurve: 'continuous'`, except capsules
   (`borderRadius: 999`).
 
 ## Platform notes
 
-- `AnimationMenu` (`Stack.Toolbar`) is **iOS-only**; it renders nothing on
-  Android/web. The nav title pill still shows everywhere.
+- `HeaderMenu` (`Stack.Toolbar`, animation + theme pickers) is **iOS-only**; it
+  renders nothing on Android/web. The nav title pill still shows everywhere.
 - `ContinueButton` swaps implementation by `process.env.EXPO_OS`. Native
   variants use the system font; only the web fallback uses Open Runde.
 - The back button is intentionally removed (`headerBackVisible: false`).

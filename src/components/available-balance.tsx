@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 /**
  * "Available: $500.65" hint shown under the amount, with a credit-card icon.
@@ -10,6 +10,7 @@ import { colors } from '@/theme/tokens';
  * @param amount - Available balance in the account's major unit (dollars).
  */
 export function AvailableBalance({ amount }: { amount: number }) {
+  const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <Image source="sf:creditcard" tintColor={colors.textMuted} style={{ width: 18, height: 14 }} />

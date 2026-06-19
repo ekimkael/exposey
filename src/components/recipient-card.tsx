@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { font } from '@/lib/fonts';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 export interface Recipient {
   /** Full name of the person receiving the transfer. */
@@ -19,6 +19,7 @@ export interface Recipient {
  * card with the recipient's details.
  */
 export function RecipientCard({ recipient }: { recipient: Recipient }) {
+  const { colors } = useTheme();
   return (
     <View
       style={{

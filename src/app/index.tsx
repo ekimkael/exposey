@@ -9,9 +9,9 @@ import { AvailableBalance } from '@/components/available-balance';
 import { ContinueButton } from '@/components/continue-button';
 import { ErrorBanner } from '@/components/error-banner';
 import { RecipientCard, type Recipient } from '@/components/recipient-card';
-import { AnimationMenu, HeaderPill } from '@/components/send-money-header';
+import { HeaderMenu, HeaderPill } from '@/components/send-money-header';
 import { applyKey } from '@/lib/amount';
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-context';
 
 /** Mock transfer recipient — replace with real data when wiring a backend. */
 const RECIPIENT: Recipient = {
@@ -35,6 +35,7 @@ const BALANCE_EXCEEDED_MESSAGE = 'Montant supérieur au solde disponible';
  */
 export default function SendMoneyScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [amount, setAmount] = useState('100.25');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('pulse');
 
@@ -43,9 +44,9 @@ export default function SendMoneyScreen() {
   const handleKeyPress = (key: string) => setAmount((current) => applyKey(current, key));
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface, paddingBottom: insets.bottom }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, paddingBottom: insets.bottom }}>
       <Stack.Screen options={{ headerTitle: () => <HeaderPill />, headerBackVisible: false }} />
-      <AnimationMenu value={animationStyle} onChange={setAnimationStyle} />
+      <HeaderMenu animationStyle={animationStyle} onAnimationChange={setAnimationStyle} />
 
       <RecipientCard recipient={RECIPIENT} />
 
