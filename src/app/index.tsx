@@ -90,12 +90,11 @@ export default function SendMoney() {
       )}
 
       {/* Keypad */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, opacity: exceeded ? 0.35 : 1 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>
         {KEYS.map((k) => (
           <Pressable
             key={k}
             onPress={() => {
-              // always allow del to unblock
               if (exceeded && k !== 'del') return;
               setAmount((v) => applyKey(v, k));
             }}
@@ -104,7 +103,7 @@ export default function SendMoney() {
               height: 70,
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: pressed && (!exceeded || k === 'del') ? 0.4 : 1,
+              opacity: exceeded && k !== 'del' ? 0.35 : pressed ? 0.4 : 1,
             })}>
             <View style={{ width: '88%', height: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 999, backgroundColor: '#F4F4F4' }}>
               {k === 'del' ? (
