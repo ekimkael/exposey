@@ -81,8 +81,10 @@ Built with **Reanimated v4**. Two independent concerns:
    - `pulse`: whole amount scales `1 → 1.08 → 1` on each keystroke.
    - `flip`: slot-machine slide, clipped to a fixed-height viewport (remount on `amount`).
    - `fade`: each digit fades in/out independently (remount per character via `key`).
-2. **Error feedback** — always on, regardless of the entry animation: dollars
-   cross-fade black↔red and the amount shakes when `exceeded` flips to true.
+2. **Error feedback** — always on, regardless of the entry animation: when
+   `exceeded` flips to true the dollars cross-fade black↔red, the amount shakes,
+   and a `Haptics.notificationAsync(Error)` buzz fires (native only). It runs
+   once per entry into the error state (the keypad is locked above the limit).
 
 All Reanimated hooks are declared unconditionally before the per-style return
 branches, so the rules of hooks are never violated.

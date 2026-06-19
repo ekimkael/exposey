@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import { Text, View, type TextStyle } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
@@ -91,7 +92,9 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
     );
   }, [amount, animationStyle]);
 
-  // Error feedback: cross-fade to red and shake whenever the balance is exceeded.
+  // Error feedback: cross-fade to red, shake, and buzz whenever the balance is
+  // exceeded. Runs only on the `exceeded` transition (the keypad is locked
+  // above the limit, so this fires once per entry into the error state).
   // Independent of animationStyle by design.
   useEffect(() => {
     errorProgress.value = withTiming(exceeded ? 1 : 0, { duration: ERROR_COLOR_MS });
@@ -99,6 +102,9 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
     shakeOffset.value = withSequence(
       ...SHAKE_OFFSETS.map((offset) => withTiming(offset, { duration: SHAKE_STEP_MS })),
     );
+    if (process.env.EXPO_OS !== 'web') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
   }, [exceeded]);
 
   const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
