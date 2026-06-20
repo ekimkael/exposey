@@ -1,0 +1,19 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C6F08A" />
+      <stop offset="0.5" stop-color="#8FD64A" />
+      <stop offset="1" stop-color="#4F9E1E" />
+    </linearGradient>
+    <linearGradient id="g2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A4E057" />
+      <stop offset="1" stop-color="#3E8A14" />
+    </linearGradient>
+  </defs>
+  <!-- back ribbon -->
+  <path d="M70 200 C60 120 130 70 180 90 C240 114 230 200 170 220 C120 236 78 250 70 200 Z" fill="url(#g2)" opacity="0.85" />
+  <!-- front twisted ribbon -->
+  <path d="M95 95 C150 55 210 90 205 150 C201 205 150 235 110 210 C75 188 88 150 130 145 C168 140 178 110 150 100 C128 92 110 100 95 95 Z" fill="url(#g1)" />
+  <!-- highlight -->
+  <path d="M120 100 C155 80 190 105 188 145" fill="none" stroke="#E4FBC0" stroke-width="6" stroke-linecap="round" opacity="0.6" />
+</svg>
