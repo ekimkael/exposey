@@ -23,7 +23,7 @@ This branch (`feat/send-money-screen`) contains the Send Money screen reproducti
 
 A money transfer screen with:
 
-- **Recipient card** — name, bank, account number
+- **Recipient card** — name + phone stacked, Change button opens a contact picker modal
 - **Amount input** — custom numeric keypad, two-tone display (dollars / cents)
 - **3 entry animations** switchable from the menu: Scale Pulse, Flip (slot machine), Fade
 - **Error feedback** — red color + shake + haptic when amount exceeds available balance, keypad locked
@@ -119,9 +119,10 @@ src/
     _layout.tsx              Loads Open Runde fonts, defines the Stack + ThemeProvider
     index.tsx                SendMoneyScreen — composition + state
   components/
-    send-money-header.tsx    HeaderPill (nav title) + HeaderMenu (animation + theme pickers, iOS)
-    recipient-card.tsx       Recipient details block
-    amount-display.tsx       Animated amount + error feedback + ANIMATION_OPTIONS
+    send-money-header.tsx    HeaderMenu (animation + theme pickers, iOS toolbar)
+    recipient-card.tsx       Name + phone card with Change button
+    contact-picker.tsx       Slide-up modal with searchable contact list
+    amount-display.tsx       Animated amount + error feedback
     available-balance.tsx    "Available: $…" hint row
     error-banner.tsx         Inline "balance exceeded" banner
     amount-keypad.tsx        Numeric keypad (presentational)
@@ -130,6 +131,7 @@ src/
   lib/
     amount.ts                applyKey / splitAmount — pure money-entry logic
     amount.test.ts           Assert self-check (see "Run tests")
+    animations.ts            AnimationStyle type + ANIMATION_OPTIONS
     fonts.ts                 Open Runde family-name constants
   theme/
     tokens.ts                Light + dark colour palettes (ThemeColors)
@@ -139,12 +141,14 @@ src/
 
 ## State
 
-`SendMoneyScreen` holds exactly two pieces of state:
+`SendMoneyScreen` holds four pieces of state:
 
 | State | Type | Meaning |
 |-------|------|---------|
 | `amount` | `string` | Raw typed amount, starts at `"0"` |
 | `animationStyle` | `AnimationStyle` | Entry animation chosen from the menu |
+| `recipient` | `Recipient` | Currently selected contact (name + phone) |
+| `pickerVisible` | `boolean` | Whether the contact picker modal is open |
 
 Theme preference (`system`/`light`/`dark`) lives in `ThemeProvider`, not in the screen.
 
@@ -191,7 +195,7 @@ To add a colour: add the key to `ThemeColors` and to BOTH palettes.
 
 ## Platform notes
 
-- `HeaderMenu` (`Stack.Toolbar`) is **iOS-only**; it renders nothing on Android/web. The nav title pill shows everywhere.
+- `HeaderMenu` (`Stack.Toolbar`) is **iOS-only**; it renders nothing on Android/web.
 - `ContinueButton` switches implementation via `process.env.EXPO_OS` (Metro build-time constant). Native variants use the system font; only the web fallback uses Open Runde.
 - The back button is intentionally removed (`headerBackVisible: false`).
 - `@expo/ui` imports are lazy `require()` inside `if` blocks: `@expo/ui/swift-ui` is a native iOS module that would throw at load time on Android if imported at the top level.
