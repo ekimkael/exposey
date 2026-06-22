@@ -16,9 +16,8 @@ import { useTheme } from '@/theme/theme-context';
 
 /** Mock transfer recipient — replace with real data when wiring a backend. */
 const RECIPIENT: Recipient = {
-  name: 'Aliko Mohammed Dangote',
-  bank: 'Grey Finance',
-  accountNumber: '2893902383',
+  name: 'Michel Mbili',
+  phone: '+243 81 234 5678',
 };
 
 /** Mock available balance (dollars). Transfers above this are blocked. */

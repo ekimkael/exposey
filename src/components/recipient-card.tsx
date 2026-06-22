@@ -6,17 +6,15 @@ import { useTheme } from '@/theme/theme-context';
 export interface Recipient {
   /** Full name of the person receiving the transfer. */
   name: string;
-  /** Bank / institution the account belongs to. */
-  bank: string;
-  /** Destination account number. */
-  accountNumber: string;
+  /** Phone number associated with the recipient. */
+  phone: string;
 }
 
 /**
  * Read-only summary of the transfer recipient.
  *
- * Renders as a light-grey block containing column labels and an inner white
- * card with the recipient's details.
+ * Renders as a light-grey block containing an inner white card with the
+ * recipient's name and phone number.
  */
 export function RecipientCard({ recipient }: { recipient: Recipient }) {
   const { colors } = useTheme();
@@ -26,16 +24,10 @@ export function RecipientCard({ recipient }: { recipient: Recipient }) {
         marginHorizontal: 20,
         marginTop: 16,
         padding: 8,
-        gap: 8,
         backgroundColor: colors.surfaceMuted,
         borderRadius: 20,
         borderCurve: 'continuous',
       }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 }}>
-        <Text style={{ color: colors.textMuted, fontSize: 13, fontFamily: font.regular }}>Recipient Name/Bank</Text>
-        <Text style={{ color: colors.textMuted, fontSize: 13, fontFamily: font.regular }}>Bank Account</Text>
-      </View>
-
       <View
         style={{
           flexDirection: 'row',
@@ -46,12 +38,9 @@ export function RecipientCard({ recipient }: { recipient: Recipient }) {
           borderRadius: 12,
           borderCurve: 'continuous',
         }}>
-        <View style={{ gap: 2 }}>
-          <Text style={{ fontSize: 16, fontFamily: font.semibold, color: colors.text }}>{recipient.name}</Text>
-          <Text style={{ fontSize: 14, fontFamily: font.regular, color: colors.textMuted }}>{recipient.bank}</Text>
-        </View>
-        <Text selectable style={{ fontSize: 15, fontFamily: font.regular, color: colors.textSubtle, fontVariant: ['tabular-nums'] }}>
-          {recipient.accountNumber}
+        <Text style={{ fontSize: 16, fontFamily: font.semibold, color: colors.text }}>{recipient.name}</Text>
+        <Text selectable style={{ fontSize: 15, fontFamily: font.regular, color: colors.textMuted, fontVariant: ['tabular-nums'] }}>
+          {recipient.phone}
         </Text>
       </View>
     </View>
