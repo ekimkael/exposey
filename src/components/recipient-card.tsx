@@ -1,22 +1,14 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
 
 export interface Recipient {
-  /** Full name of the person receiving the transfer. */
   name: string;
-  /** Phone number associated with the recipient. */
   phone: string;
 }
 
-/**
- * Read-only summary of the transfer recipient.
- *
- * Renders as a light-grey block containing an inner white card with the
- * recipient's name and phone number.
- */
-export function RecipientCard({ recipient }: { recipient: Recipient }) {
+export function RecipientCard({ recipient, onChangePress }: { recipient: Recipient; onChangePress?: () => void }) {
   const { colors } = useTheme();
   return (
     <View
@@ -38,10 +30,13 @@ export function RecipientCard({ recipient }: { recipient: Recipient }) {
           borderRadius: 12,
           borderCurve: 'continuous',
         }}>
-        <Text style={{ fontSize: 16, fontFamily: font.semibold, color: colors.text }}>{recipient.name}</Text>
-        <Text selectable style={{ fontSize: 15, fontFamily: font.regular, color: colors.textMuted, fontVariant: ['tabular-nums'] }}>
-          {recipient.phone}
-        </Text>
+        <View style={{ gap: 2 }}>
+          <Text style={{ fontSize: 16, fontFamily: font.semibold, color: colors.text }}>{recipient.name}</Text>
+          <Text style={{ fontSize: 14, fontFamily: font.regular, color: colors.textMuted }}>{recipient.phone}</Text>
+        </View>
+        <Pressable onPress={onChangePress} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+          <Text style={{ fontSize: 14, fontFamily: font.medium, color: colors.accent }}>Change</Text>
+        </Pressable>
       </View>
     </View>
   );

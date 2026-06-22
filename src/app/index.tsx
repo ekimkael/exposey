@@ -4,51 +4,59 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AmountDisplay } from '@/components/amount-display';
-import { type AnimationStyle } from '@/lib/animations';
 import { AmountKeypad } from '@/components/amount-keypad';
 import { AvailableBalance } from '@/components/available-balance';
+import { ContactPicker } from '@/components/contact-picker';
 import { ContinueButton } from '@/components/continue-button';
 import { ErrorBanner } from '@/components/error-banner';
 import { RecipientCard, type Recipient } from '@/components/recipient-card';
 import { HeaderMenu } from '@/components/send-money-header';
+import { type AnimationStyle } from '@/lib/animations';
 import { applyKey } from '@/lib/amount';
 import { useTheme } from '@/theme/theme-context';
 
-/** Mock transfer recipient — replace with real data when wiring a backend. */
-const RECIPIENT: Recipient = {
-  name: 'Michel Mbili',
-  phone: '+243 81 234 5678',
-};
+const CONTACTS: Recipient[] = [
+  { name: 'Michel Mbili',       phone: '+243 81 234 5678' },
+  { name: 'Petar Moktar',       phone: '+243 99 876 5432' },
+  { name: 'Aliko Dangote',      phone: '+234 80 123 4567' },
+  { name: 'Amara Diallo',       phone: '+221 77 456 7890' },
+  { name: 'Fatou Ndiaye',       phone: '+221 76 234 5678' },
+  { name: 'Kofi Mensah',        phone: '+233 24 567 8901' },
+  { name: 'Ngozi Okonkwo',      phone: '+234 81 345 6789' },
+  { name: 'Sekou Touré',        phone: '+224 62 456 7890' },
+  { name: 'Aminata Camara',     phone: '+224 65 678 9012' },
+  { name: 'David Osei',         phone: '+233 20 789 0123' },
+  { name: 'Grace Mutua',        phone: '+254 71 890 1234' },
+  { name: 'Ibrahim Diop',       phone: '+221 78 901 2345' },
+  { name: 'Josephine Abiola',   phone: '+234 70 012 3456' },
+  { name: 'Kwame Asante',       phone: '+233 27 123 4567' },
+  { name: 'Layla Hassan',       phone: '+251 91 234 5678' },
+  { name: 'Moussa Traoré',      phone: '+223 76 345 6789' },
+  { name: 'Nadia Benzara',      phone: '+213 55 456 7890' },
+  { name: 'Olu Adeyemi',        phone: '+234 90 567 8901' },
+  { name: 'Priya Sharma',       phone: '+27 82 678 9012' },
+  { name: 'Rania El-Amin',      phone: '+20 10 789 0123' },
+];
 
-/** Mock available balance (dollars). Transfers above this are blocked. */
 const AVAILABLE_BALANCE = 500.65;
-
 const BALANCE_EXCEEDED_MESSAGE = 'Montant supérieur au solde disponible';
 
-/**
- * Send Money screen.
- *
- * Composition only — each section is its own component. Holds the two pieces of
- * screen state: the raw `amount` string and the selected entry `animationStyle`.
- * Entering a value above {@link AVAILABLE_BALANCE} locks the keypad (except
- * backspace) and triggers the error feedback on {@link AmountDisplay}.
- */
 export default function SendMoneyScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [amount, setAmount] = useState('0');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('pulse');
+  const [recipient, setRecipient] = useState<Recipient>(CONTACTS[0]);
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   const isBalanceExceeded = parseFloat(amount || '0') > AVAILABLE_BALANCE;
-
-  const handleKeyPress = (key: string) => setAmount((current) => applyKey(current, key));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, paddingBottom: insets.bottom }}>
       <Stack.Screen options={{ headerTitle: '', headerBackVisible: false }} />
       <HeaderMenu animationStyle={animationStyle} onAnimationChange={setAnimationStyle} />
 
-      <RecipientCard recipient={RECIPIENT} />
+      <RecipientCard recipient={recipient} onChangePress={() => setPickerVisible(true)} />
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
         <AmountDisplay amount={amount} exceeded={isBalanceExceeded} animationStyle={animationStyle} />
@@ -57,11 +65,18 @@ export default function SendMoneyScreen() {
 
       {isBalanceExceeded && <ErrorBanner message={BALANCE_EXCEEDED_MESSAGE} />}
 
-      <AmountKeypad onKeyPress={handleKeyPress} locked={isBalanceExceeded} />
+      <AmountKeypad onKeyPress={(key) => setAmount((cur) => applyKey(cur, key))} locked={isBalanceExceeded} />
 
       <View style={{ alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
         <ContinueButton />
       </View>
+
+      <ContactPicker
+        visible={pickerVisible}
+        contacts={CONTACTS}
+        onSelect={setRecipient}
+        onClose={() => setPickerVisible(false)}
+      />
     </View>
   );
 }
