@@ -10,7 +10,7 @@ import { AvailableBalance } from '@/components/available-balance';
 import { ContinueButton } from '@/components/continue-button';
 import { ErrorBanner } from '@/components/error-banner';
 import { RecipientCard, type Recipient } from '@/components/recipient-card';
-import { HeaderMenu, HeaderPill } from '@/components/send-money-header';
+import { HeaderMenu } from '@/components/send-money-header';
 import { applyKey } from '@/lib/amount';
 import { useTheme } from '@/theme/theme-context';
 
@@ -46,7 +46,7 @@ export default function SendMoneyScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, paddingBottom: insets.bottom }}>
-      <Stack.Screen options={{ headerTitle: () => <HeaderPill />, headerBackVisible: false }} />
+      <Stack.Screen options={{ headerTitle: '', headerBackVisible: false }} />
       <HeaderMenu animationStyle={animationStyle} onAnimationChange={setAnimationStyle} />
 
       <RecipientCard recipient={RECIPIENT} />
