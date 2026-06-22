@@ -28,7 +28,7 @@ A money transfer screen with:
 - **3 entry animations** switchable from the menu: Scale Pulse, Flip (slot machine), Fade
 - **Error feedback** — red color + shake + haptic when amount exceeds available balance, keypad locked
 - **Available balance** — displayed with a credit card icon
-- **Native Continue button** — SwiftUI `borderedProminent` on iOS, Jetpack Compose `Button` on Android
+- **Continue button** — action-swap-cascade animation: letters exit upward one by one, spinner slides in and spins
 - **iOS toolbar menu** — animation picker + theme picker in the navigation bar
 - **Light / dark / system theme** — follows the OS or forced from the menu
 
@@ -125,7 +125,8 @@ src/
     available-balance.tsx    "Available: $…" hint row
     error-banner.tsx         Inline "balance exceeded" banner
     amount-keypad.tsx        Numeric keypad (presentational)
-    continue-button.tsx      Native CTA per platform (SwiftUI / Compose / web)
+    continue-button.tsx      CTA — delegates to ActionSwapCascade
+    action-swap-cascade.tsx  Cascade letter-exit + spin animation on press
   lib/
     amount.ts                applyKey / splitAmount — pure money-entry logic
     amount.test.ts           Assert self-check (see "Run tests")
