@@ -1,12 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInUp,
   FadeOutUp,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
@@ -15,17 +16,21 @@ import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
 
 const LABEL = 'Continue';
+const LOADING_TEXT = 'Sending...';
 const STAGGER_MS = 28;
 const LETTER_EXIT_MS = 160;
-// Spinner enters once the last letter has fully exited.
-const SPINNER_DELAY_MS = LABEL.length * STAGGER_MS + LETTER_EXIT_MS;
+// New content enters once the last letter has fully exited.
+const SWAP_DELAY_MS = LABEL.length * STAGGER_MS + LETTER_EXIT_MS;
+const ENTRY_DURATION_MS = 220;
+// Spin starts only after the new content has fully settled.
+const SPIN_START_MS = SWAP_DELAY_MS + ENTRY_DURATION_MS;
 
 /**
  * "Continue" CTA with an action-swap-cascade press animation.
  *
- * On press: each letter of the label exits upward in a left-to-right cascade.
- * Once the last letter clears, a spinner slides in from below and spins
- * continuously to signal that the action is in progress.
+ * On press: each letter exits upward in a left-to-right cascade. Once
+ * the last letter clears, [icon + "Sending..."] slides in as a unit.
+ * Only after that entry animation completes does the icon start spinning.
  */
 export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
   const { colors } = useTheme();
@@ -39,10 +44,10 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
   const handlePress = () => {
     if (loading) return;
     setLoading(true);
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 900, easing: Easing.linear }),
-      -1,
-      false,
+    // Spin starts only after the swap + entry animation has completed.
+    rotation.value = withDelay(
+      SPIN_START_MS,
+      withRepeat(withTiming(360, { duration: 900, easing: Easing.linear }), -1, false),
     );
     if (process.env.EXPO_OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -58,6 +63,7 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
         { backgroundColor: colors.text, opacity: pressed && !loading ? 0.85 : 1 },
       ]}>
       <View style={styles.inner}>
+        {/* Idle state: letters exit one by one upward */}
         {!loading &&
           LABEL.split('').map((char, i) => (
             <Animated.Text
@@ -68,16 +74,20 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
             </Animated.Text>
           ))}
 
+        {/* Loading state: icon + text enter as one unit, then icon spins */}
         {loading && (
           <Animated.View
-            entering={FadeInUp.delay(SPINNER_DELAY_MS).duration(180)}
-            style={spinStyle}>
-            <View
-              style={[
-                styles.spinnerRing,
-                { borderColor: colors.background, borderTopColor: 'transparent' },
-              ]}
-            />
+            entering={FadeInUp.delay(SWAP_DELAY_MS).duration(ENTRY_DURATION_MS)}
+            style={styles.loadingRow}>
+            <Animated.View style={spinStyle}>
+              <View
+                style={[
+                  styles.spinnerRing,
+                  { borderColor: colors.background, borderTopColor: 'transparent' },
+                ]}
+              />
+            </Animated.View>
+            <Text style={[styles.letter, { color: colors.background }]}>{LOADING_TEXT}</Text>
           </Animated.View>
         )}
       </View>
@@ -100,14 +110,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 20,
   },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   letter: {
     fontSize: 16,
     fontFamily: font.semibold,
   },
   spinnerRing: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     borderWidth: 2.5,
   },
 });
