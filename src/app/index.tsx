@@ -1,98 +1,98 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Stack } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import { type LayoutChangeEvent, type ViewToken, View } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { PlaylistCard } from '@/components/playlist-card';
+import { layout } from '@/constants/layout';
+import { CATEGORIES, PLAYLISTS, palette, type Category, type Playlist } from '@/constants/playlists';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+/** A card is "active" once it covers at least this much of the viewport. */
+const ACTIVE_VISIBILITY_PERCENT = 60;
+
+/**
+ * Featured screen — a vertical, snapping feed of playlist cards. The card
+ * snapped to the top autoplays its preview; scrolling scales the neighbours
+ * down. The header is the native stack header: a hamburger button and a native
+ * category menu on the left, list/search actions on the right.
+ */
+export default function FeaturedScreen() {
+  const [category, setCategory] = useState<Category>('Featured');
+  const [activeId, setActiveId] = useState(PLAYLISTS[0]?.id);
+  const [areaHeight, setAreaHeight] = useState(0);
+
+  // Card fills most of the area below the header, leaving a peek of the next.
+  const cardHeight = Math.round(areaHeight * layout.feed.cardHeightRatio);
+  const snap = cardHeight + layout.feed.cardGap;
+
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: ACTIVE_VISIBILITY_PERCENT }).current;
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    const first = viewableItems[0]?.item as Playlist | undefined;
+    if (first) setActiveId(first.id);
+  }).current;
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: Playlist; index: number }) => (
+      <PlaylistCard
+        playlist={item}
+        active={item.id === activeId}
+        scrollY={scrollY}
+        index={index}
+        height={cardHeight}
+        snap={snap}
+      />
+    ),
+    [activeId, scrollY, cardHeight, snap],
+  );
+
+  const onAreaLayout = (e: LayoutChangeEvent) => setAreaHeight(e.nativeEvent.layout.height);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View style={{ flex: 1, backgroundColor: palette.background }} onLayout={onAreaLayout}>
+      <Stack.Screen options={{ headerShown: true, title: '', headerShadowVisible: false }} />
+
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button icon="line.3.horizontal" onPress={() => {}} />
+        <Stack.Toolbar.Menu title={category}>
+          {CATEGORIES.map((c) => (
+            <Stack.Toolbar.MenuAction key={c} isOn={c === category} onPress={() => setCategory(c)}>
+              {c}
+            </Stack.Toolbar.MenuAction>
+          ))}
+        </Stack.Toolbar.Menu>
+      </Stack.Toolbar>
+
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button icon="square.grid.2x2" onPress={() => {}} />
+        <Stack.Toolbar.Button icon="magnifyingglass" onPress={() => {}} />
+      </Stack.Toolbar>
+
+      {areaHeight > 0 && (
+        <Animated.FlatList
+          data={PLAYLISTS}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          snapToInterval={snap}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          showsVerticalScrollIndicator={false}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          ItemSeparatorComponent={() => <View style={{ height: layout.feed.cardGap }} />}
+          contentContainerStyle={{
+            paddingHorizontal: layout.feed.horizontalPadding,
+            paddingTop: 8,
+            paddingBottom: layout.feed.cardGap,
+          }}
+        />
+      )}
+    </View>
   );
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
