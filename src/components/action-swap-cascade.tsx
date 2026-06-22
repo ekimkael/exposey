@@ -58,9 +58,10 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
   return (
     <Pressable
       onPress={handlePress}
+      disabled={loading}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: colors.text, opacity: pressed && !loading ? 0.85 : 1 },
+        { backgroundColor: colors.text, opacity: loading ? 0.45 : pressed ? 0.85 : 1 },
       ]}>
       <View style={styles.inner}>
         {/* Idle state: letters exit one by one upward */}
