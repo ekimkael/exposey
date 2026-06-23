@@ -1,18 +1,24 @@
-import { ActionSwapCascade } from '@/components/action-swap-cascade';
+import { ActionSwapRoll } from '@/components/action-swap-roll';
 
 export interface ContinueButtonProps {
-  /** Tap handler. No-op by default (there is no next screen yet). */
+  /** Called immediately on tap (before the roll animation completes). */
   onPress?: () => void;
-  /** Greys out and blocks the press (e.g. invalid amount). */
+  /**
+   * Greys out the button and blocks interaction.
+   * Set to `true` when the amount is 0 or exceeds the available balance.
+   */
   disabled?: boolean;
 }
 
 /**
- * Primary "Continue" CTA.
+ * Primary "Send" CTA.
  *
- * Delegates to {@link ActionSwapCascade} which animates the label out
- * letter-by-letter on press and replaces it with a spinner.
+ * Delegates entirely to {@link ActionSwapRoll}:
+ * - Idle: shows "Send" label.
+ * - After tap: label rolls out, spinner + "Processing…" rolls in.
+ * - Reset: parent bumps the `key` prop (`buttonKey` in `SendMoneyScreen`) when
+ *   the confirm sheet is dismissed, which remounts this component back to idle.
  */
 export function ContinueButton({ onPress, disabled }: ContinueButtonProps) {
-  return <ActionSwapCascade onPress={onPress} disabled={disabled} />;
+  return <ActionSwapRoll onPress={onPress} disabled={disabled} />;
 }

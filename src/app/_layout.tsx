@@ -45,8 +45,23 @@ function ThemedStack() {
         screenOptions={{
           headerShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
-        }}
-      />
+        }}>
+        {/*
+         * Biometric confirm sheet — native iOS form sheet at ~45 % height.
+         * Detents: [0.45, 1.0] — confirm state fits at 0.45; user can pull
+         * to full screen if needed. headerShown:false because the screen
+         * provides its own layout with safe-area insets.
+         */}
+        <Stack.Screen
+          name="confirm"
+          options={{
+            presentation: 'formSheet',
+            sheetGrabberVisible: true,
+            sheetAllowedDetents: [0.45, 1.0],
+            headerShown: false,
+          }}
+        />
+      </Stack>
     </NavigationThemeProvider>
   );
 }
