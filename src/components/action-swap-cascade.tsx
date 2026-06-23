@@ -32,7 +32,7 @@ const SPIN_START_MS = SWAP_DELAY_MS + ENTRY_DURATION_MS;
  * the last letter clears, [icon + "Sending..."] slides in as a unit.
  * Only after that entry animation completes does the icon start spinning.
  */
-export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
+export function ActionSwapCascade({ onPress, disabled }: { onPress?: () => void; disabled?: boolean }) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const rotation = useSharedValue(0);
@@ -42,7 +42,7 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
   }));
 
   const handlePress = () => {
-    if (loading) return;
+    if (loading || disabled) return;
     setLoading(true);
     // Spin starts only after the swap + entry animation has completed.
     rotation.value = withDelay(
@@ -58,10 +58,10 @@ export function ActionSwapCascade({ onPress }: { onPress?: () => void }) {
   return (
     <Pressable
       onPress={handlePress}
-      disabled={loading}
+      disabled={loading || disabled}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: colors.text, opacity: loading ? 0.45 : pressed ? 0.85 : 1 },
+        { backgroundColor: colors.text, opacity: loading || disabled ? 0.45 : pressed ? 0.85 : 1 },
       ]}>
       <View style={styles.inner}>
         {/* Idle state: letters exit one by one upward */}

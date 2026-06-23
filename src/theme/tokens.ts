@@ -37,6 +37,11 @@ export interface ThemeColors {
   danger: string;
   /** Error banner background. */
   dangerSoft: string;
+
+  /** Success foreground (transfer confirmed checkmark). */
+  success: string;
+  /** Soft success background. */
+  successSoft: string;
 }
 
 export const lightColors: ThemeColors = {
@@ -55,6 +60,9 @@ export const lightColors: ThemeColors = {
 
   danger: '#E0312A',
   dangerSoft: '#FFF0F0',
+
+  success: '#1FA463',
+  successSoft: '#E8F8EF',
 };
 
 export const darkColors: ThemeColors = {
@@ -73,4 +81,7 @@ export const darkColors: ThemeColors = {
 
   danger: '#FF6961',
   dangerSoft: '#3A1E1E',
+
+  success: '#30D158',
+  successSoft: '#10301E',
 };

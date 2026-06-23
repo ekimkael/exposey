@@ -9,6 +9,7 @@ import { AvailableBalance } from '@/components/available-balance';
 import { ContactPicker } from '@/components/contact-picker';
 import { ContinueButton } from '@/components/continue-button';
 import { ErrorBanner } from '@/components/error-banner';
+import { PaymentConfirmSheet } from '@/components/payment-confirm-sheet';
 import { RecipientCard, type Recipient } from '@/components/recipient-card';
 import { HeaderMenu } from '@/components/send-money-header';
 import { type AnimationStyle } from '@/lib/animations';
@@ -48,8 +49,22 @@ export default function SendMoneyScreen() {
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('pulse');
   const [recipient, setRecipient] = useState<Recipient>(CONTACTS[0]);
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [buttonKey, setButtonKey] = useState(0);
 
   const isBalanceExceeded = parseFloat(amount || '0') > AVAILABLE_BALANCE;
+  const canContinue = !isBalanceExceeded && parseFloat(amount || '0') > 0;
+
+  // The button spins for ~3s, then the biometric confirm sheet slides up.
+  const handleContinue = () => {
+    setTimeout(() => setConfirmVisible(true), 3000);
+  };
+
+  // Closing the sheet (cancel or done) resets the button to its idle label.
+  const handleConfirmClose = () => {
+    setConfirmVisible(false);
+    setButtonKey((k) => k + 1);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, paddingBottom: insets.bottom }}>
@@ -68,7 +83,7 @@ export default function SendMoneyScreen() {
       <AmountKeypad onKeyPress={(key) => setAmount((cur) => applyKey(cur, key))} locked={isBalanceExceeded} />
 
       <View style={{ alignItems: 'center', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
-        <ContinueButton />
+        <ContinueButton key={buttonKey} onPress={handleContinue} disabled={!canContinue} />
       </View>
 
       <ContactPicker
@@ -76,6 +91,13 @@ export default function SendMoneyScreen() {
         contacts={CONTACTS}
         onSelect={setRecipient}
         onClose={() => setPickerVisible(false)}
+      />
+
+      <PaymentConfirmSheet
+        visible={confirmVisible}
+        amount={amount}
+        recipient={recipient}
+        onClose={handleConfirmClose}
       />
     </View>
   );

@@ -29,6 +29,7 @@ A money transfer screen with:
 - **Error feedback** — red color + shake + haptic when amount exceeds available balance, keypad locked
 - **Available balance** — displayed with a credit card icon
 - **Continue button** — action-swap-cascade animation: letters exit upward one by one, spinner slides in and spins
+- **Confirm & pay** — after a ~3s loading spin, a 30% form sheet slides up; Face ID / Touch ID validates, then the sheet morphs into a success screen
 - **iOS toolbar menu** — animation picker + theme picker in the navigation bar
 - **Light / dark / system theme** — follows the OS or forced from the menu
 
@@ -42,6 +43,7 @@ A money transfer screen with:
 | Native UI | `@expo/ui` — SwiftUI (iOS), Jetpack Compose (Android) |
 | Typography | Open Runde (open-source SF Pro Rounded alternative) |
 | Haptics | expo-haptics |
+| Biometrics | expo-local-authentication (Face ID / Touch ID) |
 | Theming | React context — light / dark / system |
 
 ## Prerequisites
@@ -122,6 +124,7 @@ src/
     send-money-header.tsx    HeaderMenu (animation + theme pickers, iOS toolbar)
     recipient-card.tsx       Name + phone card with Change button
     contact-picker.tsx       Slide-up modal with searchable contact list
+    payment-confirm-sheet.tsx Biometric confirm sheet → morphing success screen
     amount-display.tsx       Animated amount + error feedback
     available-balance.tsx    "Available: $…" hint row
     error-banner.tsx         Inline "balance exceeded" banner
@@ -141,7 +144,7 @@ src/
 
 ## State
 
-`SendMoneyScreen` holds four pieces of state:
+`SendMoneyScreen` holds:
 
 | State | Type | Meaning |
 |-------|------|---------|
@@ -149,6 +152,8 @@ src/
 | `animationStyle` | `AnimationStyle` | Entry animation chosen from the menu |
 | `recipient` | `Recipient` | Currently selected contact (name + phone) |
 | `pickerVisible` | `boolean` | Whether the contact picker modal is open |
+| `confirmVisible` | `boolean` | Whether the biometric confirm sheet is open |
+| `buttonKey` | `number` | Bumped on close to remount the Continue button back to idle |
 
 Theme preference (`system`/`light`/`dark`) lives in `ThemeProvider`, not in the screen.
 
@@ -175,6 +180,16 @@ All Reanimated hooks are declared unconditionally before the per-style branches,
 
 To add an animation: extend `AnimationStyle`, add an entry to `ANIMATION_OPTIONS` (label + SF Symbol), and add a branch in `AmountDisplay`. The header menu renders itself from `ANIMATION_OPTIONS` — no other change needed.
 
+## Confirm & success flow (`payment-confirm-sheet.tsx`)
+
+Pressing **Continue** (enabled only when the amount is > 0 and within balance) runs the action-swap-cascade spin for ~3s, then opens a confirm sheet:
+
+1. **Confirm** — a ~30% bottom sheet shows the recipient + amount and a "Confirm with Face ID" button.
+2. **Authenticate** — `expo-local-authentication` runs Face ID / Touch ID. On the web, or a simulator with no enrolled biometrics, it skips straight through so the flow stays demoable.
+3. **Success** — the card **morphs**: a `LinearTransition` springs its height taller while the content cross-fades into a checkmark (`ZoomIn`) + receipt. A success haptic fires; a failed scan returns to step 1 with an error haptic.
+
+The card remounts on each open (a `visible &&` gate), so phase state resets without an effect. Closing bumps `buttonKey` in the screen to reset the Continue button to its idle label.
+
 ## Theming (`theme/`)
 
 Light, dark, and system modes are supported.
@@ -196,6 +211,7 @@ To add a colour: add the key to `ThemeColors` and to BOTH palettes.
 ## Platform notes
 
 - `HeaderMenu` (`Stack.Toolbar`) is **iOS-only**; it renders nothing on Android/web.
-- `ContinueButton` switches implementation via `process.env.EXPO_OS` (Metro build-time constant). Native variants use the system font; only the web fallback uses Open Runde.
+- Haptics fire only on native (`process.env.EXPO_OS !== 'web'`).
+- Biometrics: Face ID needs `NSFaceIDUsageDescription` (set via the `expo-local-authentication` plugin in `app.json`). When no scanner is enrolled — web, or a fresh simulator — the confirm step proceeds without a prompt so the morph stays demoable.
 - The back button is intentionally removed (`headerBackVisible: false`).
 - `@expo/ui` imports are lazy `require()` inside `if` blocks: `@expo/ui/swift-ui` is a native iOS module that would throw at load time on Android if imported at the top level.
