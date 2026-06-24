@@ -1,6 +1,32 @@
-# Welcome to your Expo app 👋
+# rn.ui — Expo UI Showcase
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A collection of native UI patterns built with Expo 56 and React Native 0.85 (New Architecture).
+
+## Screens
+
+### Onboarding carousel (`/onboarding`)
+
+A 4-slide fullscreen carousel reproducing an iOS onboarding pattern. Navigate to it via `router.push('/onboarding')` or directly in dev tools.
+
+**Key techniques:**
+- `experimental_backgroundImage` CSS gradient (New Architecture only) for the teal-to-aqua background
+- `Animated.ScrollView` with `pagingEnabled` + `useAnimatedScrollHandler` from Reanimated v4
+- Animated pill-shaped dot indicators driven by scroll position via `interpolate`
+- `SymbolView` (expo-symbols) for SF Symbols inside the phone mockup and badges
+- Haptic feedback on page transitions (`expo-haptics`)
+- iOS lock-screen phone mockup with stacked translucent cards — pure RN Views, no images
+
+**Route structure:**
+```
+src/app/
+  _layout.tsx          Root Stack (headerShown: false for all screens)
+  (tabs)/
+    _layout.tsx        NativeTabs — Home + Explore
+    index.tsx
+    explore.tsx
+  onboarding/
+    index.tsx          Carousel screen
+```
 
 ## Get started
 
