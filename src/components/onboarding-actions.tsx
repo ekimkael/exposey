@@ -4,7 +4,7 @@ import { SymbolView } from 'expo-symbols';
 
 function AppleLogo() {
   if (Platform.OS === 'ios') {
-    return <SymbolView name="apple.logo" size={18} tintColor="#111" style={styles.appleIcon} />;
+    return <SymbolView name="apple.logo" size={24} tintColor="#111" style={styles.appleIcon} />;
   }
   // Android: Unicode private-use Apple glyph (renders correctly on Roboto fallback)
   return <Text style={styles.appleIconText}></Text>;
@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
     // SymbolView has no additional style needed — size is set via prop
   },
   appleIconText: {
-    fontSize: 18,
+    fontSize: 24,
     color: '#111',
-    lineHeight: 22,
+    lineHeight: 28,
   },
   primaryText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     color: '#111',
     letterSpacing: -0.1,
@@ -92,20 +92,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.18)',
   },
   markBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     backgroundColor: 'rgba(255,255,255,0.30)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   markLetter: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '800',
     color: '#fff',
   },
   secondaryText: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: '500',
     color: 'rgba(255,255,255,0.92)',
   },
