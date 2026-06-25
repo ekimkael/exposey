@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   primaryText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#111',
     letterSpacing: -0.1,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   secondaryText: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '500',
     color: 'rgba(255,255,255,0.92)',
   },

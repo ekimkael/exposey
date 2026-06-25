@@ -10,7 +10,7 @@
  */
 import { View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 
 import { CyclingWords } from '@/components/cycling-words';
 import OnboardingActions from '@/components/onboarding-actions';
@@ -20,15 +20,13 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Radial gradient: white at top-centre → grey mid → black bottom */}
+      {/* 2-colour gradient: white (top) → black (bottom) */}
       <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
         <Defs>
-          {/* cx/cy = focal point at top-centre; rx wide, ry tall so it fans top→bottom */}
-          <RadialGradient id="grad" cx="50%" cy="0%" rx="120%" ry="100%" fx="50%" fy="0%">
-            <Stop offset="0"    stopColor="#ffffff" />
-            <Stop offset="0.45" stopColor="#888888" />
-            <Stop offset="1"    stopColor="#000000" />
-          </RadialGradient>
+          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#ffffff" />
+            <Stop offset="1" stopColor="#000000" />
+          </LinearGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
       </Svg>
@@ -96,8 +94,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 17,
+    lineHeight: 25,
     color: 'rgba(255,255,255,0.82)',
     marginBottom: 4,
   },
