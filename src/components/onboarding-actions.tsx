@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 44,
-    borderRadius: 22,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: 'rgba(255,255,255,0.18)',
   },
   markBox: {

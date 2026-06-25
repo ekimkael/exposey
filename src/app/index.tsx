@@ -10,25 +10,25 @@
  */
 import { View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 
 import { CyclingWords } from '@/components/cycling-words';
 import OnboardingActions from '@/components/onboarding-actions';
-import { BRAND } from '@/utils/tokens';
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.root}>
-      {/* Gradient background: white at top, brand blue at bottom */}
+      {/* Radial gradient: white at top-centre → grey mid → black bottom */}
       <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
         <Defs>
-          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0.36" stopColor="#ffffff" />
-            <Stop offset="0.68" stopColor="#7CB9F0" />
-            <Stop offset="1"    stopColor={BRAND}   />
-          </LinearGradient>
+          {/* cx/cy = focal point at top-centre; rx wide, ry tall so it fans top→bottom */}
+          <RadialGradient id="grad" cx="50%" cy="0%" rx="120%" ry="100%" fx="50%" fy="0%">
+            <Stop offset="0"    stopColor="#ffffff" />
+            <Stop offset="0.45" stopColor="#888888" />
+            <Stop offset="1"    stopColor="#000000" />
+          </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
       </Svg>
