@@ -25,7 +25,7 @@ export default function OnboardingScreen() {
         <Defs>
           <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0"    stopColor="#ffffff" />
-            <Stop offset="0.42" stopColor="#ffffff" />
+            <Stop offset="0.62" stopColor="#ffffff" />
             <Stop offset="1"    stopColor="#000000" />
           </LinearGradient>
         </Defs>
