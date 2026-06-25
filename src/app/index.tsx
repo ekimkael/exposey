@@ -1,98 +1,104 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+/**
+ * Remindo onboarding / landing screen.
+ *
+ * Layout (top → bottom):
+ *   - Fullscreen white→brand-blue SVG gradient background
+ *   - Cycling value-prop slot machine (white area, top half)
+ *   - Logo mark + headline + subtitle + CTA buttons (gradient/blue area, bottom half)
+ *
+ * @module app/index
+ */
+import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { CyclingWords } from '@/components/cycling-words';
+import OnboardingActions from '@/components/onboarding-actions';
+import { BRAND } from '@/utils/tokens';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.root}>
+      {/* Gradient background: white at top, brand blue at bottom */}
+      <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0.36" stopColor="#ffffff" />
+            <Stop offset="0.68" stopColor="#7CB9F0" />
+            <Stop offset="1"    stopColor={BRAND}   />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
+      </Svg>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <View style={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }]}>
+        {/* Top: cycling words fill the white area */}
+        <View style={styles.topSection}>
+          <CyclingWords />
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        {/* Bottom: identity + copy + actions */}
+        <View style={styles.bottomSection}>
+          {/* Logo mark: frosted rounded square */}
+          <View style={styles.logoMark}>
+            <Text style={styles.logoLetter}>R</Text>
+          </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          <Text style={styles.headline}>Your day, organised</Text>
+          <Text style={styles.subtitle}>
+            Plan, remind and share —{'\n'}synced across all your devices.
+          </Text>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <OnboardingActions />
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+  },
+  topSection: {
     flex: 1,
     justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  bottomSection: {
+    paddingHorizontal: 28,
+    paddingBottom: 8,
   },
-  heroSection: {
-    alignItems: 'center',
+  logoMark: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.28)',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    alignItems: 'center',
+    marginBottom: 14,
   },
-  title: {
-    textAlign: 'center',
+  logoLetter: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#fff',
   },
-  code: {
-    textTransform: 'uppercase',
+  headline: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: -0.3,
+    marginBottom: 8,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: 'rgba(255,255,255,0.82)',
+    marginBottom: 4,
   },
 });

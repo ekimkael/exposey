@@ -1,4 +1,36 @@
-# Welcome to your Expo app 👋
+# rn.ui — Remindo Onboarding
+
+Expo SDK 56 showcase: a **value-prop cycling onboarding screen** inspired by the Fuse fintech animation, rebranded for Remindo (productivity app).
+
+## What's in this branch (`feat/value-prop-onboarding`)
+
+| Feature | Implementation |
+|---|---|
+| Vertical slot-machine animation | Reanimated 4 `withRepeat` + per-row `useAnimatedStyle` |
+| White → brand-blue gradient | `react-native-svg` `LinearGradient` |
+| Native buttons (iOS) | `@expo/ui/swift-ui` `Button` inside `Host` |
+| Native buttons (Android) | `@expo/ui/jetpack-compose` `Button` / `TextButton` |
+| Press haptics | `expo-haptics` (no navigation wired) |
+
+### Key files
+
+```
+src/app/index.tsx                     ← onboarding screen
+src/components/cycling-words.tsx      ← slot-machine animation
+src/components/onboarding-actions.ios.tsx    ← SwiftUI buttons
+src/components/onboarding-actions.android.tsx ← Compose buttons
+src/utils/tokens.ts                   ← colour tokens + word list
+```
+
+### Customising
+
+- **Change words / colours** → edit `WORDS` in `src/utils/tokens.ts`
+- **Adjust animation speed** → change `1_400` ms per word in `cycling-words.tsx`
+- **Wire auth** → replace haptic calls in `onboarding-actions.*.tsx`
+
+---
+
+# Welcome to your Expo app
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
