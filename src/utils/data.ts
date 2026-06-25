@@ -9,7 +9,7 @@
  * Drop SVG mockups under `assets/images/ghost-phone-*.svg` and reference them
  * via `require(...)` in the `image` field below.
  *
- * @module features/onboarding/data
+ * @module utils/data
  */
 
 // ─── Constants ────────────────────────────────────────────────────────────────

@@ -68,8 +68,14 @@ export interface UseCarouselReturn {
   scrollRef: React.RefObject<ScrollView | null>;
 
   /**
+   * Raw horizontal scroll offset as a shared value (updated on every scroll frame).
+   * Use this to drive scroll-synchronized animations on the UI thread.
+   */
+  scrollX: SharedValue<number>;
+
+  /**
    * Animated scroll handler — pass directly to `onScroll` on the ScrollView.
-   * Currently a no-op but kept for future scroll-driven animations.
+   * Tracks {@link scrollX} on every frame.
    */
   scrollHandler: ReturnType<typeof useAnimatedScrollHandler>;
 
@@ -111,9 +117,13 @@ export function useCarousel({
   const [page, setPage] = useState(0);
   const pageShared = useSharedValue(0);
   const progress = useSharedValue(0);
+  const scrollX = useSharedValue(0);
 
-  // No-op scroll handler — retained for future scroll-driven animations.
-  const scrollHandler = useAnimatedScrollHandler({ onScroll: () => {} });
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
 
   /**
    * Scrolls the view to `nextPage` and updates both the JS state and shared value.
@@ -167,6 +177,7 @@ export function useCarousel({
     page,
     pageShared,
     progress,
+    scrollX,
     scrollRef,
     scrollHandler,
     handleMomentumEnd,
