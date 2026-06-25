@@ -14,6 +14,7 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 
 import { CyclingWords } from '@/components/cycling-words';
 import OnboardingActions from '@/components/onboarding-actions';
+import { SparkleParticles } from '@/components/sparkle-particles';
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
@@ -40,6 +41,8 @@ export default function OnboardingScreen() {
 
         {/* Bottom: identity + copy + actions */}
         <View style={styles.bottomSection}>
+          {/* Orbiting stars cover the whole bottom section */}
+          <SparkleParticles />
           {/* Logo mark: frosted rounded square */}
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>R</Text>
