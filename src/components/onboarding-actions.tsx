@@ -1,12 +1,12 @@
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { SymbolView } from 'expo-symbols';
+import { SparkleButton } from './sparkle-button';
 
 function AppleLogo() {
   if (Platform.OS === 'ios') {
-    return <SymbolView name="apple.logo" size={24} tintColor="#111" style={styles.appleIcon} />;
+    return <SymbolView name="apple.logo" size={24} tintColor="#111" />;
   }
-  // Android: Unicode private-use Apple glyph (renders correctly on Roboto fallback)
   return <Text style={styles.appleIconText}></Text>;
 }
 
@@ -18,17 +18,16 @@ function RemindoMark() {
   );
 }
 
-/** CTA buttons matching the Fuse onboarding reference: white pill + frosted secondary. */
+/** CTA buttons: white pill primary + sparkle-border secondary. */
 export default function OnboardingActions() {
   const onPrimary = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  const onSecondary = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
   return (
     <View style={styles.container}>
-      {/* White pill — primary CTA */}
+      {/* White pill — primary */}
       <Pressable
         onPress={onPrimary}
-        style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.primary, pressed && { opacity: 0.75 }]}
         accessibilityRole="button"
         accessibilityLabel="Continue with Apple"
       >
@@ -36,16 +35,11 @@ export default function OnboardingActions() {
         <Text style={styles.primaryText}>Continue with Apple</Text>
       </Pressable>
 
-      {/* Frosted secondary CTA */}
-      <Pressable
-        onPress={onSecondary}
-        style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
-        accessibilityRole="button"
-        accessibilityLabel="Restore from iCloud"
-      >
-        <RemindoMark />
-        <Text style={styles.secondaryText}>Restore from iCloud</Text>
-      </Pressable>
+      {/* Sparkle border — secondary */}
+      <SparkleButton
+        label="Restore from iCloud"
+        leftSlot={<RemindoMark />}
+      />
     </View>
   );
 }
@@ -55,8 +49,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 16,
   },
-
-  // ── Primary ──────────────────────────────────────────────
   primary: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -65,9 +57,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     backgroundColor: '#fff',
-  },
-  appleIcon: {
-    // SymbolView has no additional style needed — size is set via prop
   },
   appleIconText: {
     fontSize: 24,
@@ -79,17 +68,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111',
     letterSpacing: -0.1,
-  },
-
-  // ── Secondary ─────────────────────────────────────────────
-  secondary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   markBox: {
     width: 28,
@@ -103,15 +81,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     color: '#fff',
-  },
-  secondaryText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.92)',
-  },
-
-  // ── Shared ────────────────────────────────────────────────
-  pressed: {
-    opacity: 0.75,
   },
 });
