@@ -31,11 +31,11 @@ export default function TripDetailScreen() {
 
 				{/* Version B: Places To Visit */}
 				<SectionHeader title="Places To Visit" count={TRIP.places.length + 10} iconColor={COLORS.brand} />
-				<CircularAvatarRow items={TRIP.places} showStatus />
+				<CircularAvatarRow items={TRIP.places} showStatus grid />
 
 				{/* Version B: Hotels */}
 				<SectionHeader title="Hotels" count={TRIP.hotels.length + 3} iconColor={COLORS.hotelIcon} />
-				<CircularAvatarRow items={TRIP.hotels} />
+				<CircularAvatarRow items={TRIP.hotels} grid />
 			</ScrollView>
 		</SafeAreaView>
 	);

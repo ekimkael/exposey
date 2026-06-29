@@ -6,12 +6,12 @@ import StoryRing from '@/components/story-ring';
 import StoryViewer from '@/components/story-viewer';
 
 type Item = { id: string; name: string; imageUrl: string };
-type Props = { items: readonly Item[]; showStatus?: boolean };
+type Props = { items: readonly Item[]; showStatus?: boolean; grid?: boolean };
 
 const AVATAR = 60;
 const RING_SIZE = AVATAR + 8;
 
-export default function CircularAvatarRow({ items, showStatus = false }: Props) {
+export default function CircularAvatarRow({ items, showStatus = false, grid = false }: Props) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   // track which stories have been viewed
   const [viewed, setViewed] = useState<Set<number>>(new Set());
@@ -27,27 +27,31 @@ export default function CircularAvatarRow({ items, showStatus = false }: Props) 
 
   return (
     <>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={s.content}
-      >
-        {items.map((item, i) => (
-          <Pressable key={item.id} style={s.item} onPress={() => showStatus && openStory(i)}>
-            <View style={s.avatarWrap}>
-              {showStatus && (
-                <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />
-              )}
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={[s.avatar, showStatus && s.avatarOffset]}
-                contentFit="cover"
-              />
-            </View>
-            <Text style={s.label} numberOfLines={2}>{item.name}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+      {grid ? (
+        <View style={s.gridContent}>
+          {items.map((item, i) => (
+            <Pressable key={item.id} style={s.gridItem} onPress={() => showStatus && openStory(i)}>
+              <View style={s.avatarWrap}>
+                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />}
+                <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
+              </View>
+              <Text style={s.label} numberOfLines={2}>{item.name}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.content}>
+          {items.map((item, i) => (
+            <Pressable key={item.id} style={s.item} onPress={() => showStatus && openStory(i)}>
+              <View style={s.avatarWrap}>
+                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />}
+                <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
+              </View>
+              <Text style={s.label} numberOfLines={2}>{item.name}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
 
       {showStatus && (
         <StoryViewer
@@ -92,4 +96,11 @@ const s = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
+  gridContent: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.screenH,
+    paddingBottom: SPACING.lg,
+    justifyContent: 'space-between',
+  },
+  gridItem: { alignItems: 'center', flex: 1 },
 });
