@@ -5,7 +5,8 @@ import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 import StoryRing from '@/components/story-ring';
 import StoryViewer from '@/components/story-viewer';
 
-type Item = { id: string; name: string; imageUrl: string };
+type StorySlide = { id: string; imageUrl: string };
+type Item = { id: string; name: string; imageUrl: string; stories?: readonly StorySlide[] };
 type Props = { items: readonly Item[]; showStatus?: boolean; grid?: boolean };
 
 const AVATAR = 60;
@@ -32,7 +33,7 @@ export default function CircularAvatarRow({ items, showStatus = false, grid = fa
           {items.map((item, i) => (
             <Pressable key={item.id} style={s.gridItem} onPress={() => showStatus && openStory(i)}>
               <View style={s.avatarWrap}>
-                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />}
+                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} segments={item.stories?.length ?? 1} />}
                 <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
               </View>
               <Text style={s.label} numberOfLines={2}>{item.name}</Text>
@@ -44,7 +45,7 @@ export default function CircularAvatarRow({ items, showStatus = false, grid = fa
           {items.map((item, i) => (
             <Pressable key={item.id} style={s.item} onPress={() => showStatus && openStory(i)}>
               <View style={s.avatarWrap}>
-                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />}
+                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} segments={item.stories?.length ?? 1} />}
                 <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
               </View>
               <Text style={s.label} numberOfLines={2}>{item.name}</Text>
@@ -53,14 +54,20 @@ export default function CircularAvatarRow({ items, showStatus = false, grid = fa
         </ScrollView>
       )}
 
-      {showStatus && (
-        <StoryViewer
-          items={(items as Item[]).slice(viewerIndex ?? 0)}
-          startIndex={0}
-          visible={viewerIndex !== null}
-          onClose={closeStory}
-        />
-      )}
+      {showStatus && viewerIndex !== null && (() => {
+        const item = items[viewerIndex];
+        const storyItems = item?.stories
+          ? (item.stories as StorySlide[]).map((s) => ({ id: s.id, name: item.name, imageUrl: s.imageUrl }))
+          : [{ id: item?.id ?? '', name: item?.name ?? '', imageUrl: item?.imageUrl ?? '' }];
+        return (
+          <StoryViewer
+            items={storyItems}
+            startIndex={0}
+            visible
+            onClose={closeStory}
+          />
+        );
+      })()}
     </>
   );
 }

@@ -8,6 +8,7 @@ import {
   Dimensions,
   Animated,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,21 +26,22 @@ type Props = {
   onClose: () => void;
 };
 
-function ProgressBar({ active, passed }: { active: boolean; passed: boolean }) {
+function ProgressBar({ active, passed, paused }: { active: boolean; passed: boolean; paused: boolean }) {
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (active) {
+    if (active && !paused) {
       anim.setValue(0);
       Animated.timing(anim, {
         toValue: 1,
         duration: STORY_DURATION,
         useNativeDriver: false,
       }).start();
-    } else {
+    } else if (!active) {
       anim.setValue(passed ? 1 : 0);
     }
-  }, [active, passed]);
+    // if active && paused: keep at 0, animation starts once paused becomes false
+  }, [active, passed, paused]);
 
   return (
     <View style={p.track}>
@@ -57,13 +59,19 @@ const p = StyleSheet.create({
 
 export default function StoryViewer({ items, startIndex = 0, visible, onClose }: Props) {
   const [index, setIndex] = useState(startIndex);
+  const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const advance = useCallback(() => {
     setIndex((i) => {
-      if (i + 1 >= items.length) { onClose(); return i; }
-      return i + 1;
+      const next = i + 1;
+      if (next >= items.length) {
+        // defer close so current render finishes cleanly
+        setTimeout(onClose, 0);
+        return i;
+      }
+      return next;
     });
   }, [items.length, onClose]);
 
@@ -72,15 +80,23 @@ export default function StoryViewer({ items, startIndex = 0, visible, onClose }:
     setIndex(startIndex);
   }, [visible, startIndex]);
 
+  // clamp index if items shrink (e.g. when slice changes after parent re-render)
   useEffect(() => {
-    if (!visible) return;
+    setIndex((i) => Math.min(i, Math.max(0, items.length - 1)));
+  }, [items.length]);
+
+  useEffect(() => { setLoading(true); }, [index]);
+
+  useEffect(() => {
+    if (!visible || loading) return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(advance, STORY_DURATION);
     return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [index, visible, advance]);
+  }, [index, visible, loading, advance]);
 
   if (!items.length) return null;
-  const current = items[index];
+  const current = items[index] ?? items[0];
+  if (!current) return null;
 
   const goBack = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -95,25 +111,15 @@ export default function StoryViewer({ items, startIndex = 0, visible, onClose }:
   return (
     <Modal visible={visible} animationType="fade" statusBarTranslucent>
       <View style={s.root}>
-        <Image source={{ uri: current.imageUrl }} style={s.image} contentFit="cover" />
-
-        {/* Gradient overlay top */}
-        <View style={[s.topOverlay, { paddingTop: insets.top + SPACING.sm }]}>
-          {/* Progress bars */}
-          <View style={s.bars}>
-            {items.map((_, i) => (
-              <ProgressBar key={i} active={i === index} passed={i < index} />
-            ))}
-          </View>
-
-          {/* Header row */}
-          <View style={s.header}>
-            <Text style={s.name}>{current.name}</Text>
-            <Pressable onPress={onClose} hitSlop={16}>
-              <Text style={s.close}>✕</Text>
-            </Pressable>
-          </View>
-        </View>
+        <Image
+          source={{ uri: current.imageUrl }}
+          style={s.image}
+          contentFit="cover"
+          onLoadEnd={() => setLoading(false)}
+        />
+        {loading && (
+          <ActivityIndicator size="large" color="#fff" style={s.loader} />
+        )}
 
         {/* Tap zones: left = back, right = forward */}
         <View style={s.tapRow} pointerEvents="box-none">
@@ -123,6 +129,21 @@ export default function StoryViewer({ items, startIndex = 0, visible, onClose }:
           <TouchableWithoutFeedback onPress={goForward}>
             <View style={s.tapHalf} />
           </TouchableWithoutFeedback>
+        </View>
+
+        {/* Top overlay rendered last so it's above tap zones */}
+        <View style={[s.topOverlay, { paddingTop: insets.top + SPACING.sm }]} pointerEvents="box-none">
+          <View style={s.bars} pointerEvents="none">
+            {items.map((_, i) => (
+              <ProgressBar key={i} active={i === index} passed={i < index} paused={loading} />
+            ))}
+          </View>
+          <View style={s.header} pointerEvents="box-none">
+            <Text style={s.name}>{current.name}</Text>
+            <Pressable onPress={onClose} hitSlop={20}>
+              <Text style={s.close}>✕</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
@@ -147,4 +168,5 @@ const s = StyleSheet.create({
   close: { fontSize: 18, color: COLORS.white, fontWeight: '300' },
   tapRow: { ...StyleSheet.absoluteFill, flexDirection: 'row', top: 80 },
   tapHalf: { flex: 1 },
+  loader: { ...StyleSheet.absoluteFill, justifyContent: 'center', alignItems: 'center' },
 });
