@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
@@ -42,7 +43,7 @@ function AttractionIcon() {
   );
 }
 
-const ICONS: Record<string, () => JSX.Element> = {
+const ICONS: Record<string, () => React.ReactElement> = {
   hotel: HotelIcon,
   car: CarIcon,
   restaurant: RestaurantIcon,

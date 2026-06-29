@@ -32,7 +32,7 @@ const s = StyleSheet.create({
     overflow: 'hidden',
     height: 220,
   },
-  image: { ...StyleSheet.absoluteFillObject },
+  image: { ...StyleSheet.absoluteFill },
   overlay: {
     position: 'absolute',
     bottom: 0,
