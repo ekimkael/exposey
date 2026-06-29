@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import Svg, { Path } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 import { TRIP } from '@/utils/trip-mock';
 
-/** Map pin SVG inline — avoids external icon dep */
 function MapPin() {
   return (
     <Svg width={10} height={12} viewBox="0 0 10 12">
@@ -18,21 +18,27 @@ function MapPin() {
 export default function TripHeader() {
   return (
     <View style={s.container}>
-      {/* Brand row */}
+      {/* Brand row — pin + brand name only */}
       <View style={s.brandRow}>
-        <View style={s.brandLeft}>
-          <MapPin />
-          <Text style={s.brand}>{TRIP.brand}</Text>
+        <MapPin />
+        <Text style={s.brand}>{TRIP.brand}</Text>
+      </View>
+
+      {/* Title + flag badge on same row */}
+      <View style={s.titleRow}>
+        <View style={s.titleBlock}>
+          <Text style={s.title}>{TRIP.title}</Text>
+          <Text style={s.subtitle}>{TRIP.subtitle}</Text>
         </View>
         <View style={s.flagBadge}>
-          <Text style={s.flagEmoji}>{TRIP.flag}</Text>
+          <Image
+            source={require('../../assets/images/flag-argentina.svg')}
+            style={s.flagImage}
+            contentFit="contain"
+          />
           <Text style={s.flagCode}>{TRIP.flagCode}</Text>
         </View>
       </View>
-
-      {/* Title + subtitle */}
-      <Text style={s.title}>{TRIP.title}</Text>
-      <Text style={s.subtitle}>{TRIP.subtitle}</Text>
 
       {/* Description */}
       <Text style={s.description}>{TRIP.description}</Text>
@@ -44,28 +50,23 @@ const s = StyleSheet.create({
   container: { paddingHorizontal: SPACING.screenH, paddingTop: SPACING.lg },
   brandRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: SPACING.xs,
     marginBottom: SPACING.sm,
   },
-  brandLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
   brand: {
     fontSize: FONT.brand,
     fontWeight: '700',
     color: COLORS.brand,
     letterSpacing: FONT.brandLetterSpacing,
   },
-  flagBadge: {
+  titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.flagBg,
-    borderRadius: SPACING.flagRadius,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    gap: SPACING.xs,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
   },
-  flagEmoji: { fontSize: FONT.flagEmoji },
-  flagCode: { fontSize: FONT.flagLabel, fontWeight: '600', color: COLORS.text },
+  titleBlock: { flex: 1, marginRight: SPACING.sm },
   title: {
     fontSize: FONT.title,
     fontWeight: '700',
@@ -75,8 +76,21 @@ const s = StyleSheet.create({
   subtitle: {
     fontSize: FONT.subtitle,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
   },
+  flagBadge: {
+    alignItems: 'center',
+    backgroundColor: COLORS.flagBg,
+    borderRadius: SPACING.flagRadius,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    gap: SPACING.xs,
+  },
+  flagImage: {
+    width: 36,
+    height: 24,
+    borderRadius: 3,
+  },
+  flagCode: { fontSize: FONT.flagLabel, fontWeight: '600', color: COLORS.text },
   description: {
     fontSize: FONT.body,
     lineHeight: FONT.bodyLineHeight,
