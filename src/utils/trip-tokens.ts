@@ -35,7 +35,7 @@ export const FONT = {
   cardAddress: 12,
   title: 24,
   subtitle: 16,
-  body: 14,
+  body: 15,
   avatarLabel: 11,
   viewAll: 13,
   flagLabel: 12,
