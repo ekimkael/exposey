@@ -1,11 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 import { TRIP } from '@/utils/trip-mock';
 
 /** Map pin SVG inline — avoids external icon dep */
 function MapPin() {
-  const Svg = require('react-native-svg').Svg;
-  const Path = require('react-native-svg').Path;
   return (
     <Svg width={10} height={12} viewBox="0 0 10 12">
       <Path
@@ -54,24 +53,24 @@ const s = StyleSheet.create({
     fontSize: FONT.brand,
     fontWeight: '700',
     color: COLORS.brand,
-    letterSpacing: 1.2,
+    letterSpacing: FONT.brandLetterSpacing,
   },
   flagBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.flagBg,
-    borderRadius: 6,
+    borderRadius: SPACING.flagRadius,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     gap: SPACING.xs,
   },
-  flagEmoji: { fontSize: 18 },
+  flagEmoji: { fontSize: FONT.flagEmoji },
   flagCode: { fontSize: FONT.flagLabel, fontWeight: '600', color: COLORS.text },
   title: {
     fontSize: FONT.title,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: SPACING.tight,
   },
   subtitle: {
     fontSize: FONT.subtitle,
@@ -80,7 +79,7 @@ const s = StyleSheet.create({
   },
   description: {
     fontSize: FONT.body,
-    lineHeight: 20,
+    lineHeight: FONT.bodyLineHeight,
     color: COLORS.textSecondary,
     marginBottom: SPACING.lg,
   },

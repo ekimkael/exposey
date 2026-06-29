@@ -21,6 +21,8 @@ export const SPACING = {
   lg: 24,
   xl: 32,
   screenH: 20,   // horizontal screen padding
+  tight: 2,
+  flagRadius: 6,
 } as const;
 
 export const FONT = {
@@ -36,4 +38,7 @@ export const FONT = {
   avatarLabel: 11,
   viewAll: 13,
   flagLabel: 12,
+  brandLetterSpacing: 1.2,
+  flagEmoji: 18,
+  bodyLineHeight: 20,
 } as const;
