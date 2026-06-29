@@ -18,7 +18,7 @@ export const TRIP = {
   featuredRestaurant: {
     name: 'St. Iniesta Drawn ↗',
     address: 'New venue, US/9210',
-    imageUrl: picsum('supra-rest', 400, 260),
+    imageUrl: picsum('nature', 400, 400),
   },
   restaurants: [
     { id: 'r1', name: 'Kareems',  imageUrl: picsum('kareems',  80, 80) },
