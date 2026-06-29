@@ -30,7 +30,7 @@ export const FONT = {
   brand: 11,
   statNumber: 18,
   statLabel: 11,
-  sectionTitle: 17,
+  sectionTitle: 19,
   cardVenue: 15,
   cardAddress: 12,
   title: 24,
