@@ -79,10 +79,6 @@ const s = StyleSheet.create({
   },
   flagBadge: {
     alignItems: 'center',
-    backgroundColor: COLORS.flagBg,
-    borderRadius: SPACING.flagRadius,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
     gap: SPACING.xs,
   },
   flagImage: {
