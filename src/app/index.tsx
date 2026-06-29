@@ -65,7 +65,7 @@ export default function TripDetailScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
+  safe: { flex: 1, backgroundColor: COLORS.surface },
   scroll: { flex: 1, backgroundColor: COLORS.surface },
   content: { paddingBottom: SPACING.xl },
   cardWrap: { marginBottom: SPACING.lg },
