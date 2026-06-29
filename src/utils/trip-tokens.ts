@@ -12,6 +12,7 @@ export const COLORS = {
   cardOverlay: 'rgba(0,0,0,0.38)',
   iconBg: '#F0F0F0',
   flagBg: '#F0F0F0',
+  hotelIcon: '#4A90E2',   // hotel section icon color
 } as const;
 
 export const SPACING = {

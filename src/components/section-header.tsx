@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 
@@ -28,9 +28,9 @@ export default function SectionHeader({ title, count, iconColor }: Props) {
           {count != null ? <Text style={s.count}> ({count})</Text> : null}
         </Text>
       </View>
-      <TouchableOpacity>
+      <Pressable>
         <Text style={s.viewAll}>View all</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }

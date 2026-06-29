@@ -26,7 +26,7 @@ export default function RestaurantCard() {
 }
 
 const s = StyleSheet.create({
-  container: { paddingHorizontal: SPACING.screenH, marginBottom: SPACING.lg },
+  container: { paddingHorizontal: SPACING.screenH },
   card: {
     borderRadius: 14,
     overflow: 'hidden',

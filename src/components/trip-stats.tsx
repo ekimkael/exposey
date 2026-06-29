@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Path, Rect, Circle, Line } from 'react-native-svg';
+import Svg, { Path, Circle, Line } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 import { TRIP } from '@/utils/trip-mock';
 
@@ -56,6 +56,7 @@ export default function TripStats() {
       <View style={s.row}>
         {TRIP.stats.map((stat) => {
           const Icon = ICONS[stat.iconKey];
+          if (!Icon) return null;
           return (
             <View key={stat.iconKey} style={s.cell}>
               <Icon />

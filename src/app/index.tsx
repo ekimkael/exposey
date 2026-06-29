@@ -30,7 +30,7 @@ export default function TripDetailScreen() {
         {/* Version A: Restaurants — large photo card */}
         <SectionHeader
           title="Restaurants"
-          iconColor="#F5A623"
+          iconColor={COLORS.brandIcon}
         />
         <View style={s.cardWrap}>
           <RestaurantCard />
@@ -40,7 +40,7 @@ export default function TripDetailScreen() {
         <SectionHeader
           title="Restaurants"
           count={TRIP.restaurants.length + 3}
-          iconColor="#F5A623"
+          iconColor={COLORS.brandIcon}
         />
         <CircularAvatarRow items={TRIP.restaurants} />
 
@@ -48,7 +48,7 @@ export default function TripDetailScreen() {
         <SectionHeader
           title="Places To Visit"
           count={TRIP.places.length + 10}
-          iconColor="#E8472A"
+          iconColor={COLORS.brand}
         />
         <CircularAvatarRow items={TRIP.places} />
 
@@ -56,7 +56,7 @@ export default function TripDetailScreen() {
         <SectionHeader
           title="Hotels"
           count={TRIP.hotels.length + 3}
-          iconColor="#4A90E2"
+          iconColor={COLORS.hotelIcon}
         />
         <CircularAvatarRow items={TRIP.hotels} />
       </ScrollView>
