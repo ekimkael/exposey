@@ -51,7 +51,7 @@ function ProgressBar({ active, passed }: { active: boolean; passed: boolean }) {
 }
 
 const p = StyleSheet.create({
-  track: { flex: 1, height: 2, backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: 1, overflow: 'hidden' },
+  track: { flex: 1, height: 3.5, backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: 2, overflow: 'hidden' },
   fill: { height: '100%', backgroundColor: '#fff' },
 });
 
