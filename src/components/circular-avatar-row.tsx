@@ -1,62 +1,63 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
-import Svg, { Circle } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
+import StoryRing from '@/components/story-ring';
+import StoryViewer from '@/components/story-viewer';
 
 type Item = { id: string; name: string; imageUrl: string };
 type Props = { items: readonly Item[]; showStatus?: boolean };
 
-const AVATAR = 64;
-const RING = AVATAR + 6; // ring slightly larger than avatar
-const R = RING / 2 - 2;  // radius leaving room for stroke
-const CIRCUMFERENCE = 2 * Math.PI * R;
-const DASH = 4;
-const GAP = 3;
-
-/** Dashed SVG ring — WhatsApp/Snap story indicator */
-function StatusRing() {
-  return (
-    <Svg
-      width={RING}
-      height={RING}
-      style={s.ring}
-      viewBox={`0 0 ${RING} ${RING}`}
-    >
-      <Circle
-        cx={RING / 2}
-        cy={RING / 2}
-        r={R}
-        fill="none"
-        stroke={COLORS.brand}
-        strokeWidth={2}
-        strokeDasharray={`${DASH} ${GAP}`}
-        strokeLinecap="round"
-      />
-    </Svg>
-  );
-}
+const AVATAR = 60;
+const RING_SIZE = AVATAR + 8;
 
 export default function CircularAvatarRow({ items, showStatus = false }: Props) {
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  // track which stories have been viewed
+  const [viewed, setViewed] = useState<Set<number>>(new Set());
+
+  const openStory = (i: number) => setViewerIndex(i);
+
+  const closeStory = () => {
+    if (viewerIndex !== null) {
+      setViewed((prev) => new Set(prev).add(viewerIndex));
+    }
+    setViewerIndex(null);
+  };
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={s.content}
-    >
-      {items.map((item) => (
-        <View key={item.id} style={s.item}>
-          <View style={s.avatarWrap}>
-            {showStatus && <StatusRing />}
-            <Image
-              source={{ uri: item.imageUrl }}
-              style={s.avatar}
-              contentFit="cover"
-            />
-          </View>
-          <Text style={s.label} numberOfLines={2}>{item.name}</Text>
-        </View>
-      ))}
-    </ScrollView>
+    <>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.content}
+      >
+        {items.map((item, i) => (
+          <Pressable key={item.id} style={s.item} onPress={() => showStatus && openStory(i)}>
+            <View style={s.avatarWrap}>
+              {showStatus && (
+                <StoryRing size={RING_SIZE} viewed={viewed.has(i)} />
+              )}
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={[s.avatar, showStatus && s.avatarOffset]}
+                contentFit="cover"
+              />
+            </View>
+            <Text style={s.label} numberOfLines={2}>{item.name}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      {showStatus && (
+        <StoryViewer
+          items={items as Item[]}
+          startIndex={viewerIndex ?? 0}
+          visible={viewerIndex !== null}
+          onClose={closeStory}
+        />
+      )}
+    </>
   );
 }
 
@@ -66,22 +67,25 @@ const s = StyleSheet.create({
     gap: SPACING.md,
     paddingBottom: SPACING.lg,
   },
-  item: { alignItems: 'center', width: RING },
+  item: { alignItems: 'center', width: RING_SIZE },
   avatarWrap: {
-    width: RING,
-    height: RING,
+    width: RING_SIZE,
+    height: RING_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.xs,
-  },
-  ring: {
-    position: 'absolute',
   },
   avatar: {
     width: AVATAR,
     height: AVATAR,
     borderRadius: AVATAR / 2,
     backgroundColor: COLORS.iconBg,
+  },
+  avatarOffset: {
+    // 2px gap between avatar and ring stroke
+    width: AVATAR - 2,
+    height: AVATAR - 2,
+    borderRadius: (AVATAR - 2) / 2,
   },
   label: {
     fontSize: FONT.avatarLabel,
