@@ -54,3 +54,20 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Screens
+
+### Gatesware — Trip Detail (`feat/gatesware-trip-detail`)
+
+Reproduces the Gatesware "One Week Retreat" UI (designs A + B).
+
+**Components:**
+- `trip-header` — brand row, title, flag badge, description
+- `trip-stats` — 4-column stat grid with inline SVG icons
+- `section-header` — reusable colored icon + title + count + "View all"
+- `restaurant-card` — large photo card with overlay (version A)
+- `circular-avatar-row` — horizontal scroll of circular avatars (version B)
+
+**Utils:**
+- `src/utils/trip-tokens.ts` — color palette, spacing, typography
+- `src/utils/trip-mock.ts` — static trip data
