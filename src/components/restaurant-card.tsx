@@ -30,7 +30,7 @@ const s = StyleSheet.create({
   card: {
     borderRadius: 14,
     overflow: 'hidden',
-    height: 220,
+    aspectRatio: 1,
   },
   image: { ...StyleSheet.absoluteFill },
   overlay: {
