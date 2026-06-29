@@ -31,7 +31,7 @@ export default function TripDetailScreen() {
 
 				{/* Version B: Places To Visit */}
 				<SectionHeader title="Places To Visit" count={TRIP.places.length + 10} iconColor={COLORS.brand} />
-				<CircularAvatarRow items={TRIP.places} />
+				<CircularAvatarRow items={TRIP.places} showStatus />
 
 				{/* Version B: Hotels */}
 				<SectionHeader title="Hotels" count={TRIP.hotels.length + 3} iconColor={COLORS.hotelIcon} />
