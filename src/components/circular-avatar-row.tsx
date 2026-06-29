@@ -55,8 +55,8 @@ export default function CircularAvatarRow({ items, showStatus = false, grid = fa
 
       {showStatus && (
         <StoryViewer
-          items={items as Item[]}
-          startIndex={viewerIndex ?? 0}
+          items={(items as Item[]).slice(viewerIndex ?? 0)}
+          startIndex={0}
           visible={viewerIndex !== null}
           onClose={closeStory}
         />
