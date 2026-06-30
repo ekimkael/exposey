@@ -7,10 +7,16 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MindfulnessScreen() {
+  const insets = useSafeAreaInsets();
   return (
     <View style={s.root}>
+      <Text style={[s.subtitle, { marginTop: insets.top + 20 }]}>
+        Nothing needs your attention
+      </Text>
+
       <View style={s.center}>
 
         {/* Radial aura — 5 concentric ellipses, opacity fades outward */}
@@ -19,8 +25,6 @@ export default function MindfulnessScreen() {
         <View style={[s.aura, { width: 248, height: 192, opacity: 0.13 }]} />
         <View style={[s.aura, { width: 192, height: 148, opacity: 0.17 }]} />
         <View style={[s.aura, { width: 144, height: 112, opacity: 0.22 }]} />
-
-        <Text style={s.subtitle}>Nothing needs your attention</Text>
 
         <Link href={'/beach' as any} asChild>
           <Link.AppleZoom>
@@ -53,7 +57,7 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: '#8A8A8E',
     letterSpacing: 0.1,
-    marginBottom: 16,
+    textAlign: 'center',
   },
 
   button: {
