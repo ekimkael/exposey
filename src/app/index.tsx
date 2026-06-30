@@ -59,19 +59,6 @@ export default function MindfulnessScreen() {
           <Text style={s.undoText}>↩  Undo</Text>
         </Pressable>
 
-        {Platform.OS === 'ios' && (
-          <View style={s.tabBar}>
-            {TAB_ICONS.map(({ ios }, i) => (
-              <View key={i} style={s.tabItem}>
-                <SymbolView
-                  name={ios as any}
-                  size={22}
-                  tintColor={i === 0 ? '#111' : '#AFAFAF'}
-                />
-              </View>
-            ))}
-          </View>
-        )}
       </View>
     </View>
   );
