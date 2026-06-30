@@ -2,8 +2,26 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import Svg, { Path } from 'react-native-svg';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
-import { TRIP } from '@/utils/trip-mock';
 
+/**
+ * Props for TripHeader.
+ * All fields come from TRIP in trip-mock.ts — pass them from the screen
+ * so the component stays data-agnostic and testable.
+ */
+type Props = {
+  /** Short brand name displayed in caps above the title (e.g. "GATESWARE"). */
+  brand: string;
+  /** Main trip title (e.g. "One Week Retreat"). */
+  title: string;
+  /** Trip subtitle / location tagline (e.g. "At Supra Falls"). */
+  subtitle: string;
+  /** ISO 3166-1 alpha-3 country code shown below the flag image (e.g. "ARG"). */
+  flagCode: string;
+  /** Trip description paragraph rendered below the title row. */
+  description: string;
+};
+
+/** Brand-row pin icon — small filled teardrop in brand red. */
 function MapPin() {
   return (
     <Svg width={10} height={12} viewBox="0 0 10 12">
@@ -15,20 +33,20 @@ function MapPin() {
   );
 }
 
-export default function TripHeader() {
+export default function TripHeader({ brand, title, subtitle, flagCode, description }: Props) {
   return (
     <View style={s.container}>
-      {/* Brand row — pin + brand name only */}
+      {/* Brand row — pin + brand name */}
       <View style={s.brandRow}>
         <MapPin />
-        <Text style={s.brand}>{TRIP.brand}</Text>
+        <Text style={s.brand}>{brand}</Text>
       </View>
 
-      {/* Title + flag badge on same row */}
+      {/* Title block (left) + flag badge (right) */}
       <View style={s.titleRow}>
         <View style={s.titleBlock}>
-          <Text style={s.title}>{TRIP.title}</Text>
-          <Text style={s.subtitle}>{TRIP.subtitle}</Text>
+          <Text style={s.title}>{title}</Text>
+          <Text style={s.subtitle}>{subtitle}</Text>
         </View>
         <View style={s.flagBadge}>
           <Image
@@ -36,12 +54,11 @@ export default function TripHeader() {
             style={s.flagImage}
             contentFit="contain"
           />
-          <Text style={s.flagCode}>{TRIP.flagCode}</Text>
+          <Text style={s.flagCodeText}>{flagCode}</Text>
         </View>
       </View>
 
-      {/* Description */}
-      <Text style={s.description}>{TRIP.description}</Text>
+      <Text style={s.description}>{description}</Text>
     </View>
   );
 }
@@ -73,20 +90,10 @@ const s = StyleSheet.create({
     color: COLORS.text,
     marginBottom: SPACING.tight,
   },
-  subtitle: {
-    fontSize: FONT.subtitle,
-    color: COLORS.textSecondary,
-  },
-  flagBadge: {
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  flagImage: {
-    width: 36,
-    height: 24,
-    borderRadius: 3,
-  },
-  flagCode: { fontSize: FONT.flagLabel, fontWeight: '600', color: COLORS.text },
+  subtitle: { fontSize: FONT.subtitle, color: COLORS.textSecondary },
+  flagBadge: { alignItems: 'center', gap: SPACING.xs },
+  flagImage: { width: 36, height: 24, borderRadius: 3 },
+  flagCodeText: { fontSize: FONT.flagLabel, fontWeight: '600', color: COLORS.text },
   description: {
     fontSize: FONT.body,
     lineHeight: FONT.bodyLineHeight,

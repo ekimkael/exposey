@@ -26,6 +26,14 @@ export const SPACING = {
 	flagRadius: 6,
 } as const;
 
+/** Visual constants for the story ring SVG — kept here so design changes stay in one place. */
+export const RING = {
+	/** Stroke width of each arc segment in dp. */
+	stroke: 2.5,
+	/** Gap between arc segments in dp. */
+	segmentGap: 3,
+} as const;
+
 export const FONT = {
 	brand: 11,
 	statNumber: 18,

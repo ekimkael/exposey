@@ -4,81 +4,138 @@ import { Image } from 'expo-image';
 import { COLORS, SPACING, FONT } from '@/utils/trip-tokens';
 import StoryRing from '@/components/story-ring';
 import StoryViewer from '@/components/story-viewer';
+import type { StoryViewerItem } from '@/components/story-viewer';
 
+/** A raw story slide as stored in mock data (no `name` — name comes from parent item). */
 type StorySlide = { id: string; imageUrl: string };
-type Item = { id: string; name: string; imageUrl: string; stories?: readonly StorySlide[] };
-type Props = { items: readonly Item[]; showStatus?: boolean; grid?: boolean };
 
-const AVATAR = 60;
-const RING_SIZE = AVATAR + 8;
+/**
+ * A single item in the avatar row.
+ * `stories` is optional — items without it show no ring and open no viewer.
+ */
+type AvatarItem = {
+  id: string;
+  name: string;
+  imageUrl: string;
+  stories?: readonly StorySlide[];
+};
+
+/** Props for CircularAvatarRow. */
+type Props = {
+  /** Items to render as circular avatars. */
+  items: readonly AvatarItem[];
+  /**
+   * When true, each avatar gets a story ring and tapping opens StoryViewer.
+   * Items without a `stories` array are still tappable but show a single ring.
+   */
+  showStatus?: boolean;
+  /**
+   * When true, renders a 4-column flex grid instead of a horizontal ScrollView.
+   * Use for sections where all items should be visible at once.
+   */
+  grid?: boolean;
+};
+
+const AVATAR_SIZE = 60;
+const RING_SIZE   = AVATAR_SIZE + 8;
+
+/** Build the flat slide list that StoryViewer expects from a single AvatarItem. */
+function buildViewerItems(item: AvatarItem): StoryViewerItem[] {
+  if (item.stories && item.stories.length > 0) {
+    return item.stories.map((slide) => ({
+      id:       slide.id,
+      name:     item.name,
+      imageUrl: slide.imageUrl,
+    }));
+  }
+  return [{ id: item.id, name: item.name, imageUrl: item.imageUrl }];
+}
 
 export default function CircularAvatarRow({ items, showStatus = false, grid = false }: Props) {
-  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
-  // track which stories have been viewed
-  const [viewed, setViewed] = useState<Set<number>>(new Set());
+  const [activeViewerIndex, setActiveViewerIndex] = useState<number | null>(null);
+  /** Set of item indices whose stories have been fully seen at least once. */
+  const [viewedIndices, setViewedIndices] = useState<Set<number>>(new Set());
 
-  const openStory = (i: number) => setViewerIndex(i);
+  const openViewer = (index: number) => setActiveViewerIndex(index);
 
-  const closeStory = () => {
-    if (viewerIndex !== null) {
-      setViewed((prev) => new Set(prev).add(viewerIndex));
+  const closeViewer = () => {
+    if (activeViewerIndex !== null) {
+      setViewedIndices((prev) => new Set(prev).add(activeViewerIndex));
     }
-    setViewerIndex(null);
+    setActiveViewerIndex(null);
   };
+
+  const renderAvatar = (item: AvatarItem, index: number) => {
+    const isViewed = viewedIndices.has(index);
+    const segmentCount = item.stories?.length ?? 1;
+
+    return (
+      <Pressable
+        key={item.id}
+        style={grid ? s.gridItem : s.scrollItem}
+        onPress={() => showStatus && openViewer(index)}
+        accessibilityRole="button"
+        accessibilityLabel={`Open stories for ${item.name}`}
+      >
+        <View style={s.avatarWrap}>
+          {showStatus && (
+            <StoryRing size={RING_SIZE} viewed={isViewed} segments={segmentCount} />
+          )}
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={[s.avatar, showStatus && s.avatarWithRing]}
+            contentFit="cover"
+          />
+        </View>
+        <Text style={s.label} numberOfLines={2}>{item.name}</Text>
+      </Pressable>
+    );
+  };
+
+  const activeItem = activeViewerIndex !== null ? items[activeViewerIndex] : null;
 
   return (
     <>
       {grid ? (
-        <View style={s.gridContent}>
-          {items.map((item, i) => (
-            <Pressable key={item.id} style={s.gridItem} onPress={() => showStatus && openStory(i)}>
-              <View style={s.avatarWrap}>
-                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} segments={item.stories?.length ?? 1} />}
-                <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
-              </View>
-              <Text style={s.label} numberOfLines={2}>{item.name}</Text>
-            </Pressable>
-          ))}
+        <View style={s.gridContainer}>
+          {items.map((item, i) => renderAvatar(item, i))}
         </View>
       ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.content}>
-          {items.map((item, i) => (
-            <Pressable key={item.id} style={s.item} onPress={() => showStatus && openStory(i)}>
-              <View style={s.avatarWrap}>
-                {showStatus && <StoryRing size={RING_SIZE} viewed={viewed.has(i)} segments={item.stories?.length ?? 1} />}
-                <Image source={{ uri: item.imageUrl }} style={[s.avatar, showStatus && s.avatarOffset]} contentFit="cover" />
-              </View>
-              <Text style={s.label} numberOfLines={2}>{item.name}</Text>
-            </Pressable>
-          ))}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={s.scrollContent}
+        >
+          {items.map((item, i) => renderAvatar(item, i))}
         </ScrollView>
       )}
 
-      {showStatus && viewerIndex !== null && (() => {
-        const item = items[viewerIndex];
-        const storyItems = item?.stories
-          ? (item.stories as StorySlide[]).map((s) => ({ id: s.id, name: item.name, imageUrl: s.imageUrl }))
-          : [{ id: item?.id ?? '', name: item?.name ?? '', imageUrl: item?.imageUrl ?? '' }];
-        return (
-          <StoryViewer
-            items={storyItems}
-            startIndex={0}
-            visible
-            onClose={closeStory}
-          />
-        );
-      })()}
+      {showStatus && activeItem != null && (
+        <StoryViewer
+          items={buildViewerItems(activeItem)}
+          startIndex={0}
+          visible
+          onClose={closeViewer}
+        />
+      )}
     </>
   );
 }
 
 const s = StyleSheet.create({
-  content: {
+  scrollContent: {
     paddingHorizontal: SPACING.screenH,
     gap: SPACING.md,
     paddingBottom: SPACING.lg,
   },
-  item: { alignItems: 'center', width: RING_SIZE },
+  gridContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.screenH,
+    paddingBottom: SPACING.lg,
+    justifyContent: 'space-between',
+  },
+  scrollItem: { alignItems: 'center', width: RING_SIZE },
+  gridItem:   { alignItems: 'center', flex: 1 },
   avatarWrap: {
     width: RING_SIZE,
     height: RING_SIZE,
@@ -87,27 +144,20 @@ const s = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   avatar: {
-    width: AVATAR,
-    height: AVATAR,
-    borderRadius: AVATAR / 2,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
     backgroundColor: COLORS.iconBg,
   },
-  avatarOffset: {
-    // 2px gap between avatar and ring stroke
-    width: AVATAR - 2,
-    height: AVATAR - 2,
-    borderRadius: (AVATAR - 2) / 2,
+  // Slightly smaller when the ring is visible — creates the 2dp gap between ring and photo.
+  avatarWithRing: {
+    width: AVATAR_SIZE - 2,
+    height: AVATAR_SIZE - 2,
+    borderRadius: (AVATAR_SIZE - 2) / 2,
   },
   label: {
     fontSize: FONT.avatarLabel,
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
-  gridContent: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.screenH,
-    paddingBottom: SPACING.lg,
-    justifyContent: 'space-between',
-  },
-  gridItem: { alignItems: 'center', flex: 1 },
 });
