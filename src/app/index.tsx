@@ -9,8 +9,15 @@ import { Link } from 'expo-router';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const BLUE = '#3B82F6';
+
+// ponytail: fixed pill size avoids onLayout — change if label text changes
+const PILL_W = 164;
+const PILL_H = 50;
+
 export default function MindfulnessScreen() {
   const insets = useSafeAreaInsets();
+
   return (
     <View style={s.root}>
       <Text style={[s.subtitle, { marginTop: insets.top + 20 }]}>
@@ -18,13 +25,9 @@ export default function MindfulnessScreen() {
       </Text>
 
       <View style={s.center}>
-
-        {/* Radial aura — 5 concentric ellipses, opacity fades outward */}
-        <View style={[s.aura, { width: 380, height: 300, opacity: 0.06 }]} />
-        <View style={[s.aura, { width: 310, height: 240, opacity: 0.09 }]} />
-        <View style={[s.aura, { width: 248, height: 192, opacity: 0.13 }]} />
-        <View style={[s.aura, { width: 192, height: 148, opacity: 0.17 }]} />
-        <View style={[s.aura, { width: 144, height: 112, opacity: 0.22 }]} />
+        {/* Glow layers — same pill shape, bleed outward via shadowRadius */}
+        <View pointerEvents="none" style={s.glowFar} />
+        <View pointerEvents="none" style={s.glowNear} />
 
         <Link href={'/beach' as any} asChild>
           <Link.AppleZoom>
@@ -35,23 +38,14 @@ export default function MindfulnessScreen() {
             </Pressable>
           </Link.AppleZoom>
         </Link>
-
       </View>
     </View>
   );
 }
 
-const BLUE = '#3B82F6';
-
 const s = StyleSheet.create({
   root:   { flex: 1, backgroundColor: '#F5F5F5' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
-  aura: {
-    position: 'absolute',
-    borderRadius: 999,
-    backgroundColor: BLUE,
-  },
 
   subtitle: {
     fontSize: 13,
@@ -60,17 +54,40 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
 
-  button: {
-    backgroundColor: BLUE,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
+  // Wide soft halo
+  glowFar: {
+    position: 'absolute',
+    width: PILL_W + 60,
+    height: PILL_H + 60,
     borderRadius: 999,
-    // blue glow shadow
+    backgroundColor: BLUE,
+    opacity: 0.18,
     shadowColor: BLUE,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 55,
+  },
+  // Tighter bright core glow
+  glowNear: {
+    position: 'absolute',
+    width: PILL_W,
+    height: PILL_H,
+    borderRadius: 999,
+    backgroundColor: BLUE,
+    opacity: 0.35,
+    shadowColor: BLUE,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 28,
+  },
+
+  button: {
+    width: PILL_W,
+    height: PILL_H,
+    borderRadius: 999,
+    backgroundColor: BLUE,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     color: '#fff',
