@@ -1,19 +1,24 @@
 /**
- * Apple-Intelligence-style animated glow button.
+ * @file glow-button.tsx
+ * @description Apple-Intelligence-style animated glow button — no Skia, no extra deps.
  *
- * Visual structure (bottom → top):
- *  1. Wide semi-transparent strokes → outer color bleed / halo
- *  2. Gradient-filled pill (the visible button body)
- *  3. Subtle white inner highlight border
- *  4. Text label
+ * ## Visual structure (back → front)
+ * 1. Wide semi-transparent stroke  → soft outer halo bleed
+ * 2. Medium stroke                 → intermediate glow ring
+ * 3. Crisp `BORDER`-wide stroke    → sharp gradient border
+ * 4. Dark pill body (View)         → button background
+ * 5. Label (Text)                  → foreground text
  *
- * Animation: LinearGradient x1/y1/x2/y2 rotated via useAnimatedProps
- * giving a slow sweeping conic-like effect without Skia.
+ * ## Animation
+ * A `LinearGradient` is rotated by animating its `x1/y1/x2/y2` endpoints
+ * around the button's centroid via `useAnimatedProps`. The result approximates
+ * a conic sweep without requiring `@shopify/react-native-skia`.
  *
- * Colors lifted from the Apple Intelligence reference (purple → red → amber).
+ * ## Customisation
+ * Tweak `COLORS`, `SPEED`, `BORDER`, `WIDTH`, and `HEIGHT` at the top of the file.
  */
 import React, { useEffect } from 'react';
-import { StyleSheet, Pressable, View, ViewStyle } from 'react-native';
+import { StyleSheet, Pressable, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   withRepeat,
@@ -25,45 +30,62 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-// Apple Intelligence palette: deep indigo → violet → crimson → orange → amber
-const COLORS = ['#3730E6', '#7B1FA2', '#B71C1C', '#E65100', '#F57F17', '#3730E6'];
-const STOPS  = COLORS.map((c, i) => ({ offset: i / (COLORS.length - 1), color: c }));
+/** Apple Intelligence signature palette — first color repeated at the end for a seamless loop. */
+const COLORS = ['#BF5AF2', '#5AC8FA', '#FFFFFF', '#FF2D55', '#BF5AF2'];
+const STOPS  = COLORS.map((color, i) => ({ offset: i / (COLORS.length - 1), color }));
 
-const SPEED = 3500; // ms per revolution
-const W     = 220;
-const H     = 58;
-const RX    = H / 2;
+const SPEED  = 2400; /** ms per full gradient revolution */
+const BORDER = 3;    /** visible border stroke width in pixels */
+const WIDTH  = 180;  /** pill width in pixels */
+const HEIGHT = 52;   /** pill height in pixels */
 
-interface GlowButtonProps {
+export interface GlowButtonProps {
+  /** Text displayed inside the pill. */
   label: string;
+  /** Called when the button is pressed. Typically provided by `Link.AppleZoom`. */
   onPress?: () => void;
+  /** Extra styles applied to the outermost `Pressable`. */
   style?: ViewStyle;
+  /**
+   * Reanimated shared-element tag. Attach the same tag to the destination
+   * `Animated.View` on the next screen to trigger a morphing transition.
+   */
   sharedTransitionTag?: string;
 }
 
+/**
+ * A pill-shaped button with an animated gradient border that mimics the
+ * Apple Intelligence glow effect.
+ *
+ * @example
+ * ```tsx
+ * <GlowButton label="Be here now" sharedTransitionTag="beach-morph" />
+ * ```
+ */
 export function GlowButton({ label, onPress, style, sharedTransitionTag }: GlowButtonProps) {
-  const t = useSharedValue(0);
+  const rotation = useSharedValue(0);
 
   useEffect(() => {
-    t.value = withRepeat(
+    rotation.value = withRepeat(
       withTiming(1, { duration: SPEED, easing: Easing.linear }),
       -1,
       false,
     );
   }, []);
 
-  const cx = W / 2;
-  const cy = H / 2;
-  const r  = Math.hypot(cx, cy) * 1.2;
+  const centerX = WIDTH / 2;
+  const centerY = HEIGHT / 2;
+  // Radius large enough so the gradient covers the full pill at every angle
+  const radius = Math.hypot(centerX, centerY) * 1.15;
 
-  const gradProps = useAnimatedProps(() => {
+  const gradientProps = useAnimatedProps(() => {
     'worklet';
-    const a = t.value * 2 * Math.PI;
+    const angle = rotation.value * 2 * Math.PI;
     return {
-      x1: cx + r * Math.cos(a),
-      y1: cy + r * Math.sin(a),
-      x2: cx - r * Math.cos(a),
-      y2: cy - r * Math.sin(a),
+      x1: centerX + radius * Math.cos(angle),
+      y1: centerY + radius * Math.sin(angle),
+      x2: centerX - radius * Math.cos(angle),
+      y2: centerY - radius * Math.sin(angle),
     };
   });
 
@@ -74,41 +96,47 @@ export function GlowButton({ label, onPress, style, sharedTransitionTag }: GlowB
           style={[s.pill, pressed && s.pressed]}
           sharedTransitionTag={sharedTransitionTag}
         >
-          <Svg width={W} height={H} style={[StyleSheet.absoluteFill, { overflow: 'visible' }]}>
+          <Svg width={WIDTH} height={HEIGHT} style={StyleSheet.absoluteFill}>
             <Defs>
               <AnimatedLinearGradient
-                id="ai"
+                id="ai-glow"
                 gradientUnits="userSpaceOnUse"
-                animatedProps={gradProps}
+                animatedProps={gradientProps}
               >
                 {STOPS.map(({ offset, color }) => (
-                  <Stop key={`${color}${offset}`} offset={offset} stopColor={color} />
+                  <Stop key={`${color}-${offset}`} offset={offset} stopColor={color} />
                 ))}
               </AnimatedLinearGradient>
             </Defs>
 
-            {/* Outer halo — wide bleed */}
+            {/* Layer 1 — wide soft halo */}
             <Rect
-              x={-16} y={-16} width={W + 32} height={H + 32} rx={RX + 16}
-              fill="none" stroke="url(#ai)" strokeWidth={32} opacity={0.18}
+              x={8} y={8} width={WIDTH - 16} height={HEIGHT - 16}
+              rx={(HEIGHT - 16) / 2}
+              fill="none" stroke="url(#ai-glow)"
+              strokeWidth={20} opacity={0.12}
             />
-            {/* Mid glow */}
+            {/* Layer 2 — intermediate glow ring */}
             <Rect
-              x={-6} y={-6} width={W + 12} height={H + 12} rx={RX + 6}
-              fill="none" stroke="url(#ai)" strokeWidth={14} opacity={0.32}
+              x={5} y={5} width={WIDTH - 10} height={HEIGHT - 10}
+              rx={(HEIGHT - 10) / 2}
+              fill="none" stroke="url(#ai-glow)"
+              strokeWidth={10} opacity={0.22}
             />
-            {/* Button fill */}
-            <Rect x={0} y={0} width={W} height={H} rx={RX} fill="url(#ai)" />
-            {/* Inner highlight border */}
+            {/* Layer 3 — crisp visible border */}
             <Rect
-              x={1} y={1} width={W - 2} height={H - 2} rx={RX - 1}
-              fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1.5}
+              x={BORDER / 2} y={BORDER / 2}
+              width={WIDTH - BORDER} height={HEIGHT - BORDER}
+              rx={(HEIGHT - BORDER) / 2}
+              fill="none" stroke="url(#ai-glow)"
+              strokeWidth={BORDER} opacity={1}
             />
           </Svg>
 
-          <View style={s.textLayer}>
+          {/* Dark body sits above all SVG layers */}
+          <Animated.View style={s.body}>
             <Animated.Text style={s.label}>{label}</Animated.Text>
-          </View>
+          </Animated.View>
         </Animated.View>
       )}
     </Pressable>
@@ -116,18 +144,22 @@ export function GlowButton({ label, onPress, style, sharedTransitionTag }: GlowB
 }
 
 const s = StyleSheet.create({
-  root:      { alignSelf: 'center' },
-  pill:      { width: W, height: H },
-  pressed:   { opacity: 0.82 },
-  textLayer: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+  root:    { alignSelf: 'center' },
+  pill:    { width: WIDTH, height: HEIGHT },
+  pressed: { opacity: 0.82 },
+  body: {
+    position:        'absolute',
+    top:             0, left: 0, right: 0, bottom: 0,
+    margin:          BORDER,
+    borderRadius:    (HEIGHT - BORDER * 2) / 2,
+    backgroundColor: '#0B0B0F',
+    alignItems:      'center',
+    justifyContent:  'center',
   },
   label: {
     color:         '#FFFFFF',
-    fontSize:      16,
-    fontWeight:    '600',
-    letterSpacing: 0.2,
+    fontSize:      15,
+    fontWeight:    '500',
+    letterSpacing: 0.15,
   },
 });

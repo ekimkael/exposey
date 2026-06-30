@@ -1,56 +1,94 @@
-# Welcome to your Expo app 👋
+# rn.ui — Mindfulness Morph
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native / Expo demo exploring **native-quality transitions** and **Apple-Intelligence-style UI** without third-party graphics libraries (no Skia, no Lottie).
 
-## Get started
+## What it does
 
-1. Install dependencies
+| Screen | Description |
+|--------|-------------|
+| **Home** (`/`) | Dark canvas · ambient SVG halo · animated glow pill button |
+| **Beach** (`/beach`) | Full-screen aerial beach photo · transparent native back button |
 
-   ```bash
-   npm install
-   ```
+Tapping **"Be here now"** triggers:
+- **iOS 18+** → `Link.AppleZoom` native zoom transition (the pill morphs into the beach photo)
+- **All OS** → `sharedTransitionTag="beach-morph"` shared-element fallback (react-native-reanimated)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Tech choices
 
-In the output, you'll find options to open the app in a
+### Animated glow border — no Skia
+`GlowButton` approximates the **Apple Intelligence** conic-gradient border using `react-native-svg`:
+- A `LinearGradient` with its `x1/y1/x2/y2` endpoints rotated every frame via `useAnimatedProps`
+- Three `Rect` stroke layers (wide halo → mid ring → crisp border) at increasing opacities
+- Zero extra dependencies — everything runs on the SVG renderer bundled with Expo
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Navigation
+`Stack` (not `NativeTabs`) is required for shared-element transitions. The root layout registers three routes: `index`, `beach`, `explore`.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Splash overlay
+`AnimatedSplashOverlay` plays a one-shot shrink-and-fade keyframe on cold launch, then removes itself from the React tree. The web variant is a no-op stub (`animated-icon.web.tsx`).
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Project structure
 
-```bash
-npm run reset-project
+```
+src/
+├── app/
+│   ├── _layout.tsx        # Root Stack navigator + splash overlay
+│   ├── index.tsx          # Home / mindfulness screen
+│   ├── beach.tsx          # Beach destination screen
+│   └── explore.tsx        # Stock Expo explore screen (boilerplate)
+├── components/
+│   ├── glow-button.tsx    # Apple-Intelligence animated glow pill
+│   └── animated-icon.tsx  # AnimatedSplashOverlay (+ .web.tsx stub)
+└── constants/
+    └── theme.ts           # Design tokens (colors, spacing)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Getting started
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npm install
+npx expo start
+```
 
-## Learn more
+Press **i** for iOS simulator, **a** for Android, or scan the QR code with Expo Go.
 
-To learn more about developing your project with Expo, look at the following resources:
+> **Note:** `Link.AppleZoom` / `Link.AppleZoomTarget` requires a **development build** (not Expo Go) and **iOS 18+** for the native zoom. The `sharedTransitionTag` fallback works everywhere.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## Picking up as an agent
 
-Join our community of developers creating universal apps.
+Key invariants to preserve:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. **`Stack` at root** — do not switch to `NativeTabs`; shared-element transitions require a Stack navigator.
+2. **`sharedTransitionTag="beach-morph"`** — must match on both `GlowButton`'s internal `Animated.View` (home) and the root `Animated.View` on beach. Changing one requires changing the other.
+3. **`Link.AppleZoom` wraps `GlowButton` directly** — `Link.AppleZoom` propagates `onPress` to its child; inserting a non-pressable wrapper between them breaks navigation.
+4. **No Skia** — the glow effect is pure SVG. Do not introduce `@shopify/react-native-skia` unless the user explicitly asks.
+5. **`GlowButton` is a `Pressable`** — it must remain the direct child of `Link.AppleZoom` so the zoom gesture is handled correctly.
+
+### Colour palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Background | `#0B0B0F` | Home screen |
+| Beach bg | `#0D3326` | Beach screen (shows while image loads) |
+| Glow gradient | `#BF5AF2 → #5AC8FA → #FFF → #FF2D55` | Border animation |
+| Subtitle | `rgba(255,255,255,0.45)` | Home subtitle |
+
+### Tweaking the glow button
+
+All constants live at the top of [`src/components/glow-button.tsx`](src/components/glow-button.tsx):
+
+```ts
+const COLORS = ['#BF5AF2', '#5AC8FA', '#FFFFFF', '#FF2D55', '#BF5AF2'];
+const SPEED  = 2400; // ms per revolution — lower = faster
+const BORDER = 3;    // stroke width in px
+const WIDTH  = 180;
+const HEIGHT = 52;
+```

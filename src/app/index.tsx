@@ -1,9 +1,11 @@
 /**
- * Mindfulness home screen.
- * "Be here now" button uses the Apple-Intelligence-style animated glow border,
- * then morphs into the full-screen beach via Link.AppleZoom (iOS 18+) /
- * sharedTransitionTag fallback.
- * @module app/index
+ * @file index.tsx
+ * @description Mindfulness home screen.
+ *
+ * Displays a calming dark canvas with a subtitle and an Apple-Intelligence-style
+ * animated glow button. Tapping the button triggers a native zoom transition
+ * (iOS 18+ via `Link.AppleZoom`) that morphs the pill into the full-screen
+ * beach photo. On older OS versions the `sharedTransitionTag` fallback fires.
  */
 import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
@@ -12,7 +14,7 @@ import Svg, { Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 
 import { GlowButton } from '@/components/glow-button';
 
-export default function MindfulnessScreen() {
+export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
@@ -22,7 +24,7 @@ export default function MindfulnessScreen() {
       </Text>
 
       <View style={s.center}>
-        {/* Ambient radial glow behind button (AI colors) */}
+        {/* Ambient radial halo behind the button — matches the glow palette */}
         <Svg style={s.aura} viewBox="0 0 320 220">
           <Defs>
             <RadialGradient id="aura" cx="50%" cy="50%" rx="50%" ry="50%">
@@ -35,8 +37,11 @@ export default function MindfulnessScreen() {
           <Ellipse cx="160" cy="110" rx="160" ry="110" fill="url(#aura)" />
         </Svg>
 
-        {/* GlowButton.onPress receives the navigation handler from Link.AppleZoom */}
-        <Link href={'/beach' as any} asChild>
+        {/*
+         * Link.AppleZoom propagates its onPress to the direct child (GlowButton).
+         * The sharedTransitionTag must match the one on beach.tsx's Animated.View.
+         */}
+        <Link href="/beach" asChild>
           <Link.AppleZoom>
             <GlowButton label="Be here now" sharedTransitionTag="beach-morph" />
           </Link.AppleZoom>
@@ -47,17 +52,24 @@ export default function MindfulnessScreen() {
 }
 
 const s = StyleSheet.create({
-  root:     { flex: 1, backgroundColor: '#0B0B0F' },
-  center:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  root: {
+    flex:            1,
+    backgroundColor: '#0B0B0F',
+  },
+  center: {
+    flex:           1,
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
   subtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.45)',
+    fontSize:      13,
+    color:         'rgba(255,255,255,0.45)',
     letterSpacing: 0.15,
-    textAlign: 'center',
+    textAlign:     'center',
   },
   aura: {
     position: 'absolute',
-    width: 320,
-    height: 220,
+    width:    320,
+    height:   220,
   },
 });

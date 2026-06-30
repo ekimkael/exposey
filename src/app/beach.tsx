@@ -1,22 +1,32 @@
 /**
- * Beach destination screen.
- * Receives the zoom/morph transition from the "Be here now" pill button.
- * On iOS 18+: Link.AppleZoomTarget anchors the native zoom transition.
- * Fallback: sharedTransitionTag="beach-morph" via react-native-reanimated.
- * @module app/beach
+ * @file beach.tsx
+ * @description Beach destination screen.
+ *
+ * Receives the zoom/morph transition from the home screen's "Be here now" button.
+ * - iOS 18+: `Link.AppleZoomTarget` anchors the native zoom transition.
+ * - All OS: `sharedTransitionTag="beach-morph"` (react-native-reanimated fallback).
+ *
+ * The Stack header is shown as transparent so the native back chevron floats
+ * over the photo without any background bar. `headerBackButtonDisplayMode="minimal"`
+ * hides the previous screen's title next to the chevron.
  */
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
-import { Link, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SymbolView } from 'expo-symbols';
+import { Link, Stack } from 'expo-router';
 
 export default function BeachScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
     <Animated.View sharedTransitionTag="beach-morph" style={s.root}>
+      <Stack.Screen
+        options={{
+          headerShown:               true,
+          headerTransparent:         true,
+          title:                     '',
+          headerBackButtonDisplayMode: 'minimal',
+        }}
+      />
+
       <Link.AppleZoomTarget>
         <Image
           source={require('@/assets/images/beach.png')}
@@ -24,28 +34,10 @@ export default function BeachScreen() {
           contentFit="cover"
         />
       </Link.AppleZoomTarget>
-
-      <Pressable
-        style={[s.back, { top: insets.top + 12 }]}
-        onPress={() => router.back()}
-        hitSlop={12}
-      >
-        <SymbolView name="chevron.left" size={18} tintColor="#fff" />
-      </Pressable>
     </Animated.View>
   );
 }
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#0D3326' },
-  back: {
-    position: 'absolute',
-    left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
