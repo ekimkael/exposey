@@ -1,16 +1,17 @@
 /**
  * Mindfulness home screen.
- * "Be here now" pill button morphs into the full-screen beach view.
- * iOS 18+: Link.AppleZoom (native zoom). Fallback: sharedTransitionTag.
+ * "Be here now" button uses the Apple-Intelligence-style animated glow border,
+ * then morphs into the full-screen beach via Link.AppleZoom (iOS 18+) /
+ * sharedTransitionTag fallback.
  * @module app/index
  */
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 
-const BLUE = '#3B82F6';
+import { GlowButton } from '@/components/glow-button';
 
 export default function MindfulnessScreen() {
   const insets = useSafeAreaInsets();
@@ -22,26 +23,28 @@ export default function MindfulnessScreen() {
       </Text>
 
       <View style={s.center}>
-        {/* Soft radial glow via SVG RadialGradient — fades to transparent */}
-        <Svg style={s.glow} viewBox="0 0 320 220">
+        {/* Ambient radial glow behind button (AI colors) */}
+        <Svg style={s.aura} viewBox="0 0 320 220">
           <Defs>
-            <RadialGradient id="g" cx="50%" cy="50%" rx="50%" ry="50%">
-              <Stop offset="0%"   stopColor={BLUE} stopOpacity="0.38" />
-              <Stop offset="35%"  stopColor={BLUE} stopOpacity="0.18" />
-              <Stop offset="65%"  stopColor={BLUE} stopOpacity="0.06" />
-              <Stop offset="100%" stopColor={BLUE} stopOpacity="0"    />
+            <RadialGradient id="aura" cx="50%" cy="50%" rx="50%" ry="50%">
+              <Stop offset="0%"   stopColor="#BF5AF2" stopOpacity="0.22" />
+              <Stop offset="30%"  stopColor="#5AC8FA" stopOpacity="0.12" />
+              <Stop offset="65%"  stopColor="#FF2D55" stopOpacity="0.05" />
+              <Stop offset="100%" stopColor="#000000" stopOpacity="0"    />
             </RadialGradient>
           </Defs>
-          <Ellipse cx="160" cy="110" rx="160" ry="110" fill="url(#g)" />
+          <Ellipse cx="160" cy="110" rx="160" ry="110" fill="url(#aura)" />
         </Svg>
 
+        {/*
+         * Link.AppleZoom → native iOS 18 zoom source.
+         * Animated.View with sharedTransitionTag → reanimated fallback.
+         */}
         <Link href={'/beach' as any} asChild>
           <Link.AppleZoom>
-            <Pressable style={({ pressed }) => pressed && s.pressed}>
-              <Animated.View sharedTransitionTag="beach-morph" style={s.button}>
-                <Text style={s.label}>Be here now</Text>
-              </Animated.View>
-            </Pressable>
+            <Animated.View sharedTransitionTag="beach-morph">
+              <GlowButton label="Be here now" />
+            </Animated.View>
           </Link.AppleZoom>
         </Link>
       </View>
@@ -50,34 +53,17 @@ export default function MindfulnessScreen() {
 }
 
 const s = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: '#F5F5F5' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
+  root:     { flex: 1, backgroundColor: '#0B0B0F' },
+  center:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
   subtitle: {
     fontSize: 13,
-    color: '#8A8A8E',
-    letterSpacing: 0.1,
+    color: 'rgba(255,255,255,0.45)',
+    letterSpacing: 0.15,
     textAlign: 'center',
   },
-
-  glow: {
+  aura: {
     position: 'absolute',
     width: 320,
     height: 220,
   },
-
-  button: {
-    backgroundColor: BLUE,
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: 999,
-  },
-  label: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '500',
-    letterSpacing: 0.1,
-  },
-
-  pressed: { opacity: 0.85 },
 });
