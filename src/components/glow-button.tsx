@@ -39,9 +39,10 @@ interface GlowButtonProps {
   label: string;
   onPress?: () => void;
   style?: ViewStyle;
+  sharedTransitionTag?: string;
 }
 
-export function GlowButton({ label, onPress, style }: GlowButtonProps) {
+export function GlowButton({ label, onPress, style, sharedTransitionTag }: GlowButtonProps) {
   const t = useSharedValue(0);
 
   useEffect(() => {
@@ -71,7 +72,10 @@ export function GlowButton({ label, onPress, style }: GlowButtonProps) {
   return (
     <Pressable onPress={onPress} style={[s.root, style]}>
       {({ pressed }) => (
-        <Animated.View style={[s.pill, pressed && s.pressed]}>
+        <Animated.View
+          style={[s.pill, pressed && s.pressed]}
+          sharedTransitionTag={sharedTransitionTag}
+        >
           {/* SVG glow layers */}
           <Svg width={W} height={H} style={StyleSheet.absoluteFill}>
             <Defs>

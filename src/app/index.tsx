@@ -37,6 +37,7 @@ export default function MindfulnessScreen() {
 
         <GlowButton
           label="Be here now"
+          sharedTransitionTag="beach-morph"
           onPress={() => router.push('/beach' as any)}
         />
       </View>
