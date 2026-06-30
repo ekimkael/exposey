@@ -6,7 +6,7 @@
  * @module app/index
  */
 import { View, Text, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Ellipse } from 'react-native-svg';
 
@@ -35,11 +35,12 @@ export default function MindfulnessScreen() {
           <Ellipse cx="160" cy="110" rx="160" ry="110" fill="url(#aura)" />
         </Svg>
 
-        <GlowButton
-          label="Be here now"
-          sharedTransitionTag="beach-morph"
-          onPress={() => router.push('/beach' as any)}
-        />
+        {/* GlowButton.onPress receives the navigation handler from Link.AppleZoom */}
+        <Link href={'/beach' as any} asChild>
+          <Link.AppleZoom>
+            <GlowButton label="Be here now" sharedTransitionTag="beach-morph" />
+          </Link.AppleZoom>
+        </Link>
       </View>
     </View>
   );
