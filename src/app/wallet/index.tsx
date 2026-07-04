@@ -21,6 +21,7 @@ import {
   font,
   foregroundStyle,
   frame,
+  glassEffect,
   lineSpacing,
   opacity,
   padding,
@@ -84,9 +85,9 @@ const DETAIL_COPY = {
 const SHARED_BULLETS = ["Don't share it with anyone else", "If you lose it, we can't recover it"];
 
 /**
- * Sheet close glyph, matched to the native header X. Driving the SF Symbol
- * through a `font` modifier (not the `size` prop) lets us set the same point
- * size and weight the UIKit bar button renders, so both crosses look alike.
+ * Sheet close glyph in a Liquid Glass circle, matched to the native iOS 26
+ * header toolbar button: same SF Symbol and gray, wrapped in a circular
+ * `glassEffect` so both crosses get the OS's translucent glass treatment.
  */
 function CloseButton({ onPress }: { onPress: () => void }) {
   return (
@@ -94,7 +95,11 @@ function CloseButton({ onPress }: { onPress: () => void }) {
       <Image
         systemName="xmark"
         color={C.closeGray}
-        modifiers={[font({ size: 17, weight: 'medium' }), padding({ all: 6 })]}
+        modifiers={[
+          font({ size: 14, weight: 'semibold' }),
+          frame({ width: 30, height: 30 }),
+          glassEffect({ glass: { variant: 'regular', interactive: true }, shape: 'circle' }),
+        ]}
       />
     </Button>
   );
@@ -415,23 +420,13 @@ export default function WalletScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* Native header buttons — X (dismiss) left, gift right. hidesShared
-          background drops the iOS 26 glass pill for the reference's bare glyphs. */}
+      {/* Native header buttons — X (dismiss) left, gift right. Default iOS 26
+          rendering keeps Apple's Liquid Glass pill behind each glyph. */}
       <Stack.Toolbar placement="left">
-        <Stack.Toolbar.Button
-          icon="xmark"
-          tintColor="#8E8E93"
-          hidesSharedBackground
-          onPress={() => setSheetOpen(false)}
-        />
+        <Stack.Toolbar.Button icon="xmark" tintColor="#8E8E93" onPress={() => setSheetOpen(false)} />
       </Stack.Toolbar>
       <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button
-          icon="gift.fill"
-          tintColor={C.cardOrange}
-          hidesSharedBackground
-          onPress={() => {}}
-        />
+        <Stack.Toolbar.Button icon="gift.fill" tintColor={C.cardOrange} onPress={() => {}} />
       </Stack.Toolbar>
 
       <WalletBackdrop onOpenSheet={() => setSheetOpen(true)} />
