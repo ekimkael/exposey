@@ -47,6 +47,8 @@ const C = {
   title: '#161616',
   muted: '#9F9FA5',
   iconMuted: '#B0B0B6',
+  // Same gray as the native header X so both crosses read identically.
+  closeGray: '#8E8E93',
 };
 
 /**
@@ -57,8 +59,8 @@ const SPRING = Animation.spring({ duration: 0.45, bounce: 0.1 });
 
 // ponytail: fixed sheet heights measured from the reference frames;
 // switch to onGeometryChange-driven sizing if content becomes dynamic.
-const OPTIONS_H = 252;
-const DETAIL_H = 432;
+const OPTIONS_H = 272;
+const DETAIL_H = 468;
 /** Floating iOS 26 sheets have no bottom safe-area inset — content ≈ detent. */
 const DETAIL_CONTENT_H = DETAIL_H - 8;
 
@@ -81,10 +83,19 @@ const DETAIL_COPY = {
 
 const SHARED_BULLETS = ["Don't share it with anyone else", "If you lose it, we can't recover it"];
 
+/**
+ * Sheet close glyph, matched to the native header X. Driving the SF Symbol
+ * through a `font` modifier (not the `size` prop) lets us set the same point
+ * size and weight the UIKit bar button renders, so both crosses look alike.
+ */
 function CloseButton({ onPress }: { onPress: () => void }) {
   return (
     <Button onPress={onPress} modifiers={[buttonStyle('plain')]}>
-      <Image systemName="xmark" size={16} color={C.iconMuted} modifiers={[padding({ all: 6 })]} />
+      <Image
+        systemName="xmark"
+        color={C.closeGray}
+        modifiers={[font({ size: 17, weight: 'medium' }), padding({ all: 6 })]}
+      />
     </Button>
   );
 }
@@ -113,7 +124,7 @@ function OptionsPane({
       <HStack modifiers={[padding({ bottom: 4 })]}>
         <UIText
           modifiers={[
-            font({ size: 22, weight: 'semibold', design: 'rounded' }),
+            font({ size: 25, weight: 'semibold', design: 'rounded' }),
             foregroundStyle(C.title),
           ]}>
           Options
@@ -152,14 +163,14 @@ function OptionRow({
         modifiers={[
           padding({ horizontal: 14 }),
           // FrameModifier ignores max* once height is set — keep them split.
-          frame({ height: 52 }),
+          frame({ height: 56 }),
           frame({ maxWidth: 100000 }),
           background(destructive ? C.removeBg : C.rowBg),
-          clipShape('roundedRectangle', 14),
+          clipShape('roundedRectangle', 15),
         ]}>
-        <Image systemName={icon} size={17} color={destructive ? C.red : '#7A7A80'} />
+        <Image systemName={icon} size={19} color={destructive ? C.red : '#7A7A80'} />
         <UIText
-          modifiers={[font({ size: 17, weight: 'medium', design: 'rounded' }), foregroundStyle(tint)]}>
+          modifiers={[font({ size: 19, weight: 'medium', design: 'rounded' }), foregroundStyle(tint)]}>
           {label}
         </UIText>
         <Spacer />
@@ -198,7 +209,7 @@ function DetailPane({
       <HStack>
         <Image
           systemName={kind === 'privateKey' ? 'creditcard.viewfinder' : 'circle.grid.3x3'}
-          size={34}
+          size={38}
           color={C.title}
         />
         <Spacer />
@@ -208,7 +219,7 @@ function DetailPane({
       <UIText
         modifiers={[
           padding({ top: 14 }),
-          font({ size: 26, weight: 'bold', design: 'rounded' }),
+          font({ size: 30, weight: 'bold', design: 'rounded' }),
           foregroundStyle(C.title),
         ]}>
         {copy.title}
@@ -217,20 +228,20 @@ function DetailPane({
       <UIText
         modifiers={[
           padding({ top: 8 }),
-          font({ size: 17, weight: 'medium', design: 'rounded' }),
+          font({ size: 19, weight: 'medium', design: 'rounded' }),
           foregroundStyle(C.muted),
           lineSpacing(3),
         ]}>
         {copy.description}
       </UIText>
 
-      <VStack alignment="leading" spacing={13} modifiers={[padding({ top: 22 })]}>
+      <VStack alignment="leading" spacing={15} modifiers={[padding({ top: 24 })]}>
         {bullets.map((bullet, i) => (
           <HStack key={bullet} spacing={10}>
-            <Image systemName={bulletIcons[i]} size={16} color={C.iconMuted} />
+            <Image systemName={bulletIcons[i]} size={18} color={C.iconMuted} />
             <UIText
               modifiers={[
-                font({ size: 15, weight: 'medium', design: 'rounded' }),
+                font({ size: 17, weight: 'medium', design: 'rounded' }),
                 foregroundStyle(C.muted),
               ]}>
               {bullet}
@@ -245,11 +256,11 @@ function DetailPane({
         <Button onPress={onClose} modifiers={[buttonStyle('plain')]}>
           <UIText
             modifiers={[
-              frame({ height: 54 }),
+              frame({ height: 58 }),
               frame({ maxWidth: 100000 }),
               background(C.cancelBg),
               clipShape('capsule'),
-              font({ size: 18, weight: 'semibold', design: 'rounded' }),
+              font({ size: 20, weight: 'semibold', design: 'rounded' }),
               foregroundStyle(C.title),
             ]}>
             Cancel
@@ -259,15 +270,15 @@ function DetailPane({
           <HStack
             spacing={6}
             modifiers={[
-              frame({ height: 54 }),
+              frame({ height: 58 }),
               frame({ maxWidth: 100000 }),
               background(C.revealBlue),
               clipShape('capsule'),
             ]}>
-            <Image systemName="viewfinder" size={17} color="#FFFFFF" />
+            <Image systemName="viewfinder" size={19} color="#FFFFFF" />
             <UIText
               modifiers={[
-                font({ size: 18, weight: 'semibold', design: 'rounded' }),
+                font({ size: 20, weight: 'semibold', design: 'rounded' }),
                 foregroundStyle('#FFFFFF'),
               ]}>
               Reveal
