@@ -29,10 +29,10 @@ import {
   presentationDragIndicator,
   zIndex,
 } from '@expo/ui/swift-ui/modifiers';
+import { Stack } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 /** Palette sampled from the reference video (Family wallet). */
 const C = {
@@ -57,8 +57,8 @@ const SPRING = Animation.spring({ duration: 0.45, bounce: 0.1 });
 
 // ponytail: fixed sheet heights measured from the reference frames;
 // switch to onGeometryChange-driven sizing if content becomes dynamic.
-const OPTIONS_H = 236;
-const DETAIL_H = 400;
+const OPTIONS_H = 252;
+const DETAIL_H = 432;
 /** Floating iOS 26 sheets have no bottom safe-area inset — content ≈ detent. */
 const DETAIL_CONTENT_H = DETAIL_H - 8;
 
@@ -84,7 +84,7 @@ const SHARED_BULLETS = ["Don't share it with anyone else", "If you lose it, we c
 function CloseButton({ onPress }: { onPress: () => void }) {
   return (
     <Button onPress={onPress} modifiers={[buttonStyle('plain')]}>
-      <Image systemName="xmark" size={14} color={C.iconMuted} modifiers={[padding({ all: 6 })]} />
+      <Image systemName="xmark" size={16} color={C.iconMuted} modifiers={[padding({ all: 6 })]} />
     </Button>
   );
 }
@@ -112,7 +112,10 @@ function OptionsPane({
       ]}>
       <HStack modifiers={[padding({ bottom: 4 })]}>
         <UIText
-          modifiers={[font({ size: 18, weight: 'semibold', design: 'rounded' }), foregroundStyle(C.title)]}>
+          modifiers={[
+            font({ size: 22, weight: 'semibold', design: 'rounded' }),
+            foregroundStyle(C.title),
+          ]}>
           Options
         </UIText>
         <Spacer />
@@ -145,18 +148,18 @@ function OptionRow({
   return (
     <Button onPress={onPress} modifiers={[buttonStyle('plain')]}>
       <HStack
-        spacing={10}
+        spacing={12}
         modifiers={[
           padding({ horizontal: 14 }),
           // FrameModifier ignores max* once height is set — keep them split.
-          frame({ height: 48 }),
+          frame({ height: 52 }),
           frame({ maxWidth: 100000 }),
           background(destructive ? C.removeBg : C.rowBg),
           clipShape('roundedRectangle', 14),
         ]}>
-        <Image systemName={icon} size={15} color={destructive ? C.red : '#7A7A80'} />
+        <Image systemName={icon} size={17} color={destructive ? C.red : '#7A7A80'} />
         <UIText
-          modifiers={[font({ size: 15, weight: 'medium', design: 'rounded' }), foregroundStyle(tint)]}>
+          modifiers={[font({ size: 17, weight: 'medium', design: 'rounded' }), foregroundStyle(tint)]}>
           {label}
         </UIText>
         <Spacer />
@@ -195,7 +198,7 @@ function DetailPane({
       <HStack>
         <Image
           systemName={kind === 'privateKey' ? 'creditcard.viewfinder' : 'circle.grid.3x3'}
-          size={30}
+          size={34}
           color={C.title}
         />
         <Spacer />
@@ -205,7 +208,7 @@ function DetailPane({
       <UIText
         modifiers={[
           padding({ top: 14 }),
-          font({ size: 20, weight: 'bold', design: 'rounded' }),
+          font({ size: 26, weight: 'bold', design: 'rounded' }),
           foregroundStyle(C.title),
         ]}>
         {copy.title}
@@ -214,20 +217,20 @@ function DetailPane({
       <UIText
         modifiers={[
           padding({ top: 8 }),
-          font({ size: 15, weight: 'medium', design: 'rounded' }),
+          font({ size: 17, weight: 'medium', design: 'rounded' }),
           foregroundStyle(C.muted),
           lineSpacing(3),
         ]}>
         {copy.description}
       </UIText>
 
-      <VStack alignment="leading" spacing={12} modifiers={[padding({ top: 22 })]}>
+      <VStack alignment="leading" spacing={13} modifiers={[padding({ top: 22 })]}>
         {bullets.map((bullet, i) => (
           <HStack key={bullet} spacing={10}>
-            <Image systemName={bulletIcons[i]} size={14} color={C.iconMuted} />
+            <Image systemName={bulletIcons[i]} size={16} color={C.iconMuted} />
             <UIText
               modifiers={[
-                font({ size: 13, weight: 'medium', design: 'rounded' }),
+                font({ size: 15, weight: 'medium', design: 'rounded' }),
                 foregroundStyle(C.muted),
               ]}>
               {bullet}
@@ -242,11 +245,11 @@ function DetailPane({
         <Button onPress={onClose} modifiers={[buttonStyle('plain')]}>
           <UIText
             modifiers={[
-              frame({ height: 50 }),
+              frame({ height: 54 }),
               frame({ maxWidth: 100000 }),
               background(C.cancelBg),
               clipShape('capsule'),
-              font({ size: 16, weight: 'semibold', design: 'rounded' }),
+              font({ size: 18, weight: 'semibold', design: 'rounded' }),
               foregroundStyle(C.title),
             ]}>
             Cancel
@@ -256,15 +259,15 @@ function DetailPane({
           <HStack
             spacing={6}
             modifiers={[
-              frame({ height: 50 }),
+              frame({ height: 54 }),
               frame({ maxWidth: 100000 }),
               background(C.revealBlue),
               clipShape('capsule'),
             ]}>
-            <Image systemName="viewfinder" size={15} color="#FFFFFF" />
+            <Image systemName="viewfinder" size={17} color="#FFFFFF" />
             <UIText
               modifiers={[
-                font({ size: 16, weight: 'semibold', design: 'rounded' }),
+                font({ size: 18, weight: 'semibold', design: 'rounded' }),
                 foregroundStyle('#FFFFFF'),
               ]}>
               Reveal
@@ -277,10 +280,11 @@ function DetailPane({
 }
 
 /**
- * Morphing sheet — a native SwiftUI BottomSheet with a transparent
- * presentation background; the visible white card is our own view so its
- * height can morph with a spring while both panes cross-fade (opacity +
- * blur), all in one SwiftUI transaction keyed on `stateIdx`.
+ * Morphing sheet — a native SwiftUI BottomSheet. On iOS 26 the system sheet
+ * is already a floating inset card, so the sheet itself is the morphing card:
+ * two fixed detents with a state-driven selection make UIKit animate the
+ * height, while both panes stay mounted and cross-fade (opacity + blur) in
+ * the same transaction keyed on `stateIdx`.
  */
 function MorphingSheet({
   isPresented,
@@ -336,11 +340,7 @@ function MorphingSheet({
               onSelect={openDetail}
               onClose={() => onIsPresentedChange(false)}
             />
-            <DetailPane
-              active={!isOptions}
-              kind={detailKind}
-              onClose={() => setView('options')}
-            />
+            <DetailPane active={!isOptions} kind={detailKind} onClose={() => setView('options')} />
           </ZStack>
         </Group>
       </BottomSheet>
@@ -351,15 +351,7 @@ function MorphingSheet({
 /** Static backdrop recreating the Family wallet settings screen. */
 function WalletBackdrop({ onOpenSheet }: { onOpenSheet: () => void }) {
   return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.header}>
-        <SymbolView name="xmark" size={18} tintColor="#8E8E93" />
-        <View>
-          <SymbolView name="gift.fill" size={20} tintColor="#E68A00" />
-          <View style={styles.giftBadge} />
-        </View>
-      </View>
-
+    <View style={styles.screen}>
       <View style={styles.orangeCard}>
         <View style={styles.cardRow}>
           <SymbolView name="heart.fill" size={26} tintColor="#FFFFFF" />
@@ -395,7 +387,7 @@ function WalletBackdrop({ onOpenSheet }: { onOpenSheet: () => void }) {
           </Pressable>
         ))}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -412,6 +404,25 @@ export default function WalletScreen() {
 
   return (
     <View style={styles.screen}>
+      {/* Native header buttons — X (dismiss) left, gift right. hidesShared
+          background drops the iOS 26 glass pill for the reference's bare glyphs. */}
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button
+          icon="xmark"
+          tintColor="#8E8E93"
+          hidesSharedBackground
+          onPress={() => setSheetOpen(false)}
+        />
+      </Stack.Toolbar>
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          icon="gift.fill"
+          tintColor={C.cardOrange}
+          hidesSharedBackground
+          onPress={() => {}}
+        />
+      </Stack.Toolbar>
+
       <WalletBackdrop onOpenSheet={() => setSheetOpen(true)} />
       <MorphingSheet isPresented={sheetOpen} onIsPresentedChange={setSheetOpen} />
     </View>
@@ -427,22 +438,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 1,
     height: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  giftBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E5484D',
   },
   orangeCard: {
     marginHorizontal: 16,
