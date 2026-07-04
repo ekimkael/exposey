@@ -2,6 +2,29 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Case: Family wallet morphing sheet (`/wallet`)
+
+Reproduction of the Family wallet "morphing bottom sheet": a single white
+card anchored at the bottom that springs between three states — **Options**,
+**Private Key** and **Secret Recovery Phrase** — while the outgoing and
+incoming content cross-fade with a slight blur.
+
+**How it works** — a native SwiftUI `BottomSheet` (`@expo/ui/swift-ui`); on
+iOS 26 the system sheet is already a floating inset card, so the sheet itself
+is the morphing card. Two fixed `presentationDetents` with a state-driven
+`selection` make UIKit animate the height, while both content panes stay
+mounted in a `ZStack` and cross-fade (`opacity` + `blur`) via
+`animation(Animation.spring(...), stateIdx)` in the same commit.
+
+**Run it**: `npx expo run:ios`, then open the **Wallet** tab.
+
+**Platforms**: iOS only (`@expo/ui/swift-ui`). Android would need a parallel
+`@expo/ui/jetpack-compose` implementation; the screen shows a fallback there.
+
+**Known gaps vs the reference**: system font instead of Family's custom
+rounded typeface on the RN backdrop; SF Symbols approximate the original
+icons; card heights are fixed constants measured from the video.
+
 ## Get started
 
 1. Install dependencies
