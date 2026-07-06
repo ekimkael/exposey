@@ -14,9 +14,9 @@ import {
   zIndex,
 } from '@expo/ui/swift-ui/modifiers';
 
+import { DETAIL_CONTENT_HEIGHT } from '@/constants/animation';
 import {
   BULLET_ICONS,
-  DETAIL_CONTENT_HEIGHT,
   DETAIL_COPY,
   DETAIL_HERO_ICON,
   FILL_AVAILABLE_WIDTH,

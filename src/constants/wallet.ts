@@ -1,10 +1,13 @@
-import { Animation } from '@expo/ui/swift-ui/modifiers';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
 /**
- * Colors sampled directly from the reference video (the Family wallet).
- * Kept separate from the app-wide `Colors` in `theme.ts` because these are
- * literal values pulled from the design being reproduced, not theme tokens.
+ * Colors, copy, and content types for the wallet case. Animation and sheet
+ * dimensions live in `constants/animation.ts`.
+ *
+ * Colors are sampled directly from the reference video (the Family wallet)
+ * and kept separate from the app-wide `Colors` in `theme.ts` because these
+ * are literal values pulled from the design being reproduced, not theme
+ * tokens.
  */
 export const WALLET_COLORS = {
   screenBackground: '#F4F3F6',
@@ -22,26 +25,6 @@ export const WALLET_COLORS = {
   /** Same gray as the native header X so the in-sheet X reads identically. */
   closeGlyph: '#8E8E93',
 } as const;
-
-/**
- * Spring driving the sheet morph. The reference transition runs ~13 frames
- * at 30fps (~430ms) with a soft spring and no visible overshoot.
- */
-export const MORPH_SPRING = Animation.spring({ duration: 0.45, bounce: 0.1 });
-
-/**
- * The two heights (in points) the sheet snaps between, measured from the
- * reference frames. Swap for `onGeometryChange`-driven sizing if the pane
- * content ever becomes dynamic.
- */
-export const OPTIONS_SHEET_HEIGHT = 272;
-export const DETAIL_SHEET_HEIGHT = 468;
-
-/**
- * Detail content height. Floating iOS 26 sheets have no bottom safe-area
- * inset, so the content fills almost the whole detent.
- */
-export const DETAIL_CONTENT_HEIGHT = DETAIL_SHEET_HEIGHT - 8;
 
 /**
  * Stand-in for SwiftUI's `.infinity` maxWidth. The `@expo/ui` `frame`
