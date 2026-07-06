@@ -2,7 +2,7 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Case: Family wallet morphing sheet (`/wallet`)
+## Case: Family wallet morphing sheet
 
 Reproduction of the Family wallet "morphing bottom sheet": a single white
 card anchored at the bottom that springs between three states — **Options**,
@@ -16,7 +16,12 @@ is the morphing card. Two fixed `presentationDetents` with a state-driven
 mounted in a `ZStack` and cross-fade (`opacity` + `blur`) via
 `animation(Animation.spring(...), stateIdx)` in the same commit.
 
-**Run it**: `npx expo run:ios`, then open the **Wallet** tab.
+The screen header (X, gift) is a native `Stack` header driven by
+`Stack.Toolbar.Button`, so the buttons are real UIBarButtonItems (with the
+iOS 26 Liquid Glass background) rather than RN views. The app is a single
+screen: the root `_layout.tsx` is a `Stack` and the wallet is `index.tsx`.
+
+**Run it**: `npx expo run:ios` — the app opens straight onto the wallet.
 
 **Platforms**: iOS only (`@expo/ui/swift-ui`). Android would need a parallel
 `@expo/ui/jetpack-compose` implementation; the screen shows a fallback there.
