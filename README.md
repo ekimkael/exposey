@@ -33,11 +33,14 @@ Go will not work. Target is the **iOS 26 simulator** — see platform notes belo
   it. Two fixed `presentationDetents` (`OPTIONS_SHEET_HEIGHT`,
   `DETAIL_SHEET_HEIGHT`) with a state-driven `selection` make UIKit animate the
   height natively.
+- **Transition state is in a hook.** `useMorphTransition` owns which pane is
+  active and derives the detent height + animation key, so the components only
+  render. A single state change drives both the height spring and the fade.
 - **Both panes stay mounted.** `OptionsPane` and `DetailPane` live together in
   a `ZStack`. Only their `opacity`/`blur`/`zIndex` change, driven by the
   `active` flag, so switching panes cross-fades instead of remounting. The
-  whole thing is keyed on `animation(MORPH_SPRING, MORPH_INDEX[activeView])`,
-  so the height change and the cross-fade run in one SwiftUI transaction.
+  whole thing is keyed on `animation(MORPH_SPRING, morphKey)`, so the height
+  change and the cross-fade run in one SwiftUI transaction.
 - **Native header.** The X (dismiss) and gift buttons go through
   `Stack.Toolbar.Button`, so they are real `UIBarButtonItem`s with the iOS 26
   Liquid Glass pill. The in-sheet X (`CloseButton`) is matched to them with a
@@ -53,34 +56,41 @@ Everything for the case lives in these files (start at `src/app/index.tsx`):
 | -------------------------------------------- | ----------------------------------------------------------- |
 | `src/app/_layout.tsx`                        | Root `Stack` that hosts the native header                   |
 | `src/app/index.tsx`                          | `WalletScreen` — composes header + backdrop + sheet         |
-| `src/constants/wallet.ts`                    | Colors, spring, heights, types, and copy (all data + JSDoc) |
+| `src/hooks/use-morph-transition.ts`          | Morph transition state (`activeView`, `detailKind`, handlers) |
+| `src/constants/animation.ts`                 | Spring, detent heights, detail content height               |
+| `src/constants/wallet.ts`                    | Colors, copy, and content types                             |
 | `src/components/wallet/wallet-header.tsx`    | `Stack.Toolbar` X / gift buttons                            |
 | `src/components/wallet/wallet-backdrop.tsx`  | Static orange card + settings rows (plain RN)               |
-| `src/components/wallet/morphing-sheet.tsx`   | `BottomSheet` + morph state (`activeView`, `detailKind`)    |
+| `src/components/wallet/morphing-sheet.tsx`   | `BottomSheet` view; maps hook state onto SwiftUI modifiers  |
 | `src/components/wallet/options-pane.tsx`     | Compact first state (title + option rows)                   |
 | `src/components/wallet/detail-pane.tsx`      | Tall detail state (shared by both detail views)             |
 | `src/components/wallet/option-row.tsx`       | One row in the Options pane                                  |
 | `src/components/wallet/close-button.tsx`     | In-sheet Liquid Glass X                                      |
 
+> **Working on the animation as an agent?** See [AGENTS.md](AGENTS.md) for the
+> transition mechanics, conventions, pitfalls, and how to reuse the morph.
+
 ### State model
 
-`MorphingSheet` owns two pieces of state:
+`useMorphTransition` owns two pieces of state:
 
 - `activeView: SheetView` — `'options' | 'privateKey' | 'recoveryPhrase'`,
   which pane is shown. Drives both the detent selection and the cross-fade.
 - `detailKind: DetailKind` — the last detail pane opened. Kept separate so the
   detail copy doesn't swap while the sheet is fading *back* to Options.
 
-`WalletScreen` owns `isSheetOpen`. The header X and swipe-down close it; any
-settings row reopens it.
+It also derives `sheetHeight` and `morphKey` and exposes `showDetail` /
+`showOptions`. `WalletScreen` owns `isSheetOpen`; the header X and swipe-down
+close the sheet, and any settings row reopens it.
 
 ### Extending
 
-- **New detail pane** → add an entry to `DETAIL_COPY` / `DETAIL_HERO_ICON` in
-  `src/constants/wallet.ts`, extend the `SheetView` union, add a row in
-  `OptionsPane`, and a `MORPH_INDEX`.
-- **Different heights / colors / timing** → all live as named constants in
-  `src/constants/wallet.ts`; nothing is hard-coded in the components.
+- **New detail pane** → extend the `SheetView` union and `DETAIL_COPY` /
+  `DETAIL_HERO_ICON` in `src/constants/wallet.ts`, add the pane to `MORPH_KEY`
+  in `use-morph-transition.ts`, and add a row in `OptionsPane`.
+- **Different heights / colors / timing** → animation lives in
+  `src/constants/animation.ts`, colors/copy in `src/constants/wallet.ts`;
+  nothing is hard-coded in the components.
 
 ### Platform notes & known gaps
 
