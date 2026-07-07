@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "rn.ui",
-    "slug": "rn.ui",
+    "name": "Onyx",
+    "slug": "onyx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rnui",
-    "userInterfaceStyle": "automatic",
+    "scheme": "onyx",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "net.digitalekim.onyx"
     },
     "android": {
+      "package": "net.digitalekim.onyx",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

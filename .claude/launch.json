@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "onyx-ios",
+      "runtimeExecutable": "node_modules/.bin/expo",
+      "runtimeArgs": ["run:ios"],
+      "port": 8081
+    }
+  ]
+}
