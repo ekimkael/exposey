@@ -1,7 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
-import { CARD_FAN, CARD_SIZE, HERO_STAGE } from '@/constants/onyx';
+import { CARD_FAN, CARD_SIZE, HERO_STAGE } from '@/constants/cards';
+import { ONYX_COLORS } from '@/constants/theme';
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 function ChipGlyph({ tint }: { tint: string }) {
   return (
@@ -12,14 +15,24 @@ function ChipGlyph({ tint }: { tint: string }) {
   );
 }
 
-function CardFace({ colors, wordmark, rotate, translateX, translateY, showVisa }: (typeof CARD_FAN)[number] & { showVisa?: boolean }) {
+interface CardFaceProps {
+  colors: readonly [string, string];
+  wordmark: string;
+  /** Animated transform — see {@link useKeyboardShrink}'s `cardAnims`. */
+  rotate: Animated.AnimatedInterpolation<string>;
+  translateX: Animated.AnimatedInterpolation<number>;
+  translateY: Animated.AnimatedInterpolation<number>;
+  showVisa?: boolean;
+}
+
+function CardFace({ colors, wordmark, rotate, translateX, translateY, showVisa }: CardFaceProps) {
   return (
-    <LinearGradient
+    <AnimatedLinearGradient
       colors={colors}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.card, { transform: [{ translateX }, { translateY }, { rotate }] }]}>
-      <Text style={[styles.wordmark, { color: wordmark }]}>Slash</Text>
+      <Text style={[styles.wordmark, { color: wordmark }]}>Onyx</Text>
       <ChipGlyph tint={wordmark} />
       {showVisa && (
         <View style={styles.visaBlock}>
@@ -27,15 +40,25 @@ function CardFace({ colors, wordmark, rotate, translateX, translateY, showVisa }
           <Text style={styles.visaSubtext}>Business</Text>
         </View>
       )}
-    </LinearGradient>
+    </AnimatedLinearGradient>
   );
 }
 
-export function CardStack() {
+interface CardStackProps {
+  /** Per-card animated transform, matching `CARD_FAN` order — see
+   * {@link useKeyboardShrink}'s `cardAnims`. */
+  cardAnims: { rotate: Animated.AnimatedInterpolation<string>; translateX: Animated.AnimatedInterpolation<number>; translateY: Animated.AnimatedInterpolation<number> }[];
+}
+
+/** The gold/silver/black card-stack hero illustration. Purely presentational
+ * — geometry lives in {@link CARD_FAN}; the shrink (height, scale) and
+ * fan-closing transform are driven by the caller via
+ * {@link useKeyboardShrink}. */
+export function CardStack({ cardAnims }: CardStackProps) {
   return (
     <View style={styles.stage}>
       {CARD_FAN.map((card, index) => (
-        <CardFace key={card.rotate} {...card} showVisa={index === CARD_FAN.length - 1} />
+        <CardFace key={card.resting.rotate} colors={card.colors} wordmark={card.wordmark} {...cardAnims[index]} showVisa={index === CARD_FAN.length - 1} />
       ))}
     </View>
   );
@@ -82,10 +105,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     fontStyle: 'italic',
-    color: 'rgba(198, 202, 208, 0.85)',
+    color: ONYX_COLORS.visaText,
   },
   visaSubtext: {
     fontSize: 9,
-    color: 'rgba(198, 202, 208, 0.55)',
+    color: ONYX_COLORS.visaSubtext,
   },
 });
