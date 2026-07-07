@@ -31,10 +31,13 @@ export const ONYX_COPY = {
 
 export const CARD_SIZE = { width: 220, height: 138 } as const;
 
+// Generous canvas so the rotated cards' bounding boxes never clip.
+export const HERO_STAGE = { width: 320, height: 270 } as const;
+
 export const CARD_FAN = [
-  { colors: ONYX_COLORS.cardGold, wordmark: ONYX_COLORS.wordmarkGold, rotate: '-8deg', translateX: 0, translateY: 0 },
-  { colors: ONYX_COLORS.cardSilver, wordmark: ONYX_COLORS.wordmarkSilver, rotate: '4deg', translateX: 20, translateY: 44 },
-  { colors: ONYX_COLORS.cardBlack, wordmark: ONYX_COLORS.wordmarkBlack, rotate: '18deg', translateX: 40, translateY: 86 },
+  { colors: ONYX_COLORS.cardGold, wordmark: ONYX_COLORS.wordmarkGold, rotate: '-8deg', translateX: 16, translateY: 16 },
+  { colors: ONYX_COLORS.cardSilver, wordmark: ONYX_COLORS.wordmarkSilver, rotate: '4deg', translateX: 36, translateY: 62 },
+  { colors: ONYX_COLORS.cardBlack, wordmark: ONYX_COLORS.wordmarkBlack, rotate: '18deg', translateX: 56, translateY: 106 },
 ] as const;
 
 export const FIELD_LABEL_ANIM_MS = 150;

@@ -1,14 +1,23 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Animated, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CardStack } from '@/components/card-stack';
 import { FloatingLabelField } from '@/components/floating-label-field';
-import { CARD_SIZE, ONYX_COLORS, ONYX_COPY } from '@/constants/onyx';
+import { HERO_STAGE, ONYX_COLORS, ONYX_COPY } from '@/constants/onyx';
 import { useKeyboardShrink } from '@/hooks/use-keyboard-shrink';
 
-const HERO_HEIGHT = CARD_SIZE.height + 100;
+const HERO_HEIGHT = HERO_STAGE.height;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -20,6 +29,7 @@ export default function LoginScreen() {
     <LinearGradient colors={[ONYX_COLORS.backgroundTop, ONYX_COLORS.backgroundBottom]} style={styles.fill}>
       <SafeAreaView style={styles.fill}>
         <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.content}>
             <Animated.View
               style={[
@@ -30,6 +40,7 @@ export default function LoginScreen() {
               ]}>
               <Animated.View
                 style={{
+                  transformOrigin: 'top',
                   transform: [{ scale: shrink.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] }) }],
                 }}>
                 <CardStack />
@@ -66,6 +77,7 @@ export default function LoginScreen() {
               </Text>
             </View>
           </View>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
@@ -83,7 +95,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     overflow: 'hidden',
   },
   title: {

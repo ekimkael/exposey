@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { CARD_FAN, CARD_SIZE } from '@/constants/onyx';
+import { CARD_FAN, CARD_SIZE, HERO_STAGE } from '@/constants/onyx';
 
 function ChipGlyph({ tint }: { tint: string }) {
   return (
@@ -43,9 +43,8 @@ export function CardStack() {
 
 const styles = StyleSheet.create({
   stage: {
-    width: CARD_SIZE.width + 60,
-    height: CARD_SIZE.height + 100,
-    alignItems: 'center',
+    width: HERO_STAGE.width,
+    height: HERO_STAGE.height,
   },
   card: {
     position: 'absolute',

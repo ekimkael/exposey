@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Animated, Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { FIELD_LABEL_ANIM_MS, ONYX_COLORS } from '@/constants/onyx';
@@ -13,7 +13,7 @@ export function FloatingLabelField({ label, secureTextEntry, value, ...inputProp
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(secureTextEntry);
   const active = focused || !!value;
-  const anim = useRef(new Animated.Value(active ? 1 : 0)).current;
+  const [anim] = useState(() => new Animated.Value(active ? 1 : 0));
 
   function animateTo(toValue: number) {
     Animated.timing(anim, { toValue, duration: FIELD_LABEL_ANIM_MS, useNativeDriver: true }).start();
