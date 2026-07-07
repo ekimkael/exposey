@@ -1,3 +1,4 @@
+/** Color tokens for the Onyx login screen. */
 export const ONYX_COLORS = {
   backgroundTop: '#332920',
   backgroundBottom: '#0a0908',
@@ -8,6 +9,7 @@ export const ONYX_COLORS = {
   wordmarkSilver: 'rgba(90, 96, 104, 0.85)',
   wordmarkBlack: 'rgba(255, 255, 255, 0.08)',
   visaText: 'rgba(198, 202, 208, 0.85)',
+  visaSubtext: 'rgba(198, 202, 208, 0.55)',
   title: '#ffffff',
   subtitle: 'rgba(255, 255, 255, 0.55)',
   fieldBackground: 'rgba(255, 255, 255, 0.06)',
@@ -21,23 +23,11 @@ export const ONYX_COLORS = {
   buttonTextEnabled: '#141416',
 } as const;
 
+/** User-facing copy for the Onyx login screen. */
 export const ONYX_COPY = {
   title: 'Welcome back',
-  subtitle: 'Log into your Slash account',
+  subtitle: 'Log into your Onyx account',
   emailPlaceholder: 'Email address',
   passwordPlaceholder: 'Password',
   signIn: 'Sign in',
 } as const;
-
-export const CARD_SIZE = { width: 220, height: 138 } as const;
-
-// Generous canvas so the rotated cards' bounding boxes never clip.
-export const HERO_STAGE = { width: 320, height: 270 } as const;
-
-export const CARD_FAN = [
-  { colors: ONYX_COLORS.cardGold, wordmark: ONYX_COLORS.wordmarkGold, rotate: '-8deg', translateX: 16, translateY: 16 },
-  { colors: ONYX_COLORS.cardSilver, wordmark: ONYX_COLORS.wordmarkSilver, rotate: '4deg', translateX: 36, translateY: 62 },
-  { colors: ONYX_COLORS.cardBlack, wordmark: ONYX_COLORS.wordmarkBlack, rotate: '18deg', translateX: 56, translateY: 106 },
-] as const;
-
-export const FIELD_LABEL_ANIM_MS = 150;

@@ -2,37 +2,30 @@ import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Animated, Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
-import { FIELD_LABEL_ANIM_MS, ONYX_COLORS } from '@/constants/onyx';
+import { ONYX_COLORS } from '@/constants/theme';
+import { useFloatingLabel } from '@/hooks/use-floating-label';
 
-interface FloatingLabelFieldProps extends Pick<TextInputProps, 'value' | 'onChangeText' | 'textContentType' | 'autoComplete' | 'keyboardType' | 'returnKeyType' | 'onSubmitEditing'> {
+interface FloatingLabelFieldProps
+  extends Pick<
+    TextInputProps,
+    'value' | 'onChangeText' | 'textContentType' | 'autoComplete' | 'keyboardType' | 'returnKeyType' | 'onSubmitEditing'
+  > {
   label: string;
   secureTextEntry?: boolean;
 }
 
+/**
+ * Text field with an animated floating label (see {@link useFloatingLabel})
+ * and, for `secureTextEntry` fields, a native SF Symbol eye toggle.
+ */
 export function FloatingLabelField({ label, secureTextEntry, value, ...inputProps }: FloatingLabelFieldProps) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(secureTextEntry);
-  const active = focused || !!value;
-  const [anim] = useState(() => new Animated.Value(active ? 1 : 0));
-
-  function animateTo(toValue: number) {
-    Animated.timing(anim, { toValue, duration: FIELD_LABEL_ANIM_MS, useNativeDriver: true }).start();
-  }
+  const { labelStyle, onFocus, onBlur } = useFloatingLabel(!!value);
 
   return (
     <View style={[styles.field, focused && styles.fieldFocused]}>
-      <Animated.Text
-        style={[
-          styles.label,
-          {
-            transform: [
-              { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [0, -11] }) },
-              { scale: anim.interpolate({ inputRange: [0, 1], outputRange: [1, 0.78] }) },
-            ],
-          },
-        ]}>
-        {label}
-      </Animated.Text>
+      <Animated.Text style={[styles.label, labelStyle]}>{label}</Animated.Text>
       <TextInput
         style={styles.input}
         value={value}
@@ -43,11 +36,11 @@ export function FloatingLabelField({ label, secureTextEntry, value, ...inputProp
         cursorColor={ONYX_COLORS.fieldText}
         onFocus={() => {
           setFocused(true);
-          animateTo(1);
+          onFocus();
         }}
         onBlur={() => {
           setFocused(false);
-          animateTo(value ? 1 : 0);
+          onBlur();
         }}
         {...inputProps}
       />
@@ -76,12 +69,12 @@ const styles = StyleSheet.create({
   label: {
     position: 'absolute',
     left: 16,
-    fontSize: 15,
+    fontSize: 16,
     color: ONYX_COLORS.fieldLabel,
     transformOrigin: 'left',
   },
   input: {
-    fontSize: 15,
+    fontSize: 16,
     color: ONYX_COLORS.fieldText,
     paddingTop: 10,
     paddingRight: 28,
