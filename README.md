@@ -1,49 +1,56 @@
-# Exposey
+# Magpie — bookmark/explore hero animation
 
-Sandbox for faithfully reproducing mobile UI and animations (from a
-reference video or screenshot) using **Expo Router** and native components
-(`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
+A single looping hero animation reproduced from a reference video of an
+onboarding screen (app "Sortd."), renamed **Magpie** — a bird that hoards
+shiny objects, matching the "hoarding" theme of the source.
 
-Each reproduced screen/animation lives on **its own branch**, independent
-from `main` — `main` only holds the base Expo template. No branch is ever
-merged into another: each one is a standalone reproduction exercise.
+## What it demonstrates
 
-## Stack
+One continuous loop on the home screen:
 
-- [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
-- React Native 0.85, React 19
-- `@expo/ui` (SwiftUI / Jetpack Compose) for native components
-- React Native Reanimated + Gesture Handler for animations/gestures
+1. Five colored cards fall from above and slide behind a bookmark icon —
+   the opaque icon covers them near the end of their travel (z-order
+   occlusion, not a shrink effect). Each card lands with a "gulp": the icon
+   briefly widens and squashes, like a bite being swallowed.
+2. The icon rotates 45° into an "explore" pose.
+3. An orbit of app icons (on two rings) fades in, then does one full spin.
+4. The tagline underneath types out, then erases and retypes a second
+   phrase, in sync with the icon's state.
+5. The loop restarts — the subline erases before the headline retypes, so
+   there's no jump-cut.
 
-## Getting started
+## Prerequisites
+
+- Xcode + iOS Simulator (primary target platform)
+- Node.js + npm
+- CocoaPods (`pod`), with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` set — see
+  [AGENTS.md](./AGENTS.md#pitfalls) for why.
+
+## Install & run
 
 ```bash
 npm install
-npx expo start
+npx expo prebuild -p ios   # only needed once, or after native-affecting changes
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios
 ```
 
-Then open it in a [development build](https://docs.expo.dev/develop/development-builds/introduction/),
-an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
+This is a **custom dev client** app (not Expo Go) — the template ships with
+`ios/` checked out of git (gitignored) and needs a native build.
 
-## Branches
+## Platforms
 
-| Branch | Description |
-|---|---|
-| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Family wallet bottom sheet with a morphing transition, native Stack header toolbar, and Liquid Glass buttons (iOS 26), built with `@expo/ui` SwiftUI. |
-| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | Featured music UI with video previews and a zoomed detail view. |
-| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Trip detail screen (Airbnb/Gatesware-style): trip stats, restaurant cards, Instagram/Snap-style stories, grid layouts for places/hotels. |
-| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Onboarding and authentication flow for an investment app. |
-| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Mindfulness screen with a pill-to-beach-photo morph transition and an "Apple Intelligence"-style glowing button (SVG gradient). |
-| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Onboarding carousel with an animated globe ("Remindo" app). |
-| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
-| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
-| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
+- **iOS**: fully verified on Simulator.
+- **Android / web**: not verified. The orbit icons use SF Symbol names
+  directly; `expo-symbols` needs a `{ios, android, web}` name mapping to
+  render on those platforms, which isn't implemented here (see AGENTS.md).
 
-Each branch usually has its own `README.md`/`AGENTS.md` detailing the
-reproduced screen, technical choices, and pitfalls encountered.
+## Known limitations
 
-## Available commands
+- The "Get Started" button has no destination screen — out of scope for an
+  animation reproduction exercise.
+- Android/web icon rendering (see above).
 
-- `/reproduce-ui` — reproduce a reference (video or image) provided as an attachment.
-- `/animation-brief` — spec out an animation via multiple-choice questions before implementation.
-- `/quality-pass` — cleanup/refactoring/documentation pass on an already-implemented branch.
+## Project docs
+
+See [AGENTS.md](./AGENTS.md) for where the animation logic lives, how to
+reuse it elsewhere, and the pitfalls hit while building it.
