@@ -1,56 +1,50 @@
-# Welcome to your Expo app 👋
+# Exposey
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bac à sable pour reproduire fidèlement des interfaces et animations mobiles
+(vidéos ou screenshots de référence) avec **Expo Router** et des composants
+natifs (`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
 
-## Get started
+Chaque écran/animation reproduit vit sur **sa propre branche**, indépendante
+de `main` — `main` ne contient que le template Expo de base. Aucune branche
+n'est fusionnée dans une autre : elles sont chacune un exercice de
+reproduction autonome.
 
-1. Install dependencies
+## Stack
 
-   ```bash
-   npm install
-   ```
+- [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
+- React Native 0.85, React 19
+- `@expo/ui` (SwiftUI / Jetpack Compose) pour les composants natifs
+- React Native Reanimated + Gesture Handler pour les animations/gestes
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Démarrer
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Ouvre ensuite dans un [development build](https://docs.expo.dev/develop/development-builds/introduction/),
+un simulateur iOS, un émulateur Android, ou [Expo Go](https://expo.dev/go).
 
-### Other setup steps
+## Branches
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Branche | Description |
+|---|---|
+| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Bottom sheet "wallet familial" avec transition morphing, header natif toolbar et boutons Liquid Glass (iOS 26), via `@expo/ui` SwiftUI. |
+| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | UI de mise en avant musicale avec aperçus vidéo et vue détail en zoom. |
+| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Écran détail voyage (type Airbnb/Gatesware) : stats de trip, cartes restaurants, stories façon Instagram/Snap, grilles lieux/hôtels. |
+| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Flow d'onboarding et d'authentification pour une app d'investissement. |
+| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Écran de méditation avec transition morphing pilule → photo de plage, bouton "Apple Intelligence" à halo animé (SVG gradient). |
+| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Carrousel d'onboarding avec globe animé (app "Remindo"). |
+| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Écran d'envoi d'argent : form sheet natif, clavier numérique, animations de montant, confirmation biométrique qui morph en écran de succès. |
+| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Écran de login ("Onyx") avec éventail de cartes qui se replie en pile au focus clavier. |
+| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Écran d'onboarding à messages défilants (app "Remindo") avec dégradé radial et bouton CTA à particules. |
 
-## Learn more
+Chaque branche contient généralement son propre `README.md`/`AGENTS.md`
+détaillant l'écran reproduit, les choix techniques et les pièges rencontrés.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Commandes disponibles
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `/reproduce-ui` — reproduire une référence (vidéo ou image) fournie en pièce jointe.
+- `/animation-brief` — spécifier une animation par questions à choix avant implémentation.
+- `/quality-pass` — passe de nettoyage/refactoring/documentation sur une branche déjà implémentée.
