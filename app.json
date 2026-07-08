@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "rn.ui",
-    "slug": "rn.ui",
+    "name": "exposey",
+    "slug": "exposey",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rnui",
+    "scheme": "exposey",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
