@@ -192,6 +192,15 @@ sinon documente tes hypothèses et continue.
    (sans URL → il review la branche courante contre `main`) et
    corrige les findings bloquants avant de me présenter le résultat.
 
+## Dernière étape — renommer la session
+Une fois la validation (5) terminée, renomme le titre de la session de
+l'outil utilisé (Claude Code, Codex CLI, etc.) pour refléter le nom de
+l'app produite et l'UI reproduite (ex. `Fennec — morph button transition`),
+afin de ne pas la confondre avec d'autres sessions si je reviens dessus
+plus tard. Utilise le mécanisme de renommage natif de l'outil s'il en
+expose un ; sinon, mets à jour le titre du terminal (ex.
+`printf '\033]0;%s\007' "<titre>"`) pour qu'il reste visible dans l'onglet.
+
 ## Avant de démarrer
 Si des points sont ambigus, /grill-me — mais présente tes questions
 avec des réponses sélectionnables comme le fait /brainstorming.
