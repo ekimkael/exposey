@@ -1,82 +1,38 @@
 import { SymbolView } from 'expo-symbols';
-import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { CARD_COLORS, INNER_RADIUS, ORBIT_ICONS, OUTER_RADIUS } from '@/constants/animation';
 import { Spacing } from '@/constants/theme';
+import { useHoarderCycle } from '@/hooks/use-hoarder-cycle';
 import { useTheme } from '@/hooks/use-theme';
-
-const HEADLINE = 'A new home for your internet hoarding tendencies';
-const SUBLINE = 'A new way to explore a new city';
-
-const CARDS = ['#E7C79A', '#D98E73', '#8FA9C0', '#C24B4B', '#232323'];
-
-const OUTER_RADIUS = 160;
-const INNER_RADIUS = 105;
-
-function orbitIcon(symbol: Parameters<typeof SymbolView>[0]['name'], bg: string, angleDeg: number, ring: 'outer' | 'inner') {
-  const rad = (angleDeg * Math.PI) / 180;
-  const radius = ring === 'outer' ? OUTER_RADIUS : INNER_RADIUS;
-  return { symbol, bg, x: Math.cos(rad) * radius, y: Math.sin(rad) * radius };
-}
-
-// 3 icons on the outer ring (evenly spaced triangle), 2 on the inner ring
-// (flanking the top), for 5 total — less cluttered than one-per-45°.
-const ORBIT_ICONS = [
-  orbitIcon('paperplane.fill', '#3E8BF0', -90, 'outer'),
-  orbitIcon('safari.fill', '#3E8BF0', 30, 'outer'),
-  orbitIcon('fork.knife', '#E4483B', 150, 'outer'),
-  orbitIcon('music.note', '#111111', 180, 'inner'),
-  orbitIcon('camera.fill', '#C13584', 0, 'inner'),
-];
-
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-async function typeInto(setText: (value: string) => void, full: string, alive: { current: boolean }) {
-  for (let i = 1; i <= full.length; i++) {
-    if (!alive.current) return;
-    setText(full.slice(0, i));
-    await sleep(26);
-  }
-}
-
-async function eraseAll(setText: (value: string) => void, full: string, alive: { current: boolean }) {
-  for (let i = full.length; i >= 0; i--) {
-    if (!alive.current) return;
-    setText(full.slice(0, i));
-    await sleep(16);
-  }
-}
 
 function CardStack({ progress }: { progress: ReturnType<typeof useSharedValue<number>>[] }) {
   return (
     <>
       {progress.map((value, index) => (
-        <AnimatedCard key={index} value={value} color={CARDS[index]} />
+        <AnimatedCard key={index} value={value} color={CARD_COLORS[index]} />
       ))}
     </>
   );
 }
 
+/**
+ * A single falling card. It stays full size and slides straight down; the
+ * opaque bookmark icon (rendered after this in the tree, so it paints on
+ * top) covers it near the end of its travel — it's z-order occlusion, not a
+ * shrink-into-the-icon effect.
+ */
 function AnimatedCard({ value, color }: { value: ReturnType<typeof useSharedValue<number>>; color: string }) {
-  // Cards stay full size and slide straight down; the opaque icon (rendered
-  // after this in the tree, so it paints on top) covers them near the end —
-  // it's z-order occlusion, not a shrink-into-the-icon effect.
   const style = useAnimatedStyle(() => ({
-    opacity: interpolate(value.value, [0, 0.12, 0.8, 1], [0, 1, 1, 0]),
+    opacity: interpolate(value.value, [0, 0.15, 0.6, 1], [0, 1, 1, 0]),
     transform: [{ translateY: interpolate(value.value, [0, 1], [-140, 90]) }],
   }));
   return <Animated.View style={[styles.card, { backgroundColor: color }, style]} />;
 }
 
+/** A single badge on the orbit ring; fades and scales in as `progress` goes 0→1. */
 function OrbitIcon({ progress, symbol, bg, x, y }: (typeof ORBIT_ICONS)[number] & {
   progress: ReturnType<typeof useSharedValue<number>>;
 }) {
@@ -91,88 +47,28 @@ function OrbitIcon({ progress, symbol, bg, x, y }: (typeof ORBIT_ICONS)[number] 
   );
 }
 
+/**
+ * The Magpie home screen's looping hero: cards fall behind a bookmark icon
+ * (with a "gulp" bulge per card), the icon rotates into an "explore" pose,
+ * an orbit of app icons fades in and spins, and the tagline underneath
+ * types/erases between two phrases in sync. All timeline/orchestration
+ * logic lives in `useHoarderCycle` — this component only renders.
+ */
 export function HoarderHero() {
   const theme = useTheme();
-  const rotate = useSharedValue(0);
-  const orbit = useSharedValue(0);
-  const cardProgress = [useSharedValue(0), useSharedValue(0), useSharedValue(0), useSharedValue(0), useSharedValue(0)];
-  const [text, setText] = useState('');
-  const [caret, setCaret] = useState(false);
-  const alive = useRef(true);
-
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${interpolate(rotate.value, [0, 1], [0, 45])}deg` }],
-  }));
-  const ringStyle = useAnimatedStyle(() => ({ opacity: orbit.value }));
-
-  useEffect(() => {
-    alive.current = true;
-
-    async function playCycle(isFirst: boolean) {
-      if (!isFirst) {
-        setCaret(true);
-        await eraseAll(setText, SUBLINE, alive);
-        if (!alive.current) return;
-      }
-
-      cardProgress.forEach((value) => {
-        value.value = 0;
-      });
-      rotate.value = 0;
-      orbit.value = 0;
-      setCaret(true);
-
-      cardProgress.forEach((value, index) => {
-        value.value = withDelay(index * 220, withTiming(1, { duration: 340, easing: Easing.out(Easing.cubic) }));
-      });
-      await typeInto(setText, HEADLINE, alive);
-      setCaret(false);
-      await sleep(400);
-      if (!alive.current) return;
-
-      rotate.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-      await sleep(700);
-      if (!alive.current) return;
-
-      orbit.value = withTiming(1, { duration: 350, easing: Easing.out(Easing.back(1.4)) });
-      await sleep(650);
-      if (!alive.current) return;
-
-      setCaret(true);
-      await eraseAll(setText, HEADLINE, alive);
-      await typeInto(setText, SUBLINE, alive);
-      setCaret(false);
-      await sleep(1200);
-      if (!alive.current) return;
-
-      orbit.value = withTiming(0, { duration: 250 });
-      rotate.value = withTiming(0, { duration: 250 });
-      await sleep(300);
-    }
-
-    (async () => {
-      let isFirst = true;
-      while (alive.current) {
-        await playCycle(isFirst);
-        isFirst = false;
-      }
-    })();
-
-    return () => {
-      alive.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { iconStyle, ringStyle, orbitGroupStyle, orbit, cardProgress, text, caret } = useHoarderCycle();
 
   return (
     <View style={styles.container}>
       <View style={styles.stage}>
         <View style={styles.iconCluster}>
-          <Animated.View style={[styles.ring, styles.ringOuter, ringStyle]} />
-          <Animated.View style={[styles.ring, styles.ringInner, ringStyle]} />
-          {ORBIT_ICONS.map((icon, index) => (
-            <OrbitIcon key={index} {...icon} progress={orbit} />
-          ))}
+          <Animated.View style={[styles.orbitGroup, orbitGroupStyle]}>
+            <Animated.View style={[styles.ring, styles.ringOuter, ringStyle]} />
+            <Animated.View style={[styles.ring, styles.ringInner, ringStyle]} />
+            {ORBIT_ICONS.map((icon, index) => (
+              <OrbitIcon key={index} {...icon} progress={orbit} />
+            ))}
+          </Animated.View>
           <CardStack progress={cardProgress} />
           <Animated.View style={iconStyle}>
             <SymbolView name="bookmark.fill" size={130} tintColor={theme.text} />
@@ -183,7 +79,12 @@ export function HoarderHero() {
       <View style={styles.bottomGroup}>
         <View style={styles.copyBlock}>
           <ThemedText style={styles.brand}>Magpie.</ThemedText>
-          <ThemedText themeColor="textSecondary" style={styles.tagline} numberOfLines={2}>
+          <ThemedText
+            themeColor="textSecondary"
+            style={styles.tagline}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.6}>
             {text}
             {caret ? '_' : ''}
           </ThemedText>
@@ -222,6 +123,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  orbitGroup: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   ring: {
     position: 'absolute',
     borderRadius: 999,
@@ -256,7 +164,7 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 34,
     lineHeight: 40,
-    fontWeight: '700',
+    fontFamily: 'BricolageGrotesque_700Bold',
   },
   tagline: {
     fontSize: 19,
@@ -264,12 +172,12 @@ const styles = StyleSheet.create({
   },
   cta: {
     alignSelf: 'stretch',
-    borderRadius: 14,
+    borderRadius: 999,
     paddingVertical: Spacing.three,
     alignItems: 'center',
   },
   ctaLabel: {
-    fontWeight: '700',
+    fontFamily: 'BricolageGrotesque_700Bold',
     fontSize: 16,
   },
 });
