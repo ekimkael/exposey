@@ -63,7 +63,13 @@ function ArtistArt({ artist }: { artist: Artist }) {
 export function ArtistCard({ artist }: { artist: Artist }) {
   return (
     <View style={[styles.card, { backgroundColor: artist.bg }]}>
-      <Text style={[styles.name, { color: artist.text }]}>{artist.name}</Text>
+      <Text
+        style={[styles.name, { color: artist.text }]}
+        numberOfLines={2}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}>
+        {artist.name}
+      </Text>
       <View style={styles.art}>
         <ArtistArt artist={artist} />
       </View>
@@ -84,10 +90,10 @@ const styles = StyleSheet.create({
   },
   name: {
     flex: 1,
-    fontSize: 25,
+    fontSize: 34,
     fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 27,
+    letterSpacing: -1,
+    lineHeight: 35,
     paddingRight: 8,
   },
   art: {
