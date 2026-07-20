@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -81,10 +80,14 @@ function EdgeBlur({ position }: { position: 'top' | 'bottom' }) {
 }
 
 /**
- * One card slot: rotation and x-shift depend on the card's position in the
- * viewport (barrel effect) — flat at center (base tilt only), rocked back
- * ~-18° and shifted left near the bottom edge, slightly positive at the top.
+ * One card slot riding a rotary dial: cards sit on a wheel whose center is
+ * far off-screen to the left (radius R). Position on the arc gives both the
+ * leftward x-curve and the tangent rotation, so the whole stack reads as a
+ * rigid wheel — ~∓20° and ~-39pt at the viewport edges.
  */
+const WHEEL_RADIUS = 620;
+const RAD_TO_DEG = 180 / Math.PI;
+
 function DialSlot({
   artist,
   index,
@@ -99,10 +102,11 @@ function DialSlot({
   const half = viewportH / 2;
   const animated = useAnimatedStyle(() => {
     const d = index * PITCH + PITCH / 2 + scrollY.value - half;
+    const theta = d / WHEEL_RADIUS;
     return {
       transform: [
-        { translateX: artist.offsetX + interpolate(d, [-half, 0, half], [-6, 0, -16], 'clamp') },
-        { rotate: `${artist.tilt + interpolate(d, [-half, 0, half], [6, 0, -18], 'clamp')}deg` },
+        { translateX: artist.offsetX - WHEEL_RADIUS * (1 - Math.cos(theta)) },
+        { rotate: `${artist.tilt - theta * RAD_TO_DEG}deg` },
       ],
     };
   });
