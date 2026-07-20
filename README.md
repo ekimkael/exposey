@@ -20,9 +20,12 @@ and bottom edges.
 - **Artist art**: stylized `react-native-svg` placeholders (no real
   artist photos in the repo).
 
-Runs in **Expo Go** (SDK 56, universal layer only): `npx expo start --ios`.
-Platforms: built and validated on iOS; uses only cross-platform JS
-libraries so Android should work as-is (untested).
+Run: `npm install && npx expo start --ios` (works in **Expo Go**,
+SDK 56). Tuning lives in `src/constants/wheel.ts`. Platforms: built and
+validated on iOS; uses only cross-platform JS libraries so Android
+should work as-is (untested — the masked progressive blur may need
+`experimentalBlurMethod` there). Architecture notes for agents:
+[AGENTS.md](AGENTS.md).
 
 ---
 
