@@ -59,17 +59,10 @@ function ArtistArt({ artist }: { artist: Artist }) {
   );
 }
 
-/** One tilted sticker card of the marquee. */
+/** One sticker card of the marquee; tilt/offset are applied by the DialSlot wrapper. */
 export function ArtistCard({ artist }: { artist: Artist }) {
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: artist.bg,
-          transform: [{ translateX: artist.offsetX }, { rotate: `${artist.tilt}deg` }],
-        },
-      ]}>
+    <View style={[styles.card, { backgroundColor: artist.bg }]}>
       <Text style={[styles.name, { color: artist.text }]}>{artist.name}</Text>
       <View style={styles.art}>
         <ArtistArt artist={artist} />

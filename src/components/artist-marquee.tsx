@@ -1,18 +1,30 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { ArtistCard, CARD_HEIGHT } from '@/components/artist-card';
-import { ARTISTS } from '@/constants/artists';
+import { ARTISTS, type Artist } from '@/constants/artists';
 
 const GAP = 46;
 const PITCH = CARD_HEIGHT + GAP;
-const CYCLE = ARTISTS.length * PITCH;
-/** Reference video loops all 8 cards in ~4.4s */
-const CYCLE_MS = 4400;
+/** Rotary-dial timeline measured on the reference (4.4s loop): advance 4 slots, hold, rewind, hold. */
+const ADVANCE_SLOTS = 4;
+const ADVANCE_MS = 2400;
+const HOLD_MS = 600;
+const REWIND_MS = 600;
+const END_HOLD_MS = 800;
 
 /** Static tick ruler on the right edge, longer ticks toward the middle. */
 function Ruler() {
@@ -69,31 +81,71 @@ function EdgeBlur({ position }: { position: 'top' | 'bottom' }) {
 }
 
 /**
- * Infinite upward marquee: the artist list is rendered twice and translated
- * by one full cycle with a linear loop, so the seam is invisible.
+ * One card slot: rotation and x-shift depend on the card's position in the
+ * viewport (barrel effect) — flat at center (base tilt only), rocked back
+ * ~-18° and shifted left near the bottom edge, slightly positive at the top.
  */
-export function ArtistMarquee() {
-  const y = useSharedValue(0);
-
-  useEffect(() => {
-    y.value = withRepeat(withTiming(-CYCLE, { duration: CYCLE_MS, easing: Easing.linear }), -1);
-  }, [y]);
-
-  const scroll = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
+function DialSlot({
+  artist,
+  index,
+  scrollY,
+  viewportH,
+}: {
+  artist: Artist;
+  index: number;
+  scrollY: SharedValue<number>;
+  viewportH: number;
+}) {
+  const half = viewportH / 2;
+  const animated = useAnimatedStyle(() => {
+    const d = index * PITCH + PITCH / 2 + scrollY.value - half;
+    return {
+      transform: [
+        { translateX: artist.offsetX + interpolate(d, [-half, 0, half], [-6, 0, -16], 'clamp') },
+        { rotate: `${artist.tilt + interpolate(d, [-half, 0, half], [6, 0, -18], 'clamp')}deg` },
+      ],
+    };
+  });
 
   return (
-    <View style={styles.viewport}>
-      <Animated.View style={scroll}>
-        {[0, 1].map((copy) => (
-          <View key={copy}>
-            {ARTISTS.map((artist) => (
-              <View key={artist.name} style={styles.slot}>
-                <ArtistCard artist={artist} />
-              </View>
-            ))}
-          </View>
-        ))}
+    <View style={styles.slot}>
+      <Animated.View style={animated}>
+        <ArtistCard artist={artist} />
       </Animated.View>
+    </View>
+  );
+}
+
+/** Rotary-dial marquee: winds up 4 slots, pauses, springs back, pauses, loops. */
+export function ArtistMarquee() {
+  const scrollY = useSharedValue(0);
+  const [viewportH, setViewportH] = useState(0);
+
+  useEffect(() => {
+    const distance = -ADVANCE_SLOTS * PITCH;
+    scrollY.value = 0;
+    scrollY.value = withRepeat(
+      withSequence(
+        withTiming(distance, { duration: ADVANCE_MS, easing: Easing.inOut(Easing.cubic) }),
+        withTiming(distance, { duration: HOLD_MS }),
+        withTiming(0, { duration: REWIND_MS, easing: Easing.inOut(Easing.cubic) }),
+        withTiming(0, { duration: END_HOLD_MS }),
+      ),
+      -1,
+    );
+  }, [scrollY]);
+
+  const containerStyle = useAnimatedStyle(() => ({ transform: [{ translateY: scrollY.value }] }));
+
+  return (
+    <View style={styles.viewport} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)}>
+      {viewportH > 0 ? (
+        <Animated.View style={containerStyle}>
+          {ARTISTS.map((artist, index) => (
+            <DialSlot key={artist.name} artist={artist} index={index} scrollY={scrollY} viewportH={viewportH} />
+          ))}
+        </Animated.View>
+      ) : null}
       <Ruler />
       <EdgeBlur position="top" />
       <EdgeBlur position="bottom" />
