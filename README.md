@@ -1,16 +1,16 @@
 # Turaco — Connect Your Spotify marquee
 
-Reproduction of a "Connect Your Spotify" onboarding screen: a vertical
-**rotary-dial marquee** of tilted artist sticker cards — it winds up
-4 slots with an S-curve (2.4 s), pauses, springs back to the start
-(0.6 s), pauses again, and loops every 4.4 s like the reference video —
-with progressive blur + black fade at the top and bottom edges.
+Reproduction of a "Connect Your Spotify" onboarding screen: a
+**full-circle carousel** of tilted artist sticker cards — the 8 artists
+sit twice around a 16-slot wheel (22.5° per card, R ≈ 382 pt) that spins
+continuously (8 cards per 4.4 s, seamless wrap), with progressive blur +
+black fade at the top and bottom edges.
 
-- **Dial**: Reanimated `withRepeat(withSequence(…))` on the UI thread;
-  each card's rotation and x-shift interpolate from its viewport
-  position (barrel effect: flat at center, rocked to ~-18° and shifted
-  left at the bottom edge). See `plans/001-rotary-dial-marquee.md` for
-  the measured timeline.
+- **Carousel**: Reanimated linear loop on the UI thread; each card maps
+  its arc distance to an angle θ — `y = R·sin θ`, x curves away at the
+  edges (`R·(1−cos θ)`) and the rotation is the tangent angle, so the
+  ring turns as one rigid wheel. Tuning knobs: `WHEEL_RADIUS`/`PITCH`
+  in `src/components/artist-marquee.tsx`.
 - **Progressive blur**: `BlurView` masked by a vertical `LinearGradient`
   (`@react-native-masked-view/masked-view`), plus a short black fade.
 - **Artist art**: stylized `react-native-svg` placeholders (no real

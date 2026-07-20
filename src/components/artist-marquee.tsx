@@ -5,7 +5,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
-  withSequence,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -18,12 +17,18 @@ import { ARTISTS, type Artist } from '@/constants/artists';
 
 const GAP = 46;
 const PITCH = CARD_HEIGHT + GAP;
-/** Rotary-dial timeline measured on the reference (4.4s loop): advance 4 slots, hold, rewind, hold. */
-const ADVANCE_SLOTS = 4;
-const ADVANCE_MS = 2400;
-const HOLD_MS = 600;
-const REWIND_MS = 600;
-const END_HOLD_MS = 800;
+/**
+ * Full-circle carousel: the 8 artists are laid out twice around a 16-slot
+ * wheel (22.5° per card, R ≈ 382pt so adjacent cards sit one PITCH apart on
+ * the arc). The wheel spins continuously — 8 slots per 4.4s like the
+ * reference loop — and wraps seamlessly because slot i and i+8 hold the
+ * same artist.
+ */
+const SLOT_COUNT = 16;
+const TRACK = SLOT_COUNT * PITCH;
+const WHEEL_RADIUS = TRACK / (2 * Math.PI);
+const CYCLE_MS = 4400;
+const RAD_TO_DEG = 180 / Math.PI;
 
 /** Static tick ruler on the right edge, longer ticks toward the middle. */
 function Ruler() {
@@ -80,31 +85,33 @@ function EdgeBlur({ position }: { position: 'top' | 'bottom' }) {
 }
 
 /**
- * One card slot riding a rotary dial: cards sit on a wheel whose center is
- * far off-screen to the left (radius R). Position on the arc gives both the
- * leftward x-curve and the tangent rotation, so the whole stack reads as a
- * rigid wheel — ~∓20° and ~-39pt at the viewport edges.
+ * One card riding the wheel. Its slot's arc distance from the viewport
+ * center maps to an angle θ: y = R·sin θ (vertical travel), x curves away
+ * at the edges (R·(1−cos θ)) and the card's rotation is the tangent angle,
+ * so the whole ring turns as one rigid carousel.
  */
-const WHEEL_RADIUS = 620;
-const RAD_TO_DEG = 180 / Math.PI;
-
-function DialSlot({
+function CarouselCard({
   artist,
   index,
-  scrollY,
+  progress,
   viewportH,
 }: {
   artist: Artist;
   index: number;
-  scrollY: SharedValue<number>;
+  progress: SharedValue<number>;
   viewportH: number;
 }) {
-  const half = viewportH / 2;
+  const centerTop = viewportH / 2 - CARD_HEIGHT / 2;
   const animated = useAnimatedStyle(() => {
-    const d = index * PITCH + PITCH / 2 + scrollY.value - half;
+    let d = (index * PITCH - progress.value) % TRACK;
+    if (d > TRACK / 2) d -= TRACK;
+    if (d < -TRACK / 2) d += TRACK;
     const theta = d / WHEEL_RADIUS;
+    const behind = Math.abs(theta) > Math.PI / 2;
     return {
+      opacity: behind ? 0 : 1,
       transform: [
+        { translateY: WHEEL_RADIUS * Math.sin(theta) },
         { translateX: artist.offsetX - WHEEL_RADIUS * (1 - Math.cos(theta)) },
         { rotate: `${artist.tilt - theta * RAD_TO_DEG}deg` },
       ],
@@ -112,44 +119,38 @@ function DialSlot({
   });
 
   return (
-    <View style={styles.slot}>
-      <Animated.View style={animated}>
-        <ArtistCard artist={artist} />
-      </Animated.View>
-    </View>
+    <Animated.View style={[styles.cardHolder, { top: centerTop }, animated]} pointerEvents="none">
+      <ArtistCard artist={artist} />
+    </Animated.View>
   );
 }
 
-/** Rotary-dial marquee: winds up 4 slots, pauses, springs back, pauses, loops. */
+/** Continuously spinning full-circle carousel of artist cards. */
 export function ArtistMarquee() {
-  const scrollY = useSharedValue(0);
+  const progress = useSharedValue(0);
   const [viewportH, setViewportH] = useState(0);
 
   useEffect(() => {
-    const distance = -ADVANCE_SLOTS * PITCH;
-    scrollY.value = 0;
-    scrollY.value = withRepeat(
-      withSequence(
-        withTiming(distance, { duration: ADVANCE_MS, easing: Easing.inOut(Easing.cubic) }),
-        withTiming(distance, { duration: HOLD_MS }),
-        withTiming(0, { duration: REWIND_MS, easing: Easing.inOut(Easing.cubic) }),
-        withTiming(0, { duration: END_HOLD_MS }),
-      ),
+    progress.value = 0;
+    progress.value = withRepeat(
+      withTiming(TRACK / 2, { duration: CYCLE_MS, easing: Easing.linear }),
       -1,
     );
-  }, [scrollY]);
-
-  const containerStyle = useAnimatedStyle(() => ({ transform: [{ translateY: scrollY.value }] }));
+  }, [progress]);
 
   return (
     <View style={styles.viewport} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)}>
-      {viewportH > 0 ? (
-        <Animated.View style={containerStyle}>
-          {ARTISTS.map((artist, index) => (
-            <DialSlot key={artist.name} artist={artist} index={index} scrollY={scrollY} viewportH={viewportH} />
-          ))}
-        </Animated.View>
-      ) : null}
+      {viewportH > 0
+        ? Array.from({ length: SLOT_COUNT }, (_, index) => (
+            <CarouselCard
+              key={index}
+              artist={ARTISTS[index % ARTISTS.length]}
+              index={index}
+              progress={progress}
+              viewportH={viewportH}
+            />
+          ))
+        : null}
       <Ruler />
       <EdgeBlur position="top" />
       <EdgeBlur position="bottom" />
@@ -162,10 +163,11 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
   },
-  slot: {
-    height: PITCH,
+  cardHolder: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   edge: {
     position: 'absolute',
