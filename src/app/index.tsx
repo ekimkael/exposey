@@ -31,14 +31,14 @@ export default function ConnectSpotifyScreen() {
           <Text style={styles.title}> Spotify</Text>
         </View>
         <Text style={styles.subtitle}>
-          Link Spotify to track favorite artists and get concert{'\n'}recommendations tailored to your listening.
+          Link Spotify to track favorite artists and get concert recommendations tailored to your listening.
         </Text>
       </View>
 
       <ArtistMarquee />
 
       <Pressable style={styles.connect}>
-        <SpotifyMark size={20} color={GREEN} />
+        <SpotifyMark size={24} color={GREEN} />
         <Text style={styles.connectText}>Connect Spotify</Text>
       </Pressable>
     </View>
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: '#8E8E93',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 17,
+    lineHeight: 24,
     marginTop: 12,
     marginBottom: 4,
   },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   connectText: {
     color: GREEN,
-    fontSize: 15,
+    fontSize: 19,
     fontWeight: '700',
   },
 });
