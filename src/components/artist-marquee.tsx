@@ -28,6 +28,7 @@ const TRACK = SLOT_COUNT * PITCH;
 const WHEEL_RADIUS = TRACK / (2 * Math.PI);
 /** How far a fling carries, in ms of projected travel */
 const FLING_PROJECTION = 0.15;
+const RAD_TO_DEG = 180 / Math.PI;
 
 /** Static tick ruler on the right edge, longer ticks toward the middle. */
 function Ruler() {
@@ -85,9 +86,9 @@ function EdgeBlur({ position }: { position: 'top' | 'bottom' }) {
 
 /**
  * One card riding the wheel. Its slot's arc distance from the viewport
- * center maps to an angle θ: y = R·sin θ (vertical travel) and x curves
- * away at the edges (R·(1−cos θ)). The card itself does NOT rotate with
- * the wheel — it keeps only its static sticker tilt.
+ * center maps to an angle θ: y = R·sin θ (vertical travel), x curves away
+ * at the edges (R·(1−cos θ)) and the card is rotated by θ itself — fixed
+ * to the wheel like a sun ray / a number on a rotary dial.
  */
 function CarouselCard({
   artist,
@@ -112,7 +113,7 @@ function CarouselCard({
       transform: [
         { translateY: WHEEL_RADIUS * Math.sin(theta) },
         { translateX: artist.offsetX - WHEEL_RADIUS * (1 - Math.cos(theta)) },
-        { rotate: `${artist.tilt}deg` },
+        { rotate: `${artist.tilt + theta * RAD_TO_DEG}deg` },
       ],
     };
   });

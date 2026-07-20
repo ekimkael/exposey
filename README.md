@@ -9,8 +9,9 @@ cylinder / rotary phone dial. Progressive blur + black fade at the top
 and bottom edges.
 
 - **Wheel**: each card maps its arc distance to an angle θ —
-  `y = R·sin θ`, x curves away at the edges (`R·(1−cos θ)`). Cards do
-  not rotate with the wheel; they keep only their static sticker tilt.
+  `y = R·sin θ`, x curves away at the edges (`R·(1−cos θ)`) and the
+  card is rotated by θ itself, so cards sit radially around the circle
+  like sun rays / rotary-dial numbers (plus their static sticker tilt).
 - **Gesture**: `Gesture.Pan` drives a shared value on the UI thread;
   release projects velocity (`FLING_PROJECTION`) and settles with
   `withSpring` on the nearest `PITCH` multiple (the detent snap).
