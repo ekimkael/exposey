@@ -4,8 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { ArtistMarquee } from '@/components/artist-marquee';
 import { SpotifyMark } from '@/components/spotify-mark';
-
-const GREEN = '#31B767';
+import { COLORS } from '@/constants/theme';
 
 export default function ConnectSpotifyScreen() {
   const insets = useSafeAreaInsets();
@@ -14,7 +13,7 @@ export default function ConnectSpotifyScreen() {
     <View style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.header}>
         <Svg width={22} height={22} viewBox="0 0 24 24">
-          <Path d="M20 12H5m6-7-7 7 7 7" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <Path d="M20 12H5m6-7-7 7 7 7" stroke={COLORS.textPrimary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </Svg>
         <Text style={styles.headerTitle}>
           Connection — <Text style={styles.headerStep}>2 of 3</Text>
@@ -27,7 +26,7 @@ export default function ConnectSpotifyScreen() {
       <View style={styles.intro}>
         <Text style={styles.title}>Connect Your</Text>
         <View style={styles.titleRow}>
-          <SpotifyMark size={30} color={GREEN} />
+          <SpotifyMark size={30} color={COLORS.spotifyGreen} />
           <Text style={styles.title}> Spotify</Text>
         </View>
         <Text style={styles.subtitle}>
@@ -38,7 +37,7 @@ export default function ConnectSpotifyScreen() {
       <ArtistMarquee />
 
       <Pressable style={styles.connect}>
-        <SpotifyMark size={24} color={GREEN} />
+        <SpotifyMark size={24} color={COLORS.spotifyGreen} />
         <Text style={styles.connectText}>Connect Spotify</Text>
       </Pressable>
     </View>
@@ -48,7 +47,7 @@ export default function ConnectSpotifyScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
@@ -58,21 +57,21 @@ const styles = StyleSheet.create({
     height: 40,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 13,
     fontWeight: '500',
   },
   headerStep: {
-    color: '#7C7C80',
+    color: COLORS.headerStep,
   },
   skip: {
-    backgroundColor: '#2C2C2E',
+    backgroundColor: COLORS.skipBackground,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 6,
   },
   skipText: {
-    color: '#EBEBF0',
+    color: COLORS.skipText,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -81,7 +80,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   title: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontSize: 34,
     fontWeight: '800',
     letterSpacing: -0.8,
@@ -92,7 +91,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   subtitle: {
-    color: '#8E8E93',
+    color: COLORS.textMuted,
     fontSize: 17,
     lineHeight: 24,
     marginTop: 12,
@@ -106,10 +105,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.textPrimary,
   },
   connectText: {
-    color: GREEN,
+    color: COLORS.spotifyGreen,
     fontSize: 19,
     fontWeight: '700',
   },

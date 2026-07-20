@@ -2,9 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Polygon, Rect, Stop } from 'react-native-svg';
 
 import type { Artist } from '@/constants/artists';
-
-export const CARD_WIDTH = 296;
-export const CARD_HEIGHT = 104;
+import { CARD_HEIGHT, CARD_WIDTH } from '@/constants/wheel';
 
 /** Abstract stand-in for the artist photo (no real assets in the repo). */
 function ArtistArt({ artist }: { artist: Artist }) {
