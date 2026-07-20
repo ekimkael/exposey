@@ -1,4 +1,22 @@
-# Exposey
+# Turaco — Connect Your Spotify marquee
+
+Reproduction of a "Connect Your Spotify" onboarding screen: an infinite
+vertical marquee of tilted artist sticker cards, scrolling linearly
+(~550 ms per card, full 8-card loop in 4.4 s like the reference video),
+with progressive blur + black fade at the top and bottom edges.
+
+- **Marquee**: Reanimated `withRepeat(withTiming(…, linear))` on the UI
+  thread; the artist list is rendered twice so the loop seam is invisible.
+- **Progressive blur**: `BlurView` masked by a vertical `LinearGradient`
+  (`@react-native-masked-view/masked-view`), plus a short black fade.
+- **Artist art**: stylized `react-native-svg` placeholders (no real
+  artist photos in the repo).
+
+Runs in **Expo Go** (SDK 56, universal layer only): `npx expo start --ios`.
+Platforms: built and validated on iOS; uses only cross-platform JS
+libraries so Android should work as-is (untested).
+
+---
 
 Sandbox for faithfully reproducing mobile UI and animations (from a
 reference video or screenshot) using **Expo Router** and native components
@@ -38,6 +56,7 @@ an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
 | [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
 | [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
 | [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
+| [`feat/spotify-marquee-onboarding`](https://github.com/ekimkael/exposey/tree/feat/spotify-marquee-onboarding) | "Connect Your Spotify" onboarding ("Turaco") with an infinite vertical marquee of tilted artist sticker cards and progressive edge blur. |
 
 Each branch usually has its own `README.md`/`AGENTS.md` detailing the
 reproduced screen, technical choices, and pitfalls encountered.

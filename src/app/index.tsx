@@ -1,98 +1,116 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { ArtistMarquee } from '@/components/artist-marquee';
+import { SpotifyMark } from '@/components/spotify-mark';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+const GREEN = '#31B767';
+
+export default function ConnectSpotifyScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }]}>
+      <View style={styles.header}>
+        <Svg width={22} height={22} viewBox="0 0 24 24">
+          <Path d="M20 12H5m6-7-7 7 7 7" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </Svg>
+        <Text style={styles.headerTitle}>
+          Connection — <Text style={styles.headerStep}>2 of 3</Text>
+        </Text>
+        <Pressable style={styles.skip}>
+          <Text style={styles.skipText}>Skip</Text>
+        </Pressable>
+      </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <View style={styles.intro}>
+        <Text style={styles.title}>Connect Your</Text>
+        <View style={styles.titleRow}>
+          <SpotifyMark size={30} color={GREEN} />
+          <Text style={styles.title}> Spotify</Text>
+        </View>
+        <Text style={styles.subtitle}>
+          Link Spotify to track favorite artists and get concert{'\n'}recommendations tailored to your listening.
+        </Text>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <ArtistMarquee />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <Pressable style={styles.connect}>
+        <SpotifyMark size={20} color={GREEN} />
+        <Text style={styles.connectText}>Connect Spotify</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#000000',
+  },
+  header: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    height: 40,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  headerStep: {
+    color: '#7C7C80',
+  },
+  skip: {
+    backgroundColor: '#2C2C2E',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  skipText: {
+    color: '#EBEBF0',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  intro: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
   title: {
-    textAlign: 'center',
+    color: '#FFFFFF',
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+    lineHeight: 40,
   },
-  code: {
-    textTransform: 'uppercase',
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  subtitle: {
+    color: '#8E8E93',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  connect: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+  },
+  connectText: {
+    color: GREEN,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
