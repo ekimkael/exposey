@@ -1,16 +1,19 @@
 # Turaco — Connect Your Spotify marquee
 
 Reproduction of a "Connect Your Spotify" onboarding screen: a
-**full-circle carousel** of tilted artist sticker cards — the 8 artists
-sit twice around a 16-slot wheel (22.5° per card, R ≈ 382 pt) that spins
-continuously (8 cards per 4.4 s, seamless wrap), with progressive blur +
-black fade at the top and bottom edges.
+**gesture-driven rotary wheel** of artist sticker cards — the 8 artists
+sit twice around a 16-slot ring (R ≈ 382 pt). The user's vertical pan
+spins the wheel in either direction; on release the momentum is
+projected and the wheel **snaps to the nearest slot** like a revolver
+cylinder / rotary phone dial. Progressive blur + black fade at the top
+and bottom edges.
 
-- **Carousel**: Reanimated linear loop on the UI thread; each card maps
-  its arc distance to an angle θ — `y = R·sin θ`, x curves away at the
-  edges (`R·(1−cos θ)`) and the rotation is the tangent angle, so the
-  ring turns as one rigid wheel. Tuning knobs: `WHEEL_RADIUS`/`PITCH`
-  in `src/components/artist-marquee.tsx`.
+- **Wheel**: each card maps its arc distance to an angle θ —
+  `y = R·sin θ`, x curves away at the edges (`R·(1−cos θ)`). Cards do
+  not rotate with the wheel; they keep only their static sticker tilt.
+- **Gesture**: `Gesture.Pan` drives a shared value on the UI thread;
+  release projects velocity (`FLING_PROJECTION`) and settles with
+  `withSpring` on the nearest `PITCH` multiple (the detent snap).
 - **Progressive blur**: `BlurView` masked by a vertical `LinearGradient`
   (`@react-native-masked-view/masked-view`), plus a short black fade.
 - **Artist art**: stylized `react-native-svg` placeholders (no real

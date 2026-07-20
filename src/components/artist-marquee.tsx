@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Easing,
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
-  withTiming,
+  withSpring,
   type SharedValue,
 } from 'react-native-reanimated';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -18,17 +18,16 @@ import { ARTISTS, type Artist } from '@/constants/artists';
 const GAP = 46;
 const PITCH = CARD_HEIGHT + GAP;
 /**
- * Full-circle carousel: the 8 artists are laid out twice around a 16-slot
- * wheel (22.5° per card, R ≈ 382pt so adjacent cards sit one PITCH apart on
- * the arc). The wheel spins continuously — 8 slots per 4.4s like the
- * reference loop — and wraps seamlessly because slot i and i+8 hold the
- * same artist.
+ * Full-circle wheel: the 8 artists are laid out twice around a 16-slot ring
+ * (R ≈ 382pt so adjacent cards sit one PITCH apart on the arc). The wheel is
+ * driven by the user's vertical pan; on release the momentum is projected
+ * and the wheel snaps to the nearest slot like a revolver cylinder.
  */
 const SLOT_COUNT = 16;
 const TRACK = SLOT_COUNT * PITCH;
 const WHEEL_RADIUS = TRACK / (2 * Math.PI);
-const CYCLE_MS = 4400;
-const RAD_TO_DEG = 180 / Math.PI;
+/** How far a fling carries, in ms of projected travel */
+const FLING_PROJECTION = 0.15;
 
 /** Static tick ruler on the right edge, longer ticks toward the middle. */
 function Ruler() {
@@ -86,9 +85,9 @@ function EdgeBlur({ position }: { position: 'top' | 'bottom' }) {
 
 /**
  * One card riding the wheel. Its slot's arc distance from the viewport
- * center maps to an angle θ: y = R·sin θ (vertical travel), x curves away
- * at the edges (R·(1−cos θ)) and the card's rotation is the tangent angle,
- * so the whole ring turns as one rigid carousel.
+ * center maps to an angle θ: y = R·sin θ (vertical travel) and x curves
+ * away at the edges (R·(1−cos θ)). The card itself does NOT rotate with
+ * the wheel — it keeps only its static sticker tilt.
  */
 function CarouselCard({
   artist,
@@ -113,7 +112,7 @@ function CarouselCard({
       transform: [
         { translateY: WHEEL_RADIUS * Math.sin(theta) },
         { translateX: artist.offsetX - WHEEL_RADIUS * (1 - Math.cos(theta)) },
-        { rotate: `${artist.tilt - theta * RAD_TO_DEG}deg` },
+        { rotate: `${artist.tilt}deg` },
       ],
     };
   });
@@ -125,36 +124,49 @@ function CarouselCard({
   );
 }
 
-/** Continuously spinning full-circle carousel of artist cards. */
+/** User-driven wheel: pan spins it, release snaps to the nearest slot. */
 export function ArtistMarquee() {
   const progress = useSharedValue(0);
+  const dragStart = useSharedValue(0);
   const [viewportH, setViewportH] = useState(0);
 
-  useEffect(() => {
-    progress.value = 0;
-    progress.value = withRepeat(
-      withTiming(TRACK / 2, { duration: CYCLE_MS, easing: Easing.linear }),
-      -1,
-    );
-  }, [progress]);
+  const pan = Gesture.Pan()
+    .onBegin(() => {
+      cancelAnimation(progress);
+      dragStart.value = progress.value;
+    })
+    .onUpdate((e) => {
+      progress.value = dragStart.value - e.translationY;
+    })
+    .onEnd((e) => {
+      const projected = progress.value - e.velocityY * FLING_PROJECTION;
+      const target = Math.round(projected / PITCH) * PITCH;
+      progress.value = withSpring(target, {
+        damping: 20,
+        stiffness: 160,
+        velocity: -e.velocityY,
+      });
+    });
 
   return (
-    <View style={styles.viewport} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)}>
-      {viewportH > 0
-        ? Array.from({ length: SLOT_COUNT }, (_, index) => (
-            <CarouselCard
-              key={index}
-              artist={ARTISTS[index % ARTISTS.length]}
-              index={index}
-              progress={progress}
-              viewportH={viewportH}
-            />
-          ))
-        : null}
-      <Ruler />
-      <EdgeBlur position="top" />
-      <EdgeBlur position="bottom" />
-    </View>
+    <GestureDetector gesture={pan}>
+      <View style={styles.viewport} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)}>
+        {viewportH > 0
+          ? Array.from({ length: SLOT_COUNT }, (_, index) => (
+              <CarouselCard
+                key={index}
+                artist={ARTISTS[index % ARTISTS.length]}
+                index={index}
+                progress={progress}
+                viewportH={viewportH}
+              />
+            ))
+          : null}
+        <Ruler />
+        <EdgeBlur position="top" />
+        <EdgeBlur position="bottom" />
+      </View>
+    </GestureDetector>
   );
 }
 
