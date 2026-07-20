@@ -1,6 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
 import { ArtistMarquee } from '@/components/artist-marquee';
 import { SpotifyMark } from '@/components/spotify-mark';
@@ -12,15 +11,9 @@ export default function ConnectSpotifyScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.header}>
-        <Svg width={22} height={22} viewBox="0 0 24 24">
-          <Path d="M20 12H5m6-7-7 7 7 7" stroke={COLORS.textPrimary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </Svg>
         <Text style={styles.headerTitle}>
           Connection — <Text style={styles.headerStep}>2 of 3</Text>
         </Text>
-        <Pressable style={styles.skip}>
-          <Text style={styles.skipText}>Skip</Text>
-        </Pressable>
       </View>
 
       <View style={styles.intro}>
@@ -52,7 +45,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     height: 40,
   },
@@ -63,17 +56,6 @@ const styles = StyleSheet.create({
   },
   headerStep: {
     color: COLORS.headerStep,
-  },
-  skip: {
-    backgroundColor: COLORS.skipBackground,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-  },
-  skipText: {
-    color: COLORS.skipText,
-    fontSize: 13,
-    fontWeight: '600',
   },
   intro: {
     paddingHorizontal: 24,
