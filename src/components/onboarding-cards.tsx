@@ -5,11 +5,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+
+import { Duration, EASE_OUT } from '@/constants/motion';
 
 const CARD_W = 134;
 const CARD_H = 156;
@@ -24,20 +27,27 @@ const LOUVERS = ['#d7dbde', '#101012', '#c3c7cb', '#0d0d0f', '#d7dbde', '#101012
  * so the loop never fights the entrance. Index staggers both phases.
  */
 function FloatingCard({ children, index }: { children: ReactNode; index: number }) {
+  const reduced = useReducedMotion();
   const enter = useSharedValue(0);
   const bob = useSharedValue(0);
 
   useEffect(() => {
-    enter.value = withDelay(300 + index * 110, withTiming(1, { duration: 650, easing: Easing.out(Easing.cubic) }));
+    if (reduced) {
+      // Fade in, no travel; never start the perpetual bob (which would otherwise
+      // freeze at bob=0 and leave every card offset -4px under reduce-motion).
+      enter.value = withDelay(300 + index * 110, withTiming(1, { duration: Duration.enter }));
+      return;
+    }
+    enter.value = withDelay(300 + index * 110, withTiming(1, { duration: Duration.enter, easing: EASE_OUT }));
     bob.value = withDelay(
       index * 260,
       withRepeat(withTiming(1, { duration: 2600 + index * 180, easing: Easing.inOut(Easing.sin) }), -1, true),
     );
-  }, [enter, bob, index]);
+  }, [enter, bob, index, reduced]);
 
   const style = useAnimatedStyle(() => ({
     opacity: enter.value,
-    transform: [{ translateY: (1 - enter.value) * 26 + (bob.value * 8 - 4) }],
+    transform: [{ translateY: (reduced ? 0 : (1 - enter.value) * 26) + (reduced ? 0 : bob.value * 8 - 4) }],
   }));
 
   return <Animated.View style={style}>{children}</Animated.View>;

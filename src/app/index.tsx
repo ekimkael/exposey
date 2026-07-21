@@ -3,8 +3,8 @@ import { SymbolView } from 'expo-symbols';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withTiming,
@@ -13,18 +13,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BaobabLogo } from '@/components/baobab-logo';
 import { OnboardingCards } from '@/components/onboarding-cards';
+import { Duration, EASE_OUT } from '@/constants/motion';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-/** Fade + slide-up on mount, driven by a single shared value. */
+/** Fade + slide-up on mount. Under reduce-motion it fades only (no travel). */
 function FadeUp({ delay, children, style }: { delay: number; children: React.ReactNode; style?: any }) {
+  const reduced = useReducedMotion();
   const p = useSharedValue(0);
   useEffect(() => {
-    p.value = withDelay(delay, withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) }));
-  }, [p, delay]);
+    p.value = reduced
+      ? withDelay(delay, withTiming(1, { duration: Duration.enter }))
+      : withDelay(delay, withTiming(1, { duration: Duration.enter, easing: EASE_OUT }));
+  }, [p, delay, reduced]);
   const anim = useAnimatedStyle(() => ({
     opacity: p.value,
-    transform: [{ translateY: (1 - p.value) * 18 }],
+    transform: [{ translateY: reduced ? 0 : (1 - p.value) * 18 }],
   }));
   return <Animated.View style={[style, anim]}>{children}</Animated.View>;
 }
@@ -34,8 +38,8 @@ function AppleButton() {
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
     <AnimatedPressable
-      onPressIn={() => (scale.value = withTiming(0.96, { duration: 120 }))}
-      onPressOut={() => (scale.value = withTiming(1, { duration: 160 }))}
+      onPressIn={() => (scale.value = withTiming(0.96, { duration: Duration.pressIn, easing: EASE_OUT }))}
+      onPressOut={() => (scale.value = withTiming(1, { duration: Duration.pressOut, easing: EASE_OUT }))}
       style={[styles.appleBtn, style]}
       accessibilityRole="button"
       accessibilityLabel="Sign in with Apple">
