@@ -1,18 +1,20 @@
 {
   "expo": {
-    "name": "exposey",
-    "slug": "exposey",
+    "name": "Baobab",
+    "slug": "baobab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposey",
-    "userInterfaceStyle": "automatic",
+    "scheme": "baobab",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "net.digitalekim.baobab"
     },
     "android": {
+      "package": "net.digitalekim.baobab",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0A120E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"

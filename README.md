@@ -1,49 +1,46 @@
-# Exposey
+# Baobab — Canopi onboarding screen
 
-Sandbox for faithfully reproducing mobile UI and animations (from a
-reference video or screenshot) using **Expo Router** and native components
-(`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
+A faithful reproduction of the **"Welcome to Canopi"** onboarding screen
+(dark gradient, brand mark, a shelf of content-type cards, and a
+Sign-in-with-Apple button), built with Expo Router + Reanimated.
 
-Each reproduced screen/animation lives on **its own branch**, independent
-from `main` — `main` only holds the base Expo template. No branch is ever
-merged into another: each one is a standalone reproduction exercise.
+Project codename: **Baobab** (`net.digitalekim.baobab`). The in-app brand
+text stays *Canopi* to match the reference.
 
-## Stack
+## What's in it
 
-- [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
-- React Native 0.85, React 19
-- `@expo/ui` (SwiftUI / Jetpack Compose) for native components
-- React Native Reanimated + Gesture Handler for animations/gestures
+- `src/app/index.tsx` — the screen: gradient background, logo, headings,
+  card shelf, Apple button. Entrance = fade + slide-up (staggered).
+- `src/components/canopi-logo.tsx` — the "cp / canopy" brand mark (SVG).
+- `src/components/onboarding-cards.tsx` — the four cards (Location, Tasks,
+  Photo, Website), drawn with plain Views, plus the idle float animation.
 
-## Getting started
+All motion runs on the UI thread via Reanimated and only animates
+`opacity` / `transform` (GPU-friendly). Cards bob gently and forever with
+a per-card phase offset; the whole screen fades/slides in on mount.
+
+## Run it
 
 ```bash
-npm install
-npx expo start
+# iOS simulator (native dev build — this project has an ios/ folder)
+LANG=en_US.UTF-8 npm run ios
 ```
 
-Then open it in a [development build](https://docs.expo.dev/develop/development-builds/introduction/),
-an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
+The `LANG=en_US.UTF-8` prefix works around a CocoaPods
+`Unicode Normalization` crash under non-UTF-8 locales.
 
-## Branches
+## Platforms
 
-| Branch | Description |
-|---|---|
-| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Family wallet bottom sheet with a morphing transition, native Stack header toolbar, and Liquid Glass buttons (iOS 26), built with `@expo/ui` SwiftUI. |
-| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | Featured music UI with video previews and a zoomed detail view. |
-| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Trip detail screen (Airbnb/Gatesware-style): trip stats, restaurant cards, Instagram/Snap-style stories, grid layouts for places/hotels. |
-| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Onboarding and authentication flow for an investment app. |
-| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Mindfulness screen with a pill-to-beach-photo morph transition and an "Apple Intelligence"-style glowing button (SVG gradient). |
-| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Onboarding carousel with an animated globe ("Remindo" app). |
-| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
-| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
-| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
+- **iOS** — primary target, verified on the iPhone 16 Pro simulator.
+- **Android** — should render (all layout is universal RN); the SF Symbol
+  glyphs in the Tasks/Website/Apple button are iOS-only and fall back to
+  empty on Android. Not verified.
 
-Each branch usually has its own `README.md`/`AGENTS.md` detailing the
-reproduced screen, technical choices, and pitfalls encountered.
+## Limitations / notes
 
-## Available commands
-
-- `/reproduce-ui` — reproduce a reference (video or image) provided as an attachment.
-- `/animation-brief` — spec out an animation via multiple-choice questions before implementation.
-- `/quality-pass` — cleanup/refactoring/documentation pass on an already-implemented branch.
+- The **Apple button is a visual mock** (press animation only, no auth).
+- The **Photo** card fakes the reference's ribbed-building photo with
+  vertical louvers; the **Location** card is a stylized map — neither uses
+  a bitmap asset.
+- Gradient is a vertical `expo-linear-gradient`; the reference's faint
+  radial glow behind the cards is approximated, not exact.
