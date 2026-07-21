@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CanopiLogo } from '@/components/canopi-logo';
+import { BaobabLogo } from '@/components/baobab-logo';
 import { OnboardingCards } from '@/components/onboarding-cards';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -56,13 +56,13 @@ export default function Onboarding() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.top}>
           <FadeUp delay={0} style={styles.logoWrap}>
-            <CanopiLogo size={92} />
+            <BaobabLogo size={96} />
           </FadeUp>
           <FadeUp delay={120}>
             <Text style={styles.welcome}>Welcome to</Text>
           </FadeUp>
           <FadeUp delay={200}>
-            <Text style={styles.brand}>Canopi</Text>
+            <Text style={styles.brand}>Baobab</Text>
           </FadeUp>
           <FadeUp delay={300}>
             <Text style={styles.subtitle}>Share Memorable Moments{'\n'}with your Friends.</Text>

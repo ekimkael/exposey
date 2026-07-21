@@ -4,11 +4,10 @@
     "slug": "baobab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/baobab-icon.png",
     "scheme": "baobab",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "net.digitalekim.baobab"
     },
     "android": {
