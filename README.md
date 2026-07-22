@@ -1,46 +1,55 @@
-# Baobab — Canopi onboarding screen
+# Baobab — onboarding screen reproduction
 
-A faithful reproduction of the **"Welcome to Canopi"** onboarding screen
-(dark gradient, brand mark, a shelf of content-type cards, and a
-Sign-in-with-Apple button), built with Expo Router + Reanimated.
+A pixel-faithful reproduction of a **"Welcome to Canopi"** onboarding screen,
+rebranded as **Baobab**: a dark-green gradient backdrop, a baobab-tree brand
+mark, a shelf of content-type cards (Location · Tasks · Photo · Website) that
+bleed off both screen edges, and a Sign-in-with-Apple button — with a
+staggered entrance and a subtle perpetual card float.
 
-Project codename: **Baobab** (`net.digitalekim.baobab`). The in-app brand
-text stays *Canopi* to match the reference.
+Built with Expo Router + Reanimated. Project codename **Baobab**
+(`net.digitalekim.baobab`).
 
-## What's in it
+<!-- Reference media: the original screenshot this reproduces is not committed. -->
 
-- `src/app/index.tsx` — the screen: gradient background, logo, headings,
-  card shelf, Apple button. Entrance = fade + slide-up (staggered).
-- `src/components/canopi-logo.tsx` — the "cp / canopy" brand mark (SVG).
-- `src/components/onboarding-cards.tsx` — the four cards (Location, Tasks,
-  Photo, Website), drawn with plain Views, plus the idle float animation.
+## Requirements
 
-All motion runs on the UI thread via Reanimated and only animates
-`opacity` / `transform` (GPU-friendly). Cards bob gently and forever with
-a per-card phase offset; the whole screen fades/slides in on mount.
+- Node ≥ 20, Xcode + iOS Simulator (macOS)
+- This project has a native `ios/` folder → it runs as a **dev build**, not Expo Go.
 
 ## Run it
 
 ```bash
-# iOS simulator (native dev build — this project has an ios/ folder)
+# iOS simulator
 LANG=en_US.UTF-8 npm run ios
 ```
 
-The `LANG=en_US.UTF-8` prefix works around a CocoaPods
-`Unicode Normalization` crash under non-UTF-8 locales.
+The `LANG=en_US.UTF-8` prefix works around a CocoaPods `Unicode Normalization`
+crash under non-UTF-8 locales. See [AGENTS.md](AGENTS.md#pitfalls) for the other
+build traps.
 
 ## Platforms
 
 - **iOS** — primary target, verified on the iPhone 16 Pro simulator.
-- **Android** — should render (all layout is universal RN); the SF Symbol
-  glyphs in the Tasks/Website/Apple button are iOS-only and fall back to
-  empty on Android. Not verified.
+- **Android** — layout is universal RN and should render, but the SF Symbol
+  glyphs (Tasks / Website / Apple button) are iOS-only and fall back to empty.
+  Not verified.
 
-## Limitations / notes
+## What it demonstrates
+
+- A custom-drawn marketing screen with a gradient backdrop and vector logo.
+- Reanimated motion on the UI thread (entrance + idle float + press feedback),
+  centralised into hooks and tokens, and respecting **Reduce Motion**.
+
+## Limitations
 
 - The **Apple button is a visual mock** (press animation only, no auth).
-- The **Photo** card fakes the reference's ribbed-building photo with
-  vertical louvers; the **Location** card is a stylized map — neither uses
-  a bitmap asset.
-- Gradient is a vertical `expo-linear-gradient`; the reference's faint
-  radial glow behind the cards is approximated, not exact.
+- The **Photo** card fakes the reference's ribbed-building photo with a louver
+  gradient; the **Location** card is a stylised map — neither uses a bitmap.
+- The background gradient is vertical; the reference's faint radial glow is
+  approximated.
+
+## Project layout
+
+See [AGENTS.md](AGENTS.md) for the full map, where the animation lives, the
+conventions used, how to lift the animation into another project, and the
+build pitfalls encountered.
