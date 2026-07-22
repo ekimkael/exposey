@@ -1,15 +1,20 @@
 import Svg, { Path } from 'react-native-svg';
 
 interface BaobabLogoProps {
+  /** Width and height in px (square). Defaults to 96. */
   size?: number;
+  /** Fill colour. Defaults to white. */
   color?: string;
 }
 
 /**
- * The Baobab brand mark: a fat-trunked tree under a broad three-lobe canopy.
- * One filled <Path> only — react-native-svg's <Circle> double-registers under
- * the New Architecture ("two views with the same name RNSVGCircle"), so the
- * lobes are drawn as circular sub-paths. Reused verbatim by scripts/make-icon.
+ * The Baobab brand mark geometry (0..100 viewBox): a fat trunk under a broad
+ * three-lobe canopy, as one filled path.
+ *
+ * It is a single `<Path>` on purpose — react-native-svg's `<Circle>`
+ * double-registers under the New Architecture ("two views with the same name
+ * RNSVGCircle"), so the canopy lobes are drawn as circular arc sub-paths. The
+ * app icon (assets/images/baobab-icon.png) is a raster of this same shape.
  */
 const BAOBAB_PATH =
   // trunk
@@ -19,6 +24,12 @@ const BAOBAB_PATH =
   'M31 24 a14 14 0 1 0 0 28 a14 14 0 1 0 0 -28 Z ' +
   'M69 24 a14 14 0 1 0 0 28 a14 14 0 1 0 0 -28 Z';
 
+/**
+ * The Baobab brand logo.
+ *
+ * @param size - Square dimension in px (default 96).
+ * @param color - Fill colour (default white).
+ */
 export function BaobabLogo({ size = 96, color = '#FFFFFF' }: BaobabLogoProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">

@@ -1,18 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
-import { Duration, EASE_OUT } from '@/constants/motion';
+import { Colors } from '@/constants/theme';
+import { useFloatReveal } from '@/hooks/use-float-reveal';
 
 const CARD_W = 134;
 const CARD_H = 156;
@@ -21,36 +14,10 @@ const RADIUS = 32;
 // Alternating light/dark stops → crisp vertical louvers (the ribbed building).
 const LOUVERS = ['#d7dbde', '#101012', '#c3c7cb', '#0d0d0f', '#d7dbde', '#101012', '#c3c7cb', '#0d0d0f', '#d7dbde'] as const;
 
-/**
- * A card that fades + slides up on mount, then bobs gently forever.
- * Entrance and idle bob are separate shared values summed in the transform,
- * so the loop never fights the entrance. Index staggers both phases.
- */
+/** Wraps a card in its entrance + idle-float motion (see {@link useFloatReveal}). */
 function FloatingCard({ children, index }: { children: ReactNode; index: number }) {
-  const reduced = useReducedMotion();
-  const enter = useSharedValue(0);
-  const bob = useSharedValue(0);
-
-  useEffect(() => {
-    if (reduced) {
-      // Fade in, no travel; never start the perpetual bob (which would otherwise
-      // freeze at bob=0 and leave every card offset -4px under reduce-motion).
-      enter.value = withDelay(300 + index * 110, withTiming(1, { duration: Duration.enter }));
-      return;
-    }
-    enter.value = withDelay(300 + index * 110, withTiming(1, { duration: Duration.enter, easing: EASE_OUT }));
-    bob.value = withDelay(
-      index * 260,
-      withRepeat(withTiming(1, { duration: 2600 + index * 180, easing: Easing.inOut(Easing.sin) }), -1, true),
-    );
-  }, [enter, bob, index, reduced]);
-
-  const style = useAnimatedStyle(() => ({
-    opacity: enter.value,
-    transform: [{ translateY: (reduced ? 0 : (1 - enter.value) * 26) + (reduced ? 0 : bob.value * 8 - 4) }],
-  }));
-
-  return <Animated.View style={style}>{children}</Animated.View>;
+  const floatStyle = useFloatReveal(index);
+  return <Animated.View style={floatStyle}>{children}</Animated.View>;
 }
 
 function CardFrame({ label, children }: { label: string; children: ReactNode }) {
@@ -137,11 +104,18 @@ function WebsiteCard() {
   );
 }
 
+/** The four content-type mockups, left to right, matching the reference order. */
+const CARDS = [LocationCard, TasksCard, PhotoCard, WebsiteCard];
+
+/**
+ * The horizontal shelf of content-type cards (Location, Tasks, Photo, Website).
+ * The row is wider than the screen, so the outer cards bleed off both edges and
+ * clip at the bezel. Each card carries its own staggered entrance + idle float.
+ */
 export function OnboardingCards() {
-  const cards = [LocationCard, TasksCard, PhotoCard, WebsiteCard];
   return (
     <View style={styles.shelf}>
-      {cards.map((Card, i) => (
+      {CARDS.map((Card, i) => (
         <FloatingCard key={i} index={i}>
           <Card />
         </FloatingCard>
@@ -178,7 +152,7 @@ const styles = StyleSheet.create({
     height: 70,
   },
   cardLabel: {
-    color: '#FFFFFF',
+    color: Colors.textPrimary,
     fontSize: 17,
     fontWeight: '700',
     zIndex: 2,
