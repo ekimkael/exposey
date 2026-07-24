@@ -11,7 +11,8 @@ import { usePlayerSwap } from '@/hooks/use-player-swap';
 
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
-  const { dockStyle, pillStyle, contentStyle, dragDock, tapPill, tapGrabber } = usePlayerSwap();
+  const { dockStyle, pillStyle, contentStyle, pillPressStyle, dragDock, tapPill, tapGrabber } =
+    usePlayerSwap();
   const [playing, setPlaying] = useState(false);
   const togglePlaying = useCallback(() => setPlaying((value) => !value), []);
 
@@ -34,7 +35,13 @@ export default function LibraryScreen() {
         playing={playing}
         onPlayPause={togglePlaying}
       />
-      <PillPlayer style={pillStyle} gesture={tapPill} playing={playing} onPlayPause={togglePlaying} />
+      <PillPlayer
+        style={pillStyle}
+        gesture={tapPill}
+        pressStyle={pillPressStyle}
+        playing={playing}
+        onPlayPause={togglePlaying}
+      />
     </View>
   );
 }

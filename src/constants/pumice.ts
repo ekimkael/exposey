@@ -75,10 +75,33 @@ export const Motion = {
   spring: { damping: 22, stiffness: 220, mass: 1 },
   /** Fraction of the dock's height that must be dragged to commit to collapsing. */
   dismissRatio: 0.4,
-  /** Downward flick that commits regardless of distance, in pt/s. */
-  dismissVelocity: 600,
-  /** Resistance applied when dragging the dock upward, where it cannot go. */
-  rubberBand: 0.3,
+  /**
+   * Downward release velocity that commits regardless of distance, in pt/s.
+   *
+   * The audit playbook prescribes an average rate of 0.11 pt/ms across the whole
+   * gesture, which needs a clock inside the gesture worklet. This uses the
+   * recogniser's own `velocityY` instead: same intent, one fewer assumption, and
+   * no dependence on how the touch stream is delivered. 350 sits between the
+   * playbook's equivalent (110 pt/s) and the 600 that was previously so strict
+   * it never fired.
+   *
+   * Not verified on a real flick: synthetic slow drags fragment in the simulator,
+   * so neither this nor the rate metric could be exercised. Needs a real finger.
+   */
+  throwVelocity: 350,
+  /**
+   * Upward flick on the pill that expands regardless of distance, in pt/s.
+   * Instantaneous rather than whole-gesture: expanding is non-destructive, so
+   * it can afford to be the more forgiving of the two tests.
+   */
+  expandVelocity: 300,
+  /**
+   * Rubber-band coefficient for upward drags, where the dock cannot go. Travel
+   * follows (d·c·L)/(d·c + L) and converges on L = the dock's height, so the
+   * sheet resists harder the further it is pulled and never leaves its slot.
+   * 0.55 is the coefficient UIScrollView uses.
+   */
+  rubberBand: 0.55,
 } as const;
 
 export const NowPlaying = {

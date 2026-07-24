@@ -1,17 +1,22 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 
+import { PressScale } from '@/components/press-scale';
 import { Metrics, NowPlaying, Palette } from '@/constants/pumice';
 
 const artwork = require('@/assets/pumice/rock-that.png');
 
+type AnimatedStyleProp = ComponentProps<typeof Animated.View>['style'];
+/** Widened so composed gestures (`Gesture.Race`) are accepted, not just leaves. */
+type Gesture = ComponentProps<typeof GestureDetector>['gesture'];
+
 interface PlayerProps {
-  style: ComponentProps<typeof Animated.View>['style'];
-  gesture: GestureType;
+  style: AnimatedStyleProp;
+  gesture: Gesture;
   playing: boolean;
   onPlayPause: () => void;
 }
@@ -35,10 +40,10 @@ function Controls({ airplay, play, gap, playing, onPlayPause }: ControlsProps) {
         ]}>
         <SymbolView name={{ ios: 'airplayaudio', android: 'airplay' }} size={airplay * 0.55} tintColor="#FFFFFF" />
       </View>
-      <Pressable
+      <PressScale
         onPress={onPlayPause}
+        scaleTo={0.96}
         hitSlop={8}
-        accessibilityRole="button"
         accessibilityLabel={playing ? 'Pause' : 'Play'}
         style={[styles.circle, { width: play, height: play, borderRadius: play / 2, backgroundColor: '#FFFFFF' }]}>
         <SymbolView
@@ -46,7 +51,7 @@ function Controls({ airplay, play, gap, playing, onPlayPause }: ControlsProps) {
           size={play * 0.5}
           tintColor="#000000"
         />
-      </Pressable>
+      </PressScale>
     </View>
   );
 }
@@ -72,7 +77,7 @@ export function DockPlayer({
   grabberGesture,
   playing,
   onPlayPause,
-}: PlayerProps & { grabberGesture: GestureType }) {
+}: PlayerProps & { grabberGesture: Gesture }) {
   const { dock, page } = Metrics;
   return (
     <GestureDetector gesture={gesture}>
@@ -119,14 +124,20 @@ export function DockPlayer({
  * Resting state: compact rounded bar floating above the bottom edge, title and
  * artist on one line. Tapping the artwork or the text expands it.
  */
-export function PillPlayer({ style, gesture, playing, onPlayPause }: PlayerProps) {
+export function PillPlayer({
+  style,
+  gesture,
+  pressStyle,
+  playing,
+  onPlayPause,
+}: PlayerProps & { pressStyle: AnimatedStyleProp }) {
   const { pill } = Metrics;
   return (
     <Animated.View style={[styles.pill, style]}>
       <View style={[styles.pillRow, { left: pill.artLeft, right: pill.buttonRight }]}>
         <GestureDetector gesture={gesture}>
-          <View
-            style={styles.pillTarget}
+          <Animated.View
+            style={[styles.pillTarget, pressStyle]}
             accessible
             accessibilityRole="button"
             accessibilityLabel={`${NowPlaying.title} by ${NowPlaying.artist}`}
@@ -136,7 +147,7 @@ export function PillPlayer({ style, gesture, playing, onPlayPause }: PlayerProps
               <Text style={styles.title}>{NowPlaying.title}</Text>
               <Text style={styles.pillArtist}>{NowPlaying.artist}</Text>
             </View>
-          </View>
+          </Animated.View>
         </GestureDetector>
         <Controls
           airplay={pill.airplay}
