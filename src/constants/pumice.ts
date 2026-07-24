@@ -5,8 +5,7 @@
  */
 export const Metrics = {
   page: { inset: 24, bottomRadius: 24 },
-  tile: { width: 170, height: 190, radius: 16, gap: 12 },
-  card: { height: 298, radius: 18, pad: 16, art: 46, artRadius: 12, action: 30 },
+  tile: { radius: 16, gap: 12 },
   dock: {
     height: 124,
     inset: 22,
@@ -65,7 +64,6 @@ export const Palette = {
   textSecondary: '#6E6E73',
   onPlayerSecondary: '#8E8E93',
   track: 'rgba(255, 255, 255, 0.28)',
-  scrim: 'rgba(255, 255, 255, 0.35)',
   /** Row icons pick up the app's tint, the way a native Library screen does. */
   accent: '#FF2D55',
   chevron: '#C4C4C6',
