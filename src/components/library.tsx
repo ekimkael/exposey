@@ -46,6 +46,20 @@ const CHEVRON = {
   android: require('@expo/material-symbols/chevron_right.xml'),
 } as const;
 
+/** Track list under Recently Added — enough content to make the page overflow. */
+const PLAYED = [
+  { title: 'Rock that', artist: 'Flawor' },
+  { title: 'Surpass', artist: 'RickT' },
+  { title: 'The only one', artist: 'Make2Beats' },
+  { title: 'Lekso', artist: 'Flowme' },
+  { title: 'Mutual album', artist: 'RickT and Sharper' },
+] as const;
+
+const NOTE = {
+  ios: 'music.note',
+  android: require('@expo/material-symbols/music_note.xml'),
+} as const;
+
 const RECENT = [
   { title: 'Lekso', tracks: 12, cover: require('@/assets/pumice/lekso.png') },
   { title: 'The only one', tracks: 9, cover: require('@/assets/pumice/only-one.png') },
@@ -66,12 +80,16 @@ export const ENTER = (delay: number) => FadeInDown.duration(360).delay(delay);
  * ponytail: fixed height, so a larger Dynamic Type setting will clip the last
  * row. Upgrade path: drive it from the Host's `onLayoutContent` callback.
  */
-const LIST_HEIGHT = 6 * 58 + 68;
+/** Measured on screen: a headline-only row, and one carrying supporting text. */
+const ROW_HEIGHT = 58;
+const ROW_HEIGHT_TWO_LINE = 72;
+const LIST_INSET = 68;
+const listHeight = (rows: number, rowHeight = ROW_HEIGHT) => rows * rowHeight + LIST_INSET;
 
 /** Native rows — SwiftUI `List` on iOS, Compose on Android, from one tree. */
 export function LibraryRows() {
   return (
-    <Host style={{ height: LIST_HEIGHT }}>
+    <Host style={{ height: listHeight(ROWS.length) }}>
       <List>
         {ROWS.map((row) => (
           <ListItem
@@ -108,6 +126,30 @@ export function RecentlyAdded() {
           </Animated.View>
         ))}
       </View>
+    </View>
+  );
+}
+
+/** Recently played tracks, same native list as the navigation rows above. */
+export function RecentlyPlayed() {
+  return (
+    <View>
+      <Animated.View entering={ENTER(510)}>
+        <Text style={styles.sectionTitle}>Recently Played</Text>
+      </Animated.View>
+      <Host style={{ height: listHeight(PLAYED.length, ROW_HEIGHT_TWO_LINE) }}>
+        <List>
+          {PLAYED.map((track) => (
+            <ListItem
+              key={track.title}
+              leading={<Icon name={NOTE} size={20} color={Palette.accent} />}
+              supportingText={track.artist}
+              onPress={() => {}}>
+              {track.title}
+            </ListItem>
+          ))}
+        </List>
+      </Host>
     </View>
   );
 }
