@@ -72,21 +72,30 @@ const RECENT = [
  */
 export const ENTER = (delay: number) => FadeInDown.duration(360).delay(delay);
 
-/**
- * `matchContents` collapses to zero around a `List` — it is a scroll container,
- * so it has no intrinsic height to match, and the Host must be told how tall it
- * is. 58pt per row plus 68pt of grouped-section inset, measured on screen.
- *
- * ponytail: fixed height, so a larger Dynamic Type setting will clip the last
- * row. Upgrade path: drive it from the Host's `onLayoutContent` callback.
- */
 /** Measured on screen: a headline-only row, and one carrying supporting text. */
 const ROW_HEIGHT = 58;
 const ROW_HEIGHT_TWO_LINE = 72;
+/** Grouped-section inset the `List` adds above and below its rows. */
 const LIST_INSET = 68;
+
+/**
+ * Explicit height for a `Host` wrapping a `List`. `matchContents` collapses to
+ * zero there — a `List` is a scroll container, so it has no intrinsic height to
+ * match, and the Host must be told how tall it is.
+ *
+ * ponytail: fixed height, so a larger Dynamic Type setting will clip the last
+ * row. Upgrade path: drive it from the Host's `onLayoutContent` callback.
+ *
+ * @param rows Number of rows in the list.
+ * @param rowHeight Per-row height; pass `ROW_HEIGHT_TWO_LINE` for rows with supporting text.
+ * @returns The Host height in points.
+ */
 const listHeight = (rows: number, rowHeight = ROW_HEIGHT) => rows * rowHeight + LIST_INSET;
 
-/** Native rows — SwiftUI `List` on iOS, Compose on Android, from one tree. */
+/**
+ * The six navigational rows (Playlists, Artists, …) as a native `List` —
+ * SwiftUI on iOS, Jetpack Compose on Android, from a single tree.
+ */
 export function LibraryRows() {
   return (
     <Host style={{ height: listHeight(ROWS.length) }}>
@@ -105,6 +114,7 @@ export function LibraryRows() {
   );
 }
 
+/** Horizontal strip of album covers rendered in React Native (`@expo/ui` has no image primitive). */
 export function RecentlyAdded() {
   return (
     <View>
@@ -119,8 +129,8 @@ export function RecentlyAdded() {
               <Text style={styles.tileTitle} numberOfLines={1}>
                 {album.title}
               </Text>
-            <Text style={styles.tileMeta} numberOfLines={1}>
-                  {album.tracks} songs
+              <Text style={styles.tileMeta} numberOfLines={1}>
+                {album.tracks} songs
               </Text>
             </PressScale>
           </Animated.View>

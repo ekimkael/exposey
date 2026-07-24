@@ -11,12 +11,12 @@ import { Elevation, Metrics, NowPlaying, Palette } from '@/constants/pumice';
 const artwork = require('@/assets/pumice/rock-that.png');
 
 type AnimatedStyleProp = ComponentProps<typeof Animated.View>['style'];
-/** Widened so composed gestures (`Gesture.Race`) are accepted, not just leaves. */
-type Gesture = ComponentProps<typeof GestureDetector>['gesture'];
+/** Accepts composed gestures (`Gesture.Exclusive`), not just leaf recognisers. */
+type PlayerGesture = ComponentProps<typeof GestureDetector>['gesture'];
 
 interface PlayerProps {
   style: AnimatedStyleProp;
-  gesture: Gesture;
+  gesture: PlayerGesture;
   playing: boolean;
   onPlayPause: () => void;
 }
@@ -79,7 +79,7 @@ export function DockPlayer({
   grabberGesture,
   playing,
   onPlayPause,
-}: PlayerProps & { grabberGesture: Gesture }) {
+}: PlayerProps & { grabberGesture: PlayerGesture }) {
   const { dock, page } = Metrics;
   return (
     <GestureDetector gesture={gesture}>
