@@ -41,7 +41,13 @@ export const Metrics = {
 } as const;
 
 export const Palette = {
-  page: '#FFFFFF',
+  /**
+   * iOS systemGroupedBackground. The native `List` paints its own grouped
+   * background and offers no modifier to hide it, so the page adopts that colour
+   * instead of fighting it — which also keeps the dock's corner cut-outs correct,
+   * since they read this same token.
+   */
+  page: '#F2F2F7',
   player: '#1A1A1A',
   control: '#323232',
   text: '#000000',
@@ -49,6 +55,9 @@ export const Palette = {
   onPlayerSecondary: '#8E8E93',
   track: 'rgba(255, 255, 255, 0.28)',
   scrim: 'rgba(255, 255, 255, 0.35)',
+  /** Row icons pick up the app's tint, the way a native Library screen does. */
+  accent: '#FF2D55',
+  chevron: '#C4C4C6',
 } as const;
 
 /**
