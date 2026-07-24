@@ -3,22 +3,36 @@
 > Branch `feat/pumice-player-dock-pill` of [Exposey](#exposey).
 
 A music library screen whose now-playing bar swaps between two shapes: a
-full-width sheet **docked** to the bottom edge, and a compact rounded
-**pill floating** above it. The two states alternate on a loop.
+compact rounded **pill floating** above the bottom edge, and a full-width
+sheet **docked** to it.
+
+The pill is the resting state.
+
+- **Tap** the pill's artwork or text → expands to the dock.
+- **Drag** the dock down → collapses back to the pill. Past 40% of the
+  dock's height, or on a downward flick over 600 pt/s, it commits and
+  carries the finger's velocity through the release; short of that it
+  springs back. Dragging up rubber-bands at 0.3 and returns.
+- **Tap the grabber** → also collapses, so the player is not drag-only.
+- Play and AirPlay are independent: pressing play never changes the shape.
 
 Despite appearances the transition is **not a morph** — nothing is shared
-between the two players. Measured frame by frame off the reference
-(720×720 @ 60fps):
+between the two players. The two directions are deliberately different:
 
-| Phase | Duration | Motion |
+| | Collapse (drag) | Expand (tap) |
 |---|---|---|
-| dock leaves | 320 ms | slides straight down, `Easing.in(cubic)` |
-| dead air | 380 ms | no player on screen |
-| pill arrives | ~300 ms | slides up, spring (damping 22, stiffness 220) |
-| rest | ~1.6 s | before swapping back |
+| outgoing | tracks the finger, then leaves on its momentum | 320 ms, `Easing.in(cubic)` |
+| gap | ~500 ms with **no player on screen** | none — the dock starts rising after 120 ms |
+| incoming | spring, damping 22 / stiffness 220 | same spring |
+| visible after | ~800 ms, as measured on the reference | ~120 ms |
 
-The page content bobs down 40pt during the swap and springs back, matching
-the reference's scroll-inset shift. Only `transform` is animated.
+Collapse keeps the reference's pacing. Expand does not: it answers a
+finger, and half a second of empty screen after a tap reads as a bug
+rather than as choreography.
+
+The page content bobs down 46pt during the swap and springs back, matching
+the reference's scroll-inset shift — during a drag it follows the finger.
+Only `transform` is animated.
 
 ### Running it
 
@@ -45,9 +59,13 @@ The metrics are tuned against a 402pt-wide screen (iPhone 16/17 Pro).
   as a still; the animation under test is the player swap, not playback.
 - **The top of the screen is cropped out of the reference.** The `Listen
   Now` large title is an inference, not a reproduction.
-- The progress bar is static (48%) — there is no audio.
-- The player is non-interactive: it alternates on a timer, mirroring the
-  reference clip.
+- The progress bar is static (48%) — there is no audio, so play/pause only
+  flips the icon.
+- AirPlay has nothing to route to, so it stays a non-interactive glyph
+  rather than a button that does nothing.
+- The grabber collapses rather than opening a full-screen now-playing
+  view, which does not exist here. Dragging up rubber-bands instead of
+  promising a screen that isn't there.
 
 ---
 

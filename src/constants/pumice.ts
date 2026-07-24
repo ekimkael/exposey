@@ -53,23 +53,32 @@ export const Palette = {
 
 /**
  * Timings read frame-by-frame off the reference (see README).
- * Dock leaves over 320ms accelerating, 380ms of dead air, then the pill
- * settles in over ~300ms. The swap is never a morph: nothing is shared.
+ * The swap is never a morph: nothing is shared between the two players.
+ *
+ * Collapse keeps the reference's pacing — the dock clears, the screen sits
+ * empty, then the pill springs back. Expand is deliberately tighter: it
+ * answers a finger, and half a second of no player reads as a bug.
  */
 export const Motion = {
   outMs: 320,
+  /** Expand: the dock starts rising this long after the pill starts leaving. */
+  overlapMs: 120,
   /**
-   * Delay before the incoming player's spring starts. Tuned so the player
-   * becomes *visible* 750ms after the outgoing one starts leaving, which is
-   * what the reference shows — the raw dead air on screen is shorter, since
-   * the spring covers its first few points below the bottom edge.
+   * Collapse: dead air before the pill springs in. Tuned so the pill becomes
+   * *visible* ~800ms after the dock starts leaving, matching the reference —
+   * the gap on screen is shorter, since the spring covers its first few points
+   * below the bottom edge.
    */
   gapMs: 500,
-  /** Time spent resting in each state before swapping again. */
-  cycleMs: 2600,
   /** Content bobs down this far mid-swap and returns. */
   bob: 46,
   spring: { damping: 22, stiffness: 220, mass: 1 },
+  /** Fraction of the dock's height that must be dragged to commit to collapsing. */
+  dismissRatio: 0.4,
+  /** Downward flick that commits regardless of distance, in pt/s. */
+  dismissVelocity: 600,
+  /** Resistance applied when dragging the dock upward, where it cannot go. */
+  rubberBand: 0.3,
 } as const;
 
 export const NowPlaying = {

@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 
 import { Metrics, NowPlaying, Palette } from '@/constants/pumice';
@@ -10,17 +11,42 @@ const artwork = require('@/assets/pumice/rock-that.png');
 
 interface PlayerProps {
   style: ComponentProps<typeof Animated.View>['style'];
+  gesture: GestureType;
+  playing: boolean;
+  onPlayPause: () => void;
 }
 
-function Controls({ airplay, play, gap }: { airplay: number; play: number; gap: number }) {
+interface ControlsProps {
+  airplay: number;
+  play: number;
+  gap: number;
+  playing: boolean;
+  onPlayPause: () => void;
+}
+
+/** AirPlay has nothing to route to here, so it stays a non-interactive glyph. */
+function Controls({ airplay, play, gap, playing, onPlayPause }: ControlsProps) {
   return (
     <View style={[styles.controls, { gap }]}>
-      <View style={[styles.circle, { width: airplay, height: airplay, borderRadius: airplay / 2, backgroundColor: Palette.control }]}>
+      <View
+        style={[
+          styles.circle,
+          { width: airplay, height: airplay, borderRadius: airplay / 2, backgroundColor: Palette.control },
+        ]}>
         <SymbolView name={{ ios: 'airplayaudio', android: 'airplay' }} size={airplay * 0.55} tintColor="#FFFFFF" />
       </View>
-      <View style={[styles.circle, { width: play, height: play, borderRadius: play / 2, backgroundColor: '#FFFFFF' }]}>
-        <SymbolView name={{ ios: 'play.fill', android: 'play_arrow' }} size={play * 0.5} tintColor="#000000" />
-      </View>
+      <Pressable
+        onPress={onPlayPause}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={playing ? 'Pause' : 'Play'}
+        style={[styles.circle, { width: play, height: play, borderRadius: play / 2, backgroundColor: '#FFFFFF' }]}>
+        <SymbolView
+          name={playing ? { ios: 'pause.fill', android: 'pause' } : { ios: 'play.fill', android: 'play_arrow' }}
+          size={play * 0.5}
+          tintColor="#000000"
+        />
+      </Pressable>
     </View>
   );
 }
@@ -35,46 +61,94 @@ function Progress({ style }: { style: StyleProp<ViewStyle> }) {
   );
 }
 
-/** Full-width sheet pinned to the bottom edge, with the page's rounded bottom corners cut into it. */
-export function DockPlayer({ style }: PlayerProps) {
+/**
+ * Expanded state: full-width sheet pinned to the bottom edge, with the page's
+ * rounded bottom corners cut into it. Drag it down anywhere to collapse; the
+ * grabber doubles as a tap target for anyone who cannot pan.
+ */
+export function DockPlayer({
+  style,
+  gesture,
+  grabberGesture,
+  playing,
+  onPlayPause,
+}: PlayerProps & { grabberGesture: GestureType }) {
   const { dock, page } = Metrics;
   return (
-    <Animated.View style={[styles.dock, style]}>
-      <View style={[styles.corner, { left: 0, top: -page.bottomRadius }]}>
-        <View style={[styles.cornerDisc, { left: 0 }]} />
-      </View>
-      <View style={[styles.corner, { right: 0, top: -page.bottomRadius }]}>
-        <View style={[styles.cornerDisc, { right: 0 }]} />
-      </View>
-
-      <View style={styles.grabber} />
-      <View style={[styles.dockRow, { top: dock.artTop, left: dock.inset, right: dock.buttonRight }]}>
-        <Image source={artwork} style={{ width: dock.art, height: dock.art, borderRadius: dock.artRadius }} />
-        <View style={styles.dockText}>
-          <Text style={[styles.title, styles.dockTitle]}>{NowPlaying.title}</Text>
-          <Text style={styles.dockArtist}>{NowPlaying.artist}</Text>
+    <GestureDetector gesture={gesture}>
+      <Animated.View style={[styles.dock, style]}>
+        <View style={[styles.corner, { left: 0, top: -page.bottomRadius }]}>
+          <View style={[styles.cornerDisc, { left: 0 }]} />
         </View>
-        <Controls airplay={dock.airplay} play={dock.play} gap={dock.buttonGap} />
-      </View>
-      <Progress style={{ position: 'absolute', top: dock.progressTop, left: dock.textLeft, right: dock.inset }} />
-    </Animated.View>
+        <View style={[styles.corner, { right: 0, top: -page.bottomRadius }]}>
+          <View style={[styles.cornerDisc, { right: 0 }]} />
+        </View>
+
+        <GestureDetector gesture={grabberGesture}>
+          <View
+            style={styles.grabberTarget}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Collapse player"
+            accessibilityHint="Shrinks the player back to a floating bar">
+            <View style={styles.grabber} />
+          </View>
+        </GestureDetector>
+
+        <View style={[styles.dockRow, { top: dock.artTop, left: dock.inset, right: dock.buttonRight }]}>
+          <Image source={artwork} style={{ width: dock.art, height: dock.art, borderRadius: dock.artRadius }} />
+          <View style={styles.dockText}>
+            <Text style={[styles.title, styles.dockTitle]}>{NowPlaying.title}</Text>
+            <Text style={styles.dockArtist}>{NowPlaying.artist}</Text>
+          </View>
+          <Controls
+            airplay={dock.airplay}
+            play={dock.play}
+            gap={dock.buttonGap}
+            playing={playing}
+            onPlayPause={onPlayPause}
+          />
+        </View>
+        <Progress style={{ position: 'absolute', top: dock.progressTop, left: dock.textLeft, right: dock.inset }} />
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
-/** Compact rounded bar floating above the bottom edge, title and artist on one line. */
-export function PillPlayer({ style }: PlayerProps) {
+/**
+ * Resting state: compact rounded bar floating above the bottom edge, title and
+ * artist on one line. Tapping the artwork or the text expands it.
+ */
+export function PillPlayer({ style, gesture, playing, onPlayPause }: PlayerProps) {
   const { pill } = Metrics;
   return (
     <Animated.View style={[styles.pill, style]}>
       <View style={[styles.pillRow, { left: pill.artLeft, right: pill.buttonRight }]}>
-        <Image source={artwork} style={{ width: pill.art, height: pill.art, borderRadius: pill.artRadius }} />
-        <View style={styles.pillText}>
-          <Text style={styles.title}>{NowPlaying.title}</Text>
-          <Text style={styles.pillArtist}>{NowPlaying.artist}</Text>
-        </View>
-        <Controls airplay={pill.airplay} play={pill.play} gap={pill.buttonGap} />
+        <GestureDetector gesture={gesture}>
+          <View
+            style={styles.pillTarget}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`${NowPlaying.title} by ${NowPlaying.artist}`}
+            accessibilityHint="Expands the player">
+            <Image source={artwork} style={{ width: pill.art, height: pill.art, borderRadius: pill.artRadius }} />
+            <View style={styles.pillText}>
+              <Text style={styles.title}>{NowPlaying.title}</Text>
+              <Text style={styles.pillArtist}>{NowPlaying.artist}</Text>
+            </View>
+          </View>
+        </GestureDetector>
+        <Controls
+          airplay={pill.airplay}
+          play={pill.play}
+          gap={pill.buttonGap}
+          playing={playing}
+          onPlayPause={onPlayPause}
+        />
       </View>
-      <Progress style={{ position: 'absolute', top: pill.progressTop, left: pill.textLeft, right: pill.progressRight }} />
+      <Progress
+        style={{ position: 'absolute', top: pill.progressTop, left: pill.textLeft, right: pill.progressRight }}
+      />
     </Animated.View>
   );
 }
@@ -107,15 +181,20 @@ const styles = StyleSheet.create({
     borderRadius: Metrics.page.bottomRadius,
     backgroundColor: Palette.page,
   },
-  grabber: {
+  // The grabber is 20x4 in the reference; the target around it is what makes
+  // it reachable without a drag.
+  grabberTarget: {
     position: 'absolute',
-    top: Metrics.dock.grabberTop,
+    top: 0,
     alignSelf: 'center',
-    width: 20,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Palette.control,
+    width: 88,
+    height: 44,
+    alignItems: 'center',
+    // Keeps the bar itself exactly where the reference puts it; the rest of
+    // the box is invisible padding that makes it hittable.
+    paddingTop: Metrics.dock.grabberTop,
   },
+  grabber: { width: 20, height: 4, borderRadius: 2, backgroundColor: Palette.control },
   dockRow: {
     position: 'absolute',
     height: Metrics.dock.art,
@@ -142,6 +221,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  pillTarget: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   pillText: {
     flex: 1,
     flexDirection: 'row',

@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +11,9 @@ import { usePlayerSwap } from '@/hooks/use-player-swap';
 
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
-  const { dockStyle, pillStyle, contentStyle } = usePlayerSwap();
+  const { dockStyle, pillStyle, contentStyle, dragDock, tapPill, tapGrabber } = usePlayerSwap();
+  const [playing, setPlaying] = useState(false);
+  const togglePlaying = useCallback(() => setPlaying((value) => !value), []);
 
   return (
     <View style={styles.screen}>
@@ -24,8 +27,14 @@ export default function LibraryScreen() {
         <FeaturedCard />
       </Animated.View>
 
-      <DockPlayer style={dockStyle} />
-      <PillPlayer style={pillStyle} />
+      <DockPlayer
+        style={dockStyle}
+        gesture={dragDock}
+        grabberGesture={tapGrabber}
+        playing={playing}
+        onPlayPause={togglePlaying}
+      />
+      <PillPlayer style={pillStyle} gesture={tapPill} playing={playing} onPlayPause={togglePlaying} />
     </View>
   );
 }
