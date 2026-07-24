@@ -1,28 +1,39 @@
-# Pumice — now-playing dock ↔ floating pill
+# Pumice — now-playing player over a native library
 
 > Branch `feat/pumice-player-dock-pill` of [Exposey](#exposey).
 
-A music library screen whose now-playing bar swaps between two shapes: a
-compact rounded **pill floating** above the bottom edge, and a full-width
-sheet **docked** to it.
+An Apple-Music-style **Library** screen with a now-playing bar that swaps
+between two shapes: a compact rounded **pill floating** above the bottom
+edge, and a full-width sheet **docked** to it. The page scrolls underneath
+the player, so content genuinely passes behind it.
+
+The animated swap is the centrepiece; the page around it is built on native
+`@expo/ui` components.
+
+## The player swap
 
 The pill is the resting state.
 
-- **Tap** the pill's artwork or text → expands to the dock.
+- **Tap** the pill's artwork or text, or **swipe it up** → expands to the dock.
 - **Drag** the dock down → collapses back to the pill. Past 40% of the
-  dock's height, or on a downward flick over 600 pt/s, it commits and
+  dock's height, or on a downward flick over ~350 pt/s, it commits and
   carries the finger's velocity through the release; short of that it
-  springs back. Dragging up rubber-bands at 0.3 and returns.
+  springs back. Dragging **up** rubber-bands with rising (asymptotic)
+  resistance and returns.
 - **Tap the grabber** → also collapses, so the player is not drag-only.
+- **Press feedback**: the play button and the pill scale to 0.96 / 0.98
+  while held.
 - Play and AirPlay are independent: pressing play never changes the shape.
 
 Despite appearances the transition is **not a morph** — nothing is shared
-between the two players. The two directions are deliberately different:
+between the two players. Both stay mounted and only ever translate; only
+`transform` and `opacity` are animated. The two directions are deliberately
+different:
 
-| | Collapse (drag) | Expand (tap) |
+| | Collapse (drag) | Expand (tap / swipe) |
 |---|---|---|
 | outgoing | tracks the finger, then leaves on its momentum | 320 ms, `Easing.in(cubic)` |
-| gap | ~500 ms with **no player on screen** | none — the dock starts rising after 120 ms |
+| gap | ~500 ms with **no player on screen** | none — the dock rises after 120 ms |
 | incoming | spring, damping 22 / stiffness 220 | same spring |
 | visible after | ~800 ms, as measured on the reference | ~120 ms |
 
@@ -31,8 +42,26 @@ finger, and half a second of empty screen after a tap reads as a bug
 rather than as choreography.
 
 The page content bobs down 46pt during the swap and springs back, matching
-the reference's scroll-inset shift — during a drag it follows the finger.
-Only `transform` is animated.
+the reference's scroll-inset shift; during a drag it follows the finger.
+
+Under **Reduce Motion** the swap becomes a 150 ms crossfade in place — no
+translation — rather than a hard cut between two differently shaped players.
+
+Both players cast a layered shadow (three transparent layers, not one flat
+one): the dock casts **upward** onto the page, the pill casts **down and
+out**, so each reads as a surface with air under it rather than as the floor.
+
+## The page
+
+- Six navigational rows (Playlists, Artists, Albums, …) as a native
+  `@expo/ui` `List` — SwiftUI on iOS, Jetpack Compose on Android, from one
+  tree. Icons are SF Symbols on iOS paired with Material Symbols on Android.
+- A horizontal **Recently Added** strip of album covers, and a
+  **Recently Played** native list. The covers live in React Native, since
+  the universal `@expo/ui` layer has no image primitive.
+- The page adopts iOS `systemGroupedBackground` (`#F2F2F7`): the native
+  `List` paints its own grouped background and exposes no modifier to hide
+  it, so the page matches it rather than fighting it.
 
 ### Running it
 
@@ -40,32 +69,45 @@ Only `transform` is animated.
 npx expo run:ios
 ```
 
-Everything used here (Reanimated, `expo-image`, `expo-symbols`) also runs
-in Expo Go on SDK 56 — a development build is only needed to see the app
-under its own name and icon.
+Everything used here (Reanimated, `expo-image`, `expo-symbols`, `@expo/ui`)
+also runs in Expo Go on SDK 56 — a development build is only needed to see
+the app under its own name and icon.
+
+### Where the code lives
+
+- `src/hooks/use-player-swap.ts` — **all** the swap logic: shared values,
+  the `expand` / `collapse` / `settleBack` worklets, the gestures, and the
+  reduced-motion branch. Components never animate; they consume the styles
+  and gestures this hook returns.
+- `src/constants/pumice.ts` — every tunable: metrics (derived from the
+  reference's pixel scale), motion timings/spring, palette, elevation. No
+  magic numbers inline. This file is deliberately dependency-free data.
+- `src/components/now-playing-player.tsx` — `DockPlayer` and `PillPlayer`,
+  pure rendering.
+- `src/components/library.tsx` — the page content.
+- `plans/` — the animation audit (`improve-animations`) and its status.
 
 ### Platforms
 
-iOS is the reference target. Android renders from the same tree: SF Symbols
-are declared with their Material Symbols counterparts
-(`airplayaudio`/`airplay`, `play.fill`/`play_arrow`, `plus`/`add`,
-`arrow.right`/`arrow_forward`), so no platform-specific code is needed.
-The metrics are tuned against a 402pt-wide screen (iPhone 16/17 Pro).
+iOS is the reference target. Android renders from the same tree: every SF
+Symbol is declared with its Material Symbols counterpart, so no
+platform-specific code is needed. The metrics are tuned against a 402pt-wide
+screen (iPhone 16/17 Pro). Android has not been run.
 
 ### Known limitations
 
-- **Artwork is extracted from the reference video**, so it is soft at 3× —
-  the `Surpass` card in particular. The card's looping video is reproduced
-  as a still; the animation under test is the player swap, not playback.
-- **The top of the screen is cropped out of the reference.** The `Listen
-  Now` large title is an inference, not a reproduction.
+- **Artwork is extracted from the reference video**, so it is soft at 2–3×.
+- **The top of the screen is cropped out of the reference**, so the page
+  content above the player (the Library rows, section titles) is an
+  Apple-Music-flavoured invention, not a reproduction. The swap itself is
+  what was measured.
 - The progress bar is static (48%) — there is no audio, so play/pause only
   flips the icon.
-- AirPlay has nothing to route to, so it stays a non-interactive glyph
-  rather than a button that does nothing.
-- The grabber collapses rather than opening a full-screen now-playing
-  view, which does not exist here. Dragging up rubber-bands instead of
-  promising a screen that isn't there.
+- The flick-dismissal threshold (`throwVelocity`) is reasoned, not measured:
+  the iOS simulator fragments synthetic slow drags, so it could not be
+  exercised. It needs a real finger.
+- AirPlay and the row chevrons are non-interactive glyphs — there is nothing
+  behind them here.
 
 ---
 
