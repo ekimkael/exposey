@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "exposey",
-    "slug": "exposey",
+    "name": "Pumice",
+    "slug": "pumice",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposey",
-    "userInterfaceStyle": "automatic",
+    "scheme": "pumice",
+    "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "net.digitalekim.pumice",
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +19,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "net.digitalekim.pumice"
     },
     "web": {
       "output": "static",
@@ -34,7 +37,8 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

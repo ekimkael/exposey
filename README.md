@@ -1,3 +1,58 @@
+# Pumice — now-playing dock ↔ floating pill
+
+> Branch `feat/pumice-player-dock-pill` of [Exposey](#exposey).
+
+A music library screen whose now-playing bar swaps between two shapes: a
+full-width sheet **docked** to the bottom edge, and a compact rounded
+**pill floating** above it. The two states alternate on a loop.
+
+Despite appearances the transition is **not a morph** — nothing is shared
+between the two players. Measured frame by frame off the reference
+(720×720 @ 60fps):
+
+| Phase | Duration | Motion |
+|---|---|---|
+| dock leaves | 320 ms | slides straight down, `Easing.in(cubic)` |
+| dead air | 380 ms | no player on screen |
+| pill arrives | ~300 ms | slides up, spring (damping 22, stiffness 220) |
+| rest | ~1.6 s | before swapping back |
+
+The page content bobs down 40pt during the swap and springs back, matching
+the reference's scroll-inset shift. Only `transform` is animated.
+
+### Running it
+
+```bash
+npx expo run:ios
+```
+
+Everything used here (Reanimated, `expo-image`, `expo-symbols`) also runs
+in Expo Go on SDK 56 — a development build is only needed to see the app
+under its own name and icon.
+
+### Platforms
+
+iOS is the reference target. Android renders from the same tree: SF Symbols
+are declared with their Material Symbols counterparts
+(`airplayaudio`/`airplay`, `play.fill`/`play_arrow`, `plus`/`add`,
+`arrow.right`/`arrow_forward`), so no platform-specific code is needed.
+The metrics are tuned against a 402pt-wide screen (iPhone 16/17 Pro).
+
+### Known limitations
+
+- **Artwork is extracted from the reference video**, so it is soft at 3× —
+  the `Surpass` card in particular. The card's looping video is reproduced
+  as a still; the animation under test is the player swap, not playback.
+- **The top of the screen is cropped out of the reference.** The `Listen
+  Now` large title is an inference, not a reproduction.
+- The progress bar is static (48%) — there is no audio.
+- The player is non-interactive: it alternates on a timer, mirroring the
+  reference clip.
+
+---
+
+<a id="exposey"></a>
+
 # Exposey
 
 Sandbox for faithfully reproducing mobile UI and animations (from a
