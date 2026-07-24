@@ -13,9 +13,9 @@ import {
 
 import { Metrics, Motion } from '@/constants/pumice';
 
-/** Travel needed to clear the screen, including the dock's corner cut-outs. */
-const DOCK_OUT = Metrics.dock.height + Metrics.page.bottomRadius + 8;
-const PILL_OUT = Metrics.pill.height + Metrics.pill.bottom + 8;
+/** Travel needed to clear the screen, including the corner cut-outs and shadow. */
+const DOCK_OUT = Metrics.dock.height + Metrics.page.bottomRadius + 48;
+const PILL_OUT = Metrics.pill.height + Metrics.pill.bottom + 48;
 
 /**
  * Accelerating exit, measured off the reference: the departing player starts

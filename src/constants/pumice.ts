@@ -40,12 +40,23 @@ export const Metrics = {
   },
 } as const;
 
+/**
+ * Layered rather than single shadows: a tight contact layer, a mid, and a wide
+ * ambient one. A single flat shadow reads as a sticker; three transparent
+ * layers read as a surface with air underneath it.
+ */
+export const Elevation = {
+  /** Anchored to the bottom edge, so it casts upward onto the page. */
+  dock: '0px -1px 3px rgba(0, 0, 0, 0.06), 0px -8px 20px rgba(0, 0, 0, 0.10), 0px -20px 48px rgba(0, 0, 0, 0.10)',
+  /** Floating clear of the edge, so it casts down and out. */
+  pill: '0px 1px 2px rgba(0, 0, 0, 0.08), 0px 6px 16px rgba(0, 0, 0, 0.14), 0px 16px 32px rgba(0, 0, 0, 0.10)',
+} as const;
+
 export const Palette = {
   /**
    * iOS systemGroupedBackground. The native `List` paints its own grouped
    * background and offers no modifier to hide it, so the page adopts that colour
-   * instead of fighting it — which also keeps the dock's corner cut-outs correct,
-   * since they read this same token.
+   * instead of fighting it.
    */
   page: '#F2F2F7',
   player: '#1A1A1A',

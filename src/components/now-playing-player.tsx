@@ -6,7 +6,7 @@ import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 
 import { PressScale } from '@/components/press-scale';
-import { Metrics, NowPlaying, Palette } from '@/constants/pumice';
+import { Elevation, Metrics, NowPlaying, Palette } from '@/constants/pumice';
 
 const artwork = require('@/assets/pumice/rock-that.png');
 
@@ -67,9 +67,11 @@ function Progress({ style }: { style: StyleProp<ViewStyle> }) {
 }
 
 /**
- * Expanded state: full-width sheet pinned to the bottom edge, with the page's
- * rounded bottom corners cut into it. Drag it down anywhere to collapse; the
- * grabber doubles as a tap target for anyone who cannot pan.
+ * Expanded state: a full-width sheet at the bottom edge. The page appears to end
+ * above it with rounded bottom corners (see `corner` below) while the sheet casts
+ * upward onto it, so it reads as resting on top rather than as the floor. Drag it
+ * down anywhere to collapse; the grabber doubles as a tap target for anyone who
+ * cannot pan.
  */
 export function DockPlayer({
   style,
@@ -172,11 +174,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: Metrics.dock.height,
     backgroundColor: Palette.player,
+    boxShadow: Elevation.dock,
   },
   // ponytail: the page's rounded bottom corners are faked with two filled
-  // squares carrying a white disc, instead of clipping the whole page (which
-  // would need an animated height). Only works because the page keeps at least
-  // `bottomRadius` of white margin on both edges.
+  // squares carrying a page-coloured disc, instead of clipping the whole page
+  // (which would need an animated height). Only works because the page keeps at
+  // least `bottomRadius` of clear margin on both edges.
   corner: {
     position: 'absolute',
     width: Metrics.page.bottomRadius,
@@ -224,6 +227,7 @@ const styles = StyleSheet.create({
     height: Metrics.pill.height,
     borderRadius: Metrics.pill.radius,
     backgroundColor: Palette.player,
+    boxShadow: Elevation.pill,
   },
   pillRow: {
     position: 'absolute',
