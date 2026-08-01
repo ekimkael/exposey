@@ -7,6 +7,7 @@ bar. Audited at commit `7aa01fc`.
 | --- | --- | --- | --- | --- |
 | 001 | [Add a reduced-motion path to the coverflow strip](001-reduced-motion-coverflow.md) | MEDIUM | Accessibility | DONE |
 | 002 | [Add press feedback to the coverflow thumbnails](002-thumbnail-press-feedback.md) | MEDIUM | Physicality | DONE |
+| 003 | [Swipe the hero left/right to change entry](003-hero-swipe-navigation.md) | feature | Missed opportunity | DONE |
 
 ## Execution order
 
@@ -37,7 +38,9 @@ both plans add to each. Resolve by taking the union.
   This is a deliberate fidelity choice, documented in the root `README.md`: the
   reference recording shows no crossfade at 30fps. A ~100ms crossfade would
   soften it, at the cost of diverging from the reference. Owner's call, not a
-  defect.
+  defect. **Superseded by plan 003**, which makes the swap gesture-driven and
+  therefore animated by construction — 003 knowingly departs from the reference
+  here and updates the docs to say so.
 
 ## Categories that came back clean
 

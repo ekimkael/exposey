@@ -36,8 +36,28 @@ or types there.
 
 ## Where the animation lives
 
-All of it is in `src/hooks/use-coverflow-transform.ts`. The component tree does
-no motion work; it consumes an animated style.
+The cylinder maths is all in `src/hooks/use-coverflow-transform.ts`. The
+component tree does no motion work; it consumes an animated style.
+
+There are **two** scroll-linked surfaces: the filmstrip
+(`src/components/coverflow-strip.tsx`) and the hero pager
+(`src/components/hero-pager.tsx`). Both report into the single `selected` state
+in `src/app/index.tsx`, and both follow it.
+
+**The `activeSource` rule — read this before touching either list.** Two
+scrollable lists driving one state will fight: the strip scrolls the hero,
+whose scroll event scrolls the strip, forever. `src/app/index.tsx` tracks which
+list the user is dragging, and each list skips its programmatic
+`scrollTo` while it is the active source. It converges rather than loops,
+because a programmatic scroll settles on the same index, `setSelected` is
+called with an unchanged value, and React bails out. If you add a third way to
+change entry, route it through the same state and leave `activeSource` null so
+both lists sync.
+
+The hero pager is a paging `ScrollView`, not a pan gesture — deliberately.
+Native paging supplies velocity-aware page changes, rubber-banding at the ends
+and interruptibility for free, and it avoids needing a `GestureHandlerRootView`
+at the root, which this app does not mount.
 
 The effect is **scroll-linked, not tweened**. `useScrollOffset` reads the
 ScrollView's live offset into a shared value, and each entry derives its own

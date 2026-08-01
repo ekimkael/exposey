@@ -2,7 +2,8 @@
 
 Reproduction of a reading-log photo viewer: a hero photo with its date, and a
 bottom filmstrip whose thumbnails wrap around a cylinder. Scrolling the strip
-swaps the hero.
+swaps the hero — and the hero can be swiped directly, with the two staying in
+sync whichever one you drive.
 
 The reference is a screen recording; every constant below was measured off it
 rather than guessed (see [Geometry](#geometry)).
@@ -83,11 +84,18 @@ untouched: it tracks the finger, so it is direct manipulation rather than
 synthetic motion. Reanimated reads the setting at app start, so toggling it
 requires a relaunch.
 
-## Known limitations
+## Departures from the reference
 
+- **The hero is swipeable.** The reference only ever changes entry from the
+  filmstrip, and swaps the hero as a hard cut. Making the hero a paged list
+  means the swap is animated by construction — this is a deliberate addition,
+  not a fidelity miss. Both surfaces drive a single `selected` state; see the
+  `activeSource` note in [AGENTS.md](AGENTS.md).
 - **The hero updates immediately.** In the reference it visibly lags the
   centred thumbnail during fast scrolls — several items behind — which reads
   as update throttling in the original app rather than intent.
+
+## Known limitations
 - **The header buttons are inert.** Nothing in the reference shows what they do,
   and they carry no accessibility labels.
 - **The app icon is still the Expo template's.** The reference never shows one.
