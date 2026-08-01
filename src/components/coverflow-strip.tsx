@@ -1,10 +1,17 @@
 import { Image } from 'expo-image';
-import { useCallback } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { useCallback, useEffect } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedRef,
   useAnimatedReaction,
+  useReducedMotion,
   useScrollOffset,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -49,7 +56,12 @@ function Thumbnail({ scene, index, scrollX, onPress }: ThumbnailProps) {
 
 interface CoverflowStripProps {
   readonly entries: readonly ReadingEntry[];
+  readonly selectedIndex: number;
+  /** True while the user is dragging this strip, so it is never scrolled out from under them. */
+  readonly isActiveSource: boolean;
   readonly onSelect: (index: number) => void;
+  readonly onDragStart: () => void;
+  readonly onDragSettled: () => void;
 }
 
 /**
@@ -61,13 +73,26 @@ interface CoverflowStripProps {
  * (`snapToInterval` + `decelerationRate="fast"`) so momentum stays native.
  *
  * @param entries - Reading-log entries to display, in order.
+ * @param selectedIndex - Entry to centre; the strip scrolls to it unless it is
+ *   the list the user is currently dragging.
+ * @param isActiveSource - Whether this strip is the list driving the selection.
  * @param onSelect - Called with the entry index whenever the centred entry
  *   changes. Fires on index changes only, never at scroll frequency.
+ * @param onDragStart - Called when the user starts dragging, to claim ownership.
+ * @param onDragSettled - Called when the drag and its momentum finish.
  */
-export function CoverflowStrip({ entries, onSelect }: CoverflowStripProps) {
+export function CoverflowStrip({
+  entries,
+  selectedIndex,
+  isActiveSource,
+  onSelect,
+  onDragStart,
+  onDragSettled,
+}: CoverflowStripProps) {
   const { width } = useWindowDimensions();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollX = useScrollOffset(scrollRef);
+  const reduceMotion = useReducedMotion();
 
   useAnimatedReaction(
     () => Math.round(scrollX.value / STRIDE),
@@ -76,6 +101,23 @@ export function CoverflowStrip({ entries, onSelect }: CoverflowStripProps) {
         runOnJS(onSelect)(index);
       }
     },
+  );
+
+  // Follows the selection when the hero is the one driving. Scrolling here
+  // while this strip is under the finger would fight the drag.
+  useEffect(() => {
+    if (isActiveSource) return;
+    scrollRef.current?.scrollTo({ x: selectedIndex * STRIDE, animated: !reduceMotion });
+  }, [selectedIndex, isActiveSource, reduceMotion, scrollRef]);
+
+  // onMomentumScrollEnd never fires when a drag is released without velocity,
+  // which would strand this list as the active source and stop it ever
+  // following the hero again.
+  const handleScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (Math.abs(event.nativeEvent.velocity?.x ?? 0) < 0.1) onDragSettled();
+    },
+    [onDragSettled],
   );
 
   const handlePress = useCallback(
@@ -96,6 +138,9 @@ export function CoverflowStrip({ entries, onSelect }: CoverflowStripProps) {
       showsHorizontalScrollIndicator={false}
       snapToInterval={STRIDE}
       decelerationRate="fast"
+      onScrollBeginDrag={onDragStart}
+      onScrollEndDrag={handleScrollEndDrag}
+      onMomentumScrollEnd={onDragSettled}
     >
       {entries.map((entry, index) => (
         <Thumbnail
