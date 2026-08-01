@@ -7,6 +7,11 @@ swaps the hero.
 The reference is a screen recording; every constant below was measured off it
 rather than guessed (see [Geometry](#geometry)).
 
+## Requirements
+
+- Node 20+, Xcode with an iOS 18+ simulator
+- macOS (the target is the iOS Simulator)
+
 ## Run
 
 ```bash
@@ -14,7 +19,25 @@ npm install && npm run ios
 ```
 
 A development build is required — `expo-symbols` needs native code, so Expo
-Go will not do.
+Go will not do. The first build is a full native compile and takes a while;
+afterwards Metro hot-reloads JS instantly.
+
+## Project layout
+
+| Path | What |
+| --- | --- |
+| `src/app/` | Routes only (expo-router file-based) |
+| `src/components/coverflow-strip.tsx` | The filmstrip — rendering only |
+| `src/hooks/use-coverflow-transform.ts` | **The cylinder maths** |
+| `src/hooks/use-press-scale.ts` | Press feedback |
+| `src/constants/animation.ts` | Every motion value, measured off the reference |
+| `src/constants/theme.ts` | Colours, layout metrics, type scale |
+| `src/data/reading-log.ts` | The 14 entries |
+| `plans/` | Animation audit and the plans applied from it |
+
+Working on this with an AI agent? See [AGENTS.md](AGENTS.md) for structure,
+conventions, how to lift the effect into another project, and the traps hit
+while building it.
 
 ## Platforms
 
@@ -51,13 +74,27 @@ frame they were not fitted to:
 | d=1.5 | — | 134.6pt vs 134.9pt measured |
 | d=2 | 165.8pt vs 168.9pt | — |
 
-## Deliberate differences from the reference
+## Accessibility
+
+Under the OS **Reduce Motion** setting the 3D rotation and the synthetic
+cylinder displacement — the two vestibular triggers — are dropped for a flat
+scale falloff that still shows which entry is centred. Scrolling itself is
+untouched: it tracks the finger, so it is direct manipulation rather than
+synthetic motion. Reanimated reads the setting at app start, so toggling it
+requires a relaunch.
+
+## Known limitations
 
 - **The hero updates immediately.** In the reference it visibly lags the
   centred thumbnail during fast scrolls — several items behind — which reads
   as update throttling in the original app rather than intent.
-- **The header buttons are inert.** Nothing in the reference shows what they do.
+- **The header buttons are inert.** Nothing in the reference shows what they do,
+  and they carry no accessibility labels.
 - **The app icon is still the Expo template's.** The reference never shows one.
+- **Programmatic scroll uses the platform curve.** Tapping a thumbnail scrolls
+  it to centre with UIScrollView's canned easing rather than the strip's own
+  momentum physics. Fixing it properly means reimplementing snap-scrolling on a
+  shared value — see `plans/README.md`.
 - **The snow scene has no book in frame.** The reference uses personal photos;
   every stand-in below shows an actual open book except this one — no
   free-license "book + snow" photo turned up, so it is a cabin-through-a-window
