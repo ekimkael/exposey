@@ -1,54 +1,63 @@
-# Exposey
+# Papyrus — cylindrical coverflow filmstrip
 
-Sandbox for faithfully reproducing mobile UI and animations (from a
-reference video or screenshot) using **Expo Router** and native components
-(`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
+Reproduction of a reading-log photo viewer: a hero photo with its date, and a
+bottom filmstrip whose thumbnails wrap around a cylinder. Scrolling the strip
+swaps the hero.
 
-Each reproduced screen/animation lives on **its own branch**, independent
-from `main` — `main` only holds the base Expo template. No branch is ever
-merged into another: each one is a standalone reproduction exercise.
+The reference is a screen recording; every constant below was measured off it
+rather than guessed (see [Geometry](#geometry)).
 
-## Stack
-
-- [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
-- React Native 0.85, React 19
-- `@expo/ui` (SwiftUI / Jetpack Compose) for native components
-- React Native Reanimated + Gesture Handler for animations/gestures
-
-## Getting started
+## Run
 
 ```bash
-npm install
-npx expo start
+npm install && npm run ios
 ```
 
-Then open it in a [development build](https://docs.expo.dev/develop/development-builds/introduction/),
-an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
+A development build is required — `expo-symbols` and the SVG decoder in
+`expo-image` both need native code, so Expo Go will not do.
 
-## Branches
+## Platforms
 
-| Branch | Description |
-|---|---|
-| [`feat/canopi-onboarding`](https://github.com/ekimkael/exposey/tree/feat/canopi-onboarding) | "Welcome to Canopi" onboarding screen ("Baobab"): dark-green gradient, a shelf of content-type cards bleeding off both edges, staggered entrance and perpetual card float. |
-| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Family wallet bottom sheet with a morphing transition, native Stack header toolbar, and Liquid Glass buttons (iOS 26), built with `@expo/ui` SwiftUI. |
-| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | Featured music UI with video previews and a zoomed detail view. |
-| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Trip detail screen (Airbnb/Gatesware-style): trip stats, restaurant cards, Instagram/Snap-style stories, grid layouts for places/hotels. |
-| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Onboarding and authentication flow for an investment app. |
-| [`feat/magpie-explore-morph`](https://github.com/ekimkael/exposey/tree/feat/magpie-explore-morph) | Looping bookmark/explore hero animation ("Magpie", from app "Sortd."), reproduced from a single reference video. |
-| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Mindfulness screen with a pill-to-beach-photo morph transition and an "Apple Intelligence"-style glowing button (SVG gradient). |
-| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Onboarding carousel with an animated globe ("Remindo" app). |
-| [`feat/pumice-player-dock-pill`](https://github.com/ekimkael/exposey/tree/feat/pumice-player-dock-pill) | Apple-Music-style Library screen with a now-playing bar that swaps between a floating pill and a full-width docked sheet; page scrolls underneath it. |
-| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
-| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
-| [`feat/spotify-marquee-onboarding`](https://github.com/ekimkael/exposey/tree/feat/spotify-marquee-onboarding) | "Connect Your Spotify" onboarding screen ("Turaco"): gesture-driven rotary wheel of artist cards that snaps to the nearest slot like a rotary dial. |
-| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
+iOS is the target. Android gets the same tree for free: the whole effect is
+`transform` on a Reanimated `ScrollView`, with no platform-specific code. The
+only iOS-only piece is `SymbolView` (SF Symbols) in the header, which falls
+back to nothing on Android — swap in Material symbols there if it matters.
 
-Each branch usually has its own `README.md`/`AGENTS.md` detailing the
-reproduced screen, technical choices, and pitfalls encountered.
+## Geometry
 
-## Available commands
+Each thumbnail is transformed as `perspective → translateX → rotateY`, driven
+by `distance`, its signed offset from the centre in item units:
 
-- `/reproduce-ui` — reproduce a reference (video or image) provided as an attachment.
-- `/animation-brief` — spec out an animation via multiple-choice questions before implementation.
-- `/quality-pass` — cleanup/refactoring/documentation pass on an already-implemented branch.
-- `/social-post` — draft an announcement post for the current branch's case study.
+| Constant | Value | How it was derived |
+|---|---|---|
+| `ITEM` | 85pt | centred face measured 86.4 × 84.4pt |
+| `STRIDE` | 102pt | equals the fitted `R · Δ`, so the centre tracks the finger 1:1 |
+| `STEP_DEG` | 30.5° | width falloff at d=1 and d=2 fits `W·cos(dΔ)` — both give 30.5°/30.4° |
+| `RADIUS` | `STRIDE / STEP_rad` | derived, not tuned — 187.9pt against 191/193 fitted |
+| `PERSPECTIVE` | 500pt | trapezoid near/far edge ratio; measured 1.159 at d=2 vs 1.161 predicted |
+
+Faces land at `RADIUS · sin(angle)` instead of their flat scroll position.
+That is what packs the outer entries together; rotating them in place would
+let the gaps grow as the faces foreshorten.
+
+The constants were fitted on the at-rest reference frame, using ratios that
+are independent of the video's pixel scale, then checked against a mid-scroll
+frame they were not fitted to:
+
+| | at rest (fitted) | mid-scroll (held out) |
+|---|---|---|
+| d=0.5 | — | 49.4pt vs 49.6pt measured |
+| d=1 | 95.7pt vs 96.9pt | — |
+| d=1.5 | — | 134.6pt vs 134.9pt measured |
+| d=2 | 165.8pt vs 168.9pt | — |
+
+## Deliberate differences from the reference
+
+- **The hero updates immediately.** In the reference it visibly lags the
+  centred thumbnail during fast scrolls — several items behind — which reads
+  as update throttling in the original app rather than intent.
+- **Artwork is generated, not photographic.** The reference uses personal
+  photos. `scripts/generate-scenes.mjs` emits 14 stylised SVG scenes instead;
+  re-run it with `node scripts/generate-scenes.mjs` after editing a palette.
+- **The header buttons are inert.** Nothing in the reference shows what they do.
+- **The app icon is still the Expo template's.** The reference never shows one.

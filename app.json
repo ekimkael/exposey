@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "exposey",
-    "slug": "exposey",
+    "name": "Papyrus",
+    "slug": "papyrus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposey",
-    "userInterfaceStyle": "automatic",
+    "scheme": "papyrus",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "net.digitalekim.papyrus"
     },
     "android": {
+      "package": "net.digitalekim.papyrus",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -28,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#000000",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
