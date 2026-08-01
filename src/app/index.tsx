@@ -5,14 +5,16 @@ import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CoverflowStrip } from '@/components/coverflow-strip';
+import { COLORS, LAYOUT, TYPE } from '@/constants/theme';
 import { READING_LOG } from '@/data/reading-log';
 
-/** Side inset on the hero, measured off the reference at ~12.7% of the screen. */
-const HERO_INSET = 50;
-const HERO_ASPECT = 0.688;
-/** Empty space the reference leaves under the strip. */
-const STRIP_BOTTOM_GAP = 73;
-
+/**
+ * Reading-log viewer: a hero photo with its date above a cylindrical filmstrip.
+ *
+ * Scrolling the strip swaps the hero. The swap is a hard cut rather than a
+ * crossfade — the reference recording shows no blend between entries, and
+ * `transition={0}` keeps it that way.
+ */
 export default function ReadingLogScreen() {
   const { width } = useWindowDimensions();
   const [selected, setSelected] = useState(0);
@@ -22,14 +24,14 @@ export default function ReadingLogScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <SymbolView name="xmark" size={20} tintColor="#fff" />
+        <SymbolView name="xmark" size={20} tintColor={COLORS.foreground} />
         <Text style={styles.title}>Read at least 10 pages</Text>
-        <SymbolView name="trash" size={20} tintColor="#fff" />
+        <SymbolView name="trash" size={20} tintColor={COLORS.foreground} />
       </View>
 
       <Image
         source={entry.scene}
-        style={[styles.hero, { width: width - HERO_INSET * 2 }]}
+        style={[styles.hero, { width: width - LAYOUT.heroInset * 2 }]}
         contentFit="cover"
         transition={0}
       />
@@ -43,16 +45,26 @@ export default function ReadingLogScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#000' },
+  screen: { flex: 1, backgroundColor: COLORS.background },
   header: {
-    height: 44,
-    paddingHorizontal: 16,
+    height: LAYOUT.headerHeight,
+    paddingHorizontal: LAYOUT.headerPaddingHorizontal,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  title: { color: '#fff', fontSize: 17, fontWeight: '600' },
-  hero: { aspectRatio: HERO_ASPECT, alignSelf: 'center', marginTop: 20, borderRadius: 20 },
-  date: { color: '#fff', fontSize: 16, textAlign: 'center', marginTop: 20 },
-  strip: { marginTop: 'auto', marginBottom: STRIP_BOTTOM_GAP },
+  title: { color: COLORS.foreground, ...TYPE.title },
+  hero: {
+    aspectRatio: LAYOUT.heroAspect,
+    alignSelf: 'center',
+    marginTop: LAYOUT.gap,
+    borderRadius: LAYOUT.heroRadius,
+  },
+  date: {
+    color: COLORS.foreground,
+    ...TYPE.date,
+    textAlign: 'center',
+    marginTop: LAYOUT.gap,
+  },
+  strip: { marginTop: 'auto', marginBottom: LAYOUT.stripBottomGap },
 });

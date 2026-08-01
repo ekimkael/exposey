@@ -2,48 +2,18 @@ import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedRef,
   useAnimatedReaction,
-  useAnimatedStyle,
-  useReducedMotion,
   useScrollOffset,
-  useSharedValue,
-  withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
 
+import { ITEM, STRIDE, STRIP_HEIGHT } from '@/constants/animation';
+import { LAYOUT } from '@/constants/theme';
 import type { ReadingEntry } from '@/data/reading-log';
-
-/** Thumbnail edge length. */
-const ITEM = 85;
-/** Scroll distance between two entries. */
-const STRIDE = 102;
-/** Cylinder arc consumed by one entry. */
-const STEP_DEG = 30.5;
-const DEG_TO_RAD = Math.PI / 180;
-/**
- * Cylinder radius, derived rather than chosen: `RADIUS * STEP_rad === STRIDE`
- * makes the centre of the strip track the finger 1:1. Any other radius and the
- * carousel slides out from under the touch.
- */
-const RADIUS = STRIDE / (STEP_DEG * DEG_TO_RAD);
-const PERSPECTIVE = 500;
-/**
- * Entries stop turning at ~79deg. Parked faces stay on screen (R*sin caps at
- * RADIUS, inside the half-width), so they are faded out over the last quarter
- * step rather than cut, which would pop a visible sliver at the edge.
- */
-const MAX_STEPS = 2.6;
-const FADE_FROM = 2.35;
-/** Reduce Motion: scale drop one step out from centre, standing in for foreshortening. */
-const FLAT_SCALE_FALLOFF = 0.08;
-const STRIP_HEIGHT = 100;
-/** Press feedback: 0.97 scale, subtle enough to acknowledge without bouncing. */
-const PRESS_SCALE_DROP = 0.03;
-/** Strong ease-out — the response should be quickest where the eye is watching. */
-const PRESS_TIMING = { duration: 160, easing: Easing.bezier(0.23, 1, 0.32, 1) };
+import { useCoverflowTransform } from '@/hooks/use-coverflow-transform';
+import { usePressScale } from '@/hooks/use-press-scale';
 
 interface ThumbnailProps {
   readonly scene: number;
@@ -52,58 +22,21 @@ interface ThumbnailProps {
   readonly onPress: (index: number) => void;
 }
 
+/**
+ * One filmstrip entry: a square photo placed on the cylinder, with press
+ * feedback on a nested view so the two transforms stay independent.
+ */
 function Thumbnail({ scene, index, scrollX, onPress }: ThumbnailProps) {
-  const reduceMotion = useReducedMotion();
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const distance = index - scrollX.value / STRIDE;
-    const fade =
-      1 - Math.min(1, Math.max(0, (Math.abs(distance) - FADE_FROM) / (MAX_STEPS - FADE_FROM)));
-
-    if (reduceMotion) {
-      // Reduce Motion: no 3D rotation and no cylinder remap — the two vestibular
-      // triggers. A flat scale falloff carries the "which entry is centred" cue
-      // that foreshortening carries otherwise.
-      return {
-        opacity: fade,
-        transform: [{ scale: 1 - Math.min(Math.abs(distance), 1) * FLAT_SCALE_FALLOFF }],
-      };
-    }
-
-    const steps = Math.min(Math.max(distance, -MAX_STEPS), MAX_STEPS);
-    const angle = steps * STEP_DEG;
-
-    return {
-      opacity: fade,
-      transform: [
-        { perspective: PERSPECTIVE },
-        // Orthographic cylinder: the face sits at R*sin(angle) rather than at
-        // its flat scroll position, which is what packs the outer entries
-        // together instead of letting the gaps grow as they foreshorten.
-        { translateX: RADIUS * Math.sin(angle * DEG_TO_RAD) - distance * STRIDE },
-        { rotateY: `${angle}deg` },
-      ],
-    };
-  });
-
-  const pressed = useSharedValue(0);
-
-  const pressStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressed.value * PRESS_SCALE_DROP }],
-  }));
-
+  const coverflowStyle = useCoverflowTransform(index, scrollX);
+  const { pressStyle, handlePressIn, handlePressOut } = usePressScale();
   const handlePress = useCallback(() => onPress(index), [index, onPress]);
 
   return (
-    <Animated.View style={[styles.slot, animatedStyle]}>
+    <Animated.View style={[styles.slot, coverflowStyle]}>
       <Pressable
         onPress={handlePress}
-        onPressIn={() => {
-          pressed.value = withTiming(1, PRESS_TIMING);
-        }}
-        onPressOut={() => {
-          pressed.value = withTiming(0, PRESS_TIMING);
-        }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         accessibilityRole="imagebutton"
       >
         <Animated.View style={pressStyle}>
@@ -119,13 +52,23 @@ interface CoverflowStripProps {
   readonly onSelect: (index: number) => void;
 }
 
+/**
+ * Horizontal filmstrip whose thumbnails wrap around a cylinder.
+ *
+ * The motion is scroll-linked rather than tweened: `useScrollOffset` feeds the
+ * live offset to each entry's transform, so the effect is interruptible and
+ * carries real velocity for free. Snapping is left to the platform
+ * (`snapToInterval` + `decelerationRate="fast"`) so momentum stays native.
+ *
+ * @param entries - Reading-log entries to display, in order.
+ * @param onSelect - Called with the entry index whenever the centred entry
+ *   changes. Fires on index changes only, never at scroll frequency.
+ */
 export function CoverflowStrip({ entries, onSelect }: CoverflowStripProps) {
   const { width } = useWindowDimensions();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollX = useScrollOffset(scrollRef);
 
-  // Only crosses to JS when the centred entry actually changes, so the hero
-  // swap never runs at scroll frequency.
   useAnimatedReaction(
     () => Math.round(scrollX.value / STRIDE),
     (index, previous) => {
@@ -171,5 +114,5 @@ const styles = StyleSheet.create({
   strip: { height: STRIP_HEIGHT },
   content: { alignItems: 'center' },
   slot: { width: ITEM, marginHorizontal: (STRIDE - ITEM) / 2 },
-  thumbnail: { width: ITEM, height: ITEM, borderRadius: 10 },
+  thumbnail: { width: ITEM, height: ITEM, borderRadius: LAYOUT.thumbnailRadius },
 });
