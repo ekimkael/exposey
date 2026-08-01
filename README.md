@@ -13,8 +13,8 @@ rather than guessed (see [Geometry](#geometry)).
 npm install && npm run ios
 ```
 
-A development build is required — `expo-symbols` and the SVG decoder in
-`expo-image` both need native code, so Expo Go will not do.
+A development build is required — `expo-symbols` needs native code, so Expo
+Go will not do.
 
 ## Platforms
 
@@ -56,8 +56,32 @@ frame they were not fitted to:
 - **The hero updates immediately.** In the reference it visibly lags the
   centred thumbnail during fast scrolls — several items behind — which reads
   as update throttling in the original app rather than intent.
-- **Artwork is generated, not photographic.** The reference uses personal
-  photos. `scripts/generate-scenes.mjs` emits 14 stylised SVG scenes instead;
-  re-run it with `node scripts/generate-scenes.mjs` after editing a palette.
 - **The header buttons are inert.** Nothing in the reference shows what they do.
 - **The app icon is still the Expo template's.** The reference never shows one.
+- **The snow scene has no book in frame.** The reference uses personal photos;
+  every stand-in below shows an actual open book except this one — no
+  free-license "book + snow" photo turned up, so it is a cabin-through-a-window
+  shot instead.
+
+## Photo credits
+
+`assets/scenes/` are free-license photos from Unsplash (Unsplash License —
+free for commercial and personal use), substituting for the personal photos
+in the reference:
+
+| File | Photographer |
+|---|---|
+| 01-beach.jpg | [Jessica Mangano](https://unsplash.com/photos/an-open-book-sitting-on-top-of-a-sandy-beach-t0foNCVk6uo) |
+| 02-cafe.jpg | [American Heritage Chocolate](https://unsplash.com/photos/an-open-book-on-a-table-next-to-a-cup-of-coffee-uwXQAoTq2wU) |
+| 03-plane.jpg | [Janice Kwong](https://unsplash.com/photos/a-man-reading-a-book-on-an-airplane-kOCGv96q0jc) |
+| 04-bedside.jpg | [Aaron Burden](https://unsplash.com/photos/open-white-and-blue-book-beside-table-lamp--n_ZpsjsqHM) |
+| 05-park.jpg | [Aaron Burden](https://unsplash.com/photos/open-book-rests-on-a-weathered-park-bench-2TSHyqTRbUg) |
+| 06-train.jpg | [Adrien Olichon](https://unsplash.com/photos/a-person-is-reading-a-book-on-a-train-I6rhlEGhe4k) |
+| 07-kitchen.jpg | [Aaron Burden](https://unsplash.com/photos/an-open-book-lies-on-a-dark-wooden-table-UZ6hfdbuEqs) |
+| 08-balcony.jpg | [Austin Distel](https://unsplash.com/photos/man-reading-book-on-balcony-during-daytim-M20JaYyW1KI) |
+| 09-library.jpg | [Nejc Soklič](https://unsplash.com/photos/a-library-with-books-on-shelves-POlLqIPWR3c) |
+| 10-bath.jpg | [Thought Catalog](https://unsplash.com/photos/woman-lying-on-bathtub-with-green-book-LBavvsn86DE) |
+| 11-forest.jpg | [maria paula contreras](https://unsplash.com/photos/book-open-on-dried-leaves-top-view-photography-uGs6RoFSOi8) |
+| 12-desk.jpg | [byVlado](https://unsplash.com/photos/open-book-with-illuminated-pages-in-dim-light-k3tHnRwtTso) |
+| 13-snow.jpg | [Lukas Seitz](https://unsplash.com/photos/a-cabin-in-the-snow-seen-through-a-window-ivGTMYRw2pI) |
+| 14-hammock.jpg | [Radek Grzybowski](https://unsplash.com/photos/woman-reading-book-on-hammock-dunnqE0fcfY) |
