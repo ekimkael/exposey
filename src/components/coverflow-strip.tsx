@@ -2,11 +2,15 @@ import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
+  Easing,
   runOnJS,
   useAnimatedRef,
   useAnimatedReaction,
   useAnimatedStyle,
+  useReducedMotion,
   useScrollOffset,
+  useSharedValue,
+  withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
 
@@ -33,7 +37,13 @@ const PERSPECTIVE = 500;
  */
 const MAX_STEPS = 2.6;
 const FADE_FROM = 2.35;
+/** Reduce Motion: scale drop one step out from centre, standing in for foreshortening. */
+const FLAT_SCALE_FALLOFF = 0.08;
 const STRIP_HEIGHT = 100;
+/** Press feedback: 0.97 scale, subtle enough to acknowledge without bouncing. */
+const PRESS_SCALE_DROP = 0.03;
+/** Strong ease-out — the response should be quickest where the eye is watching. */
+const PRESS_TIMING = { duration: 160, easing: Easing.bezier(0.23, 1, 0.32, 1) };
 
 interface ThumbnailProps {
   readonly scene: number;
@@ -43,13 +53,28 @@ interface ThumbnailProps {
 }
 
 function Thumbnail({ scene, index, scrollX, onPress }: ThumbnailProps) {
+  const reduceMotion = useReducedMotion();
+
   const animatedStyle = useAnimatedStyle(() => {
     const distance = index - scrollX.value / STRIDE;
+    const fade =
+      1 - Math.min(1, Math.max(0, (Math.abs(distance) - FADE_FROM) / (MAX_STEPS - FADE_FROM)));
+
+    if (reduceMotion) {
+      // Reduce Motion: no 3D rotation and no cylinder remap — the two vestibular
+      // triggers. A flat scale falloff carries the "which entry is centred" cue
+      // that foreshortening carries otherwise.
+      return {
+        opacity: fade,
+        transform: [{ scale: 1 - Math.min(Math.abs(distance), 1) * FLAT_SCALE_FALLOFF }],
+      };
+    }
+
     const steps = Math.min(Math.max(distance, -MAX_STEPS), MAX_STEPS);
     const angle = steps * STEP_DEG;
 
     return {
-      opacity: 1 - Math.min(1, Math.max(0, (Math.abs(distance) - FADE_FROM) / (MAX_STEPS - FADE_FROM))),
+      opacity: fade,
       transform: [
         { perspective: PERSPECTIVE },
         // Orthographic cylinder: the face sits at R*sin(angle) rather than at
@@ -61,12 +86,29 @@ function Thumbnail({ scene, index, scrollX, onPress }: ThumbnailProps) {
     };
   });
 
+  const pressed = useSharedValue(0);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 - pressed.value * PRESS_SCALE_DROP }],
+  }));
+
   const handlePress = useCallback(() => onPress(index), [index, onPress]);
 
   return (
     <Animated.View style={[styles.slot, animatedStyle]}>
-      <Pressable onPress={handlePress} accessibilityRole="imagebutton">
-        <Image source={scene} style={styles.thumbnail} contentFit="cover" transition={0} />
+      <Pressable
+        onPress={handlePress}
+        onPressIn={() => {
+          pressed.value = withTiming(1, PRESS_TIMING);
+        }}
+        onPressOut={() => {
+          pressed.value = withTiming(0, PRESS_TIMING);
+        }}
+        accessibilityRole="imagebutton"
+      >
+        <Animated.View style={pressStyle}>
+          <Image source={scene} style={styles.thumbnail} contentFit="cover" transition={0} />
+        </Animated.View>
       </Pressable>
     </Animated.View>
   );
