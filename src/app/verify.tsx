@@ -37,6 +37,8 @@ export default function VerifyScreen() {
   const { country, phone } = useFlow();
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
+  /** Counts rejected submits so the input re-shakes on every attempt. */
+  const [attempt, setAttempt] = useState(0);
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
 
   // Tick the resend countdown down to zero.
@@ -52,8 +54,12 @@ export default function VerifyScreen() {
   };
 
   const handleSubmit = () => {
-    if (code === CORRECT_CODE) router.push('/profile/identity');
-    else setError(true);
+    if (code === CORRECT_CODE) {
+      router.push('/profile/identity');
+      return;
+    }
+    setError(true);
+    setAttempt((n) => n + 1);
   };
 
   return (
@@ -83,7 +89,7 @@ export default function VerifyScreen() {
         </Text>
       </View>
 
-      <OtpInput value={code} onChangeText={handleChange} length={CODE_LENGTH} error={error} />
+      <OtpInput value={code} onChangeText={handleChange} length={CODE_LENGTH} error={error} attempt={attempt} />
 
       {error ? (
         <Text selectable style={{ fontFamily: font.medium, fontSize: 13, color: colors.danger, marginTop: 12 }}>

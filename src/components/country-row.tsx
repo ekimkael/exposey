@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
+import { PressableScale } from '@/components/pressable-scale';
 import type { Country } from '@/lib/countries';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
@@ -21,19 +22,18 @@ export function CountryRow({ country, selected, onPress }: CountryRowProps) {
   const { colors } = useTheme();
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
-      style={({ pressed }) => ({
+      style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
         paddingVertical: 14,
-        opacity: pressed ? 0.6 : 1,
-      })}>
+      }}>
       <Text style={{ fontSize: 24 }}>{country.flag}</Text>
       <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 17, color: colors.text }}>{country.name}</Text>
       <Radio selected={selected} />
-    </Pressable>
+    </PressableScale>
   );
 }
 

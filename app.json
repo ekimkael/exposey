@@ -1,17 +1,18 @@
 {
   "expo": {
-    "name": "exposey",
-    "slug": "exposey",
+    "name": "Peridot",
+    "slug": "peridot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposey",
+    "scheme": "peridot",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.ekimkael.rn.ui"
+      "bundleIdentifier": "net.digitalekim.peridot"
     },
     "android": {
+      "package": "net.digitalekim.peridot",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -29,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#A4E057",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76

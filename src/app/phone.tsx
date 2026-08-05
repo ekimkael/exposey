@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { KeyboardAvoidingView, Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PressableScale } from '@/components/pressable-scale';
 import { PrimaryButton } from '@/components/primary-button';
 import { useFlow } from '@/lib/flow-context';
 import { font } from '@/lib/fonts';
@@ -32,20 +33,19 @@ export default function PhoneScreen() {
       </Text>
 
       <View style={{ backgroundColor: colors.inputBg, borderRadius: 16, borderCurve: 'continuous', overflow: 'hidden' }}>
-        <Pressable
+        <PressableScale
           onPress={() => router.push('/country?from=phone')}
-          style={({ pressed }) => ({
+          style={{
             flexDirection: 'row',
             alignItems: 'center',
             gap: 10,
             paddingHorizontal: 16,
             height: 56,
-            opacity: pressed ? 0.6 : 1,
-          })}>
+          }}>
           <Text style={{ fontSize: 22 }}>{country.flag}</Text>
           <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 16, color: colors.text }}>{country.name}</Text>
           <Image source="sf:arrow.right" tintColor={colors.textMuted} style={{ width: 16, height: 16 }} />
-        </Pressable>
+        </PressableScale>
 
         <View style={{ height: 1, backgroundColor: colors.divider, marginHorizontal: 16 }} />
 

@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { KeyboardAvoidingView, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PressableScale } from '@/components/pressable-scale';
 import { PrimaryButton } from '@/components/primary-button';
 import { TextField } from '@/components/text-field';
 import { WizardProgress } from '@/components/wizard-progress';
@@ -54,9 +55,9 @@ export default function ContactStep() {
             autoComplete="email"
           />
 
-          <Pressable
+          <PressableScale
             onPress={() => router.push('/country?from=residence')}
-            style={({ pressed }) => ({
+            style={{
               flexDirection: 'row',
               alignItems: 'center',
               gap: 10,
@@ -65,8 +66,7 @@ export default function ContactStep() {
               borderCurve: 'continuous',
               paddingHorizontal: 14,
               height: 56,
-              opacity: pressed ? 0.6 : 1,
-            })}>
+            }}>
             {profile.residenceCountry ? (
               <>
                 <Text style={{ fontSize: 22 }}>{profile.residenceCountry.flag}</Text>
@@ -80,7 +80,7 @@ export default function ContactStep() {
               </Text>
             )}
             <Image source="sf:chevron.right" tintColor={colors.textMuted} style={{ width: 14, height: 14 }} />
-          </Pressable>
+          </PressableScale>
 
           <TextField
             icon="building.2"
