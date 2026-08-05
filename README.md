@@ -1,50 +1,54 @@
 # Exposey
 
-Bac à sable pour reproduire fidèlement des interfaces et animations mobiles
-(vidéos ou screenshots de référence) avec **Expo Router** et des composants
-natifs (`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
+Sandbox for faithfully reproducing mobile UI and animations (from a
+reference video or screenshot) using **Expo Router** and native components
+(`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
 
-Chaque écran/animation reproduit vit sur **sa propre branche**, indépendante
-de `main` — `main` ne contient que le template Expo de base. Aucune branche
-n'est fusionnée dans une autre : elles sont chacune un exercice de
-reproduction autonome.
+Each reproduced screen/animation lives on **its own branch**, independent
+from `main` — `main` only holds the base Expo template. No branch is ever
+merged into another: each one is a standalone reproduction exercise.
 
 ## Stack
 
 - [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
 - React Native 0.85, React 19
-- `@expo/ui` (SwiftUI / Jetpack Compose) pour les composants natifs
-- React Native Reanimated + Gesture Handler pour les animations/gestes
+- `@expo/ui` (SwiftUI / Jetpack Compose) for native components
+- React Native Reanimated + Gesture Handler for animations/gestures
 
-## Démarrer
+## Getting started
 
 ```bash
 npm install
 npx expo start
 ```
 
-Ouvre ensuite dans un [development build](https://docs.expo.dev/develop/development-builds/introduction/),
-un simulateur iOS, un émulateur Android, ou [Expo Go](https://expo.dev/go).
+Then open it in a [development build](https://docs.expo.dev/develop/development-builds/introduction/),
+an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
 
 ## Branches
 
-| Branche | Description |
+| Branch | Description |
 |---|---|
-| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Bottom sheet "wallet familial" avec transition morphing, header natif toolbar et boutons Liquid Glass (iOS 26), via `@expo/ui` SwiftUI. |
-| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | UI de mise en avant musicale avec aperçus vidéo et vue détail en zoom. |
-| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Écran détail voyage (type Airbnb/Gatesware) : stats de trip, cartes restaurants, stories façon Instagram/Snap, grilles lieux/hôtels. |
-| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Flow d'onboarding et d'authentification pour une app d'investissement. |
-| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Écran de méditation avec transition morphing pilule → photo de plage, bouton "Apple Intelligence" à halo animé (SVG gradient). |
-| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Carrousel d'onboarding avec globe animé (app "Remindo"). |
-| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Écran d'envoi d'argent : form sheet natif, clavier numérique, animations de montant, confirmation biométrique qui morph en écran de succès. |
-| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Écran de login ("Onyx") avec éventail de cartes qui se replie en pile au focus clavier. |
-| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Écran d'onboarding à messages défilants (app "Remindo") avec dégradé radial et bouton CTA à particules. |
+| [`feat/canopi-onboarding`](https://github.com/ekimkael/exposey/tree/feat/canopi-onboarding) | "Welcome to Canopi" onboarding screen ("Baobab"): dark-green gradient, a shelf of content-type cards bleeding off both edges, staggered entrance and perpetual card float. |
+| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Family wallet bottom sheet with a morphing transition, native Stack header toolbar, and Liquid Glass buttons (iOS 26), built with `@expo/ui` SwiftUI. |
+| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | Featured music UI with video previews and a zoomed detail view. |
+| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Trip detail screen (Airbnb/Gatesware-style): trip stats, restaurant cards, Instagram/Snap-style stories, grid layouts for places/hotels. |
+| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Onboarding and authentication flow for an investment app. |
+| [`feat/magpie-explore-morph`](https://github.com/ekimkael/exposey/tree/feat/magpie-explore-morph) | Looping bookmark/explore hero animation ("Magpie", from app "Sortd."), reproduced from a single reference video. |
+| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Mindfulness screen with a pill-to-beach-photo morph transition and an "Apple Intelligence"-style glowing button (SVG gradient). |
+| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Onboarding carousel with an animated globe ("Remindo" app). |
+| [`feat/pumice-player-dock-pill`](https://github.com/ekimkael/exposey/tree/feat/pumice-player-dock-pill) | Apple-Music-style Library screen with a now-playing bar that swaps between a floating pill and a full-width docked sheet; page scrolls underneath it. |
+| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
+| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
+| [`feat/spotify-marquee-onboarding`](https://github.com/ekimkael/exposey/tree/feat/spotify-marquee-onboarding) | "Connect Your Spotify" onboarding screen ("Turaco"): gesture-driven rotary wheel of artist cards that snaps to the nearest slot like a rotary dial. |
+| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
 
-Chaque branche contient généralement son propre `README.md`/`AGENTS.md`
-détaillant l'écran reproduit, les choix techniques et les pièges rencontrés.
+Each branch usually has its own `README.md`/`AGENTS.md` detailing the
+reproduced screen, technical choices, and pitfalls encountered.
 
-## Commandes disponibles
+## Available commands
 
-- `/reproduce-ui` — reproduire une référence (vidéo ou image) fournie en pièce jointe.
-- `/animation-brief` — spécifier une animation par questions à choix avant implémentation.
-- `/quality-pass` — passe de nettoyage/refactoring/documentation sur une branche déjà implémentée.
+- `/reproduce-ui` — reproduce a reference (video or image) provided as an attachment.
+- `/animation-brief` — spec out an animation via multiple-choice questions before implementation.
+- `/quality-pass` — cleanup/refactoring/documentation pass on an already-implemented branch.
+- `/social-post` — draft an announcement post for the current branch's case study.
