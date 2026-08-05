@@ -85,6 +85,22 @@ Produis un court **storyboard écrit** :
 Attends ma validation de ce storyboard si un point te semble ambigu ;
 sinon documente tes hypothèses et continue.
 
+## Choix du runtime : Expo Go vs Development Build
+- À partir de l'inventaire de modules/packages du storyboard, vérifie
+  pour chacun s'il nécessite du code natif custom ou un config plugin
+  (`package.json` du module, doc Expo).
+- Si tous les modules sont couverts par Expo Go (SDK du projet
+  compatible, aucun config plugin, aucune couche `@expo/ui`
+  spécifique iOS/Android) → reste en **Expo Go** (itération plus
+  rapide).
+- Dès qu'un seul module l'exige (module natif custom, config plugin,
+  `@expo/ui` SwiftUI/Compose spécifique, SDK < 56) → bascule en
+  **development build** (`npx expo run:ios` / `run:android`) et
+  note-le dans le storyboard.
+- Rappel SDK : la couche universelle `@expo/ui` fonctionne dans Expo
+  Go à partir du SDK 56 ; en dessous, ou pour les couches
+  SwiftUI/Compose spécifiques, development build obligatoire.
+
 ## Stack et contraintes techniques
 - Cible prioritaire : **iOS (Simulateur iPhone)**. Si l'équivalent
   Android est faisable sans dégrader iOS, fais-le aussi — sinon iOS
@@ -98,11 +114,6 @@ sinon documente tes hypothèses et continue.
      /Expo UI Jetpack Compose) uniquement si la couche universelle
      ne couvre pas le besoin (animation/transition trop native).
   Appuie-toi sur /building-native-ui pour les patterns généraux.
-- **Vérifie le SDK Expo du projet** et adapte le runtime :
-  - SDK 56+ → la couche universelle `@expo/ui` fonctionne dans
-    **Expo Go** (itération plus rapide) ;
-  - SDK < 56 ou couches SwiftUI/Compose spécifiques → **development
-    build** requis (`npx expo run:ios`), pas Expo Go.
 - **Avant d'implémenter une transition/animation complexe** : liste les
   approches possibles (ex. expo-router transitions, Reanimated shared
   transitions, API native SwiftUI via Expo UI) avec leur statut
@@ -149,6 +160,10 @@ sinon documente tes hypothèses et continue.
   mismatch SDK/NDK, rebuild `npx expo run:android`.
 - Module natif introuvable → `npx expo install <module>` (version
   compatible SDK), puis rebuild des couches natives.
+- **En Expo Go, une erreur révèle un module natif requis** (non
+  couvert par Expo Go) → ne cherche pas de contournement, bascule en
+  development build (`npx expo run:ios` / `run:android`) et
+  documente le changement de runtime dans le storyboard.
 
 ## Assets
 - Génère les éléments nécessaires (icônes, logos, illustrations)
