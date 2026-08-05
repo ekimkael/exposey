@@ -1,8 +1,12 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
+
+/** Enter/exit duration, matching the amount's own error color transition. */
+const BANNER_ANIMATION_MS = 180;
 
 /**
  * Inline error banner shown above the keypad when the entered amount exceeds
@@ -13,10 +17,13 @@ import { useTheme } from '@/theme/theme-context';
 export function ErrorBanner({ message }: { message: string }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: colors.dangerSoft }]}>
+    <Animated.View
+      entering={FadeInDown.duration(BANNER_ANIMATION_MS)}
+      exiting={FadeOutUp.duration(BANNER_ANIMATION_MS)}
+      style={[styles.container, { backgroundColor: colors.dangerSoft }]}>
       <Image source="sf:exclamationmark.circle.fill" tintColor={colors.danger} style={styles.icon} />
       <Text style={[styles.text, { color: colors.danger }]}>{message}</Text>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -1,6 +1,7 @@
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/animated-pressable';
 import { type Recipient } from '@/components/recipient-card';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
@@ -21,9 +22,9 @@ export function ContactPicker({ visible, contacts, onSelect, onClose }: ContactP
       <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom }]}>
         <View style={[styles.header, { borderBottomColor: colors.surfaceMuted }]}>
           <Text style={[styles.title, { color: colors.text }]}>Contacts</Text>
-          <Pressable onPress={onClose} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+          <AnimatedPressable onPress={onClose} pressedOpacity={0.5}>
             <Text style={[styles.close, { color: colors.accent }]}>Done</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <FlatList
@@ -32,9 +33,7 @@ export function ContactPicker({ visible, contacts, onSelect, onClose }: ContactP
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.surfaceMuted }]} />}
           renderItem={({ item }) => (
-            <Pressable
-              onPress={() => { onSelect(item); onClose(); }}
-              style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}>
+            <AnimatedPressable onPress={() => { onSelect(item); onClose(); }} style={styles.row}>
               <View style={[styles.avatar, { backgroundColor: colors.accentSoft }]}>
                 <Text style={[styles.avatarLetter, { color: colors.accent }]}>{item.name[0]}</Text>
               </View>
@@ -42,7 +41,7 @@ export function ContactPicker({ visible, contacts, onSelect, onClose }: ContactP
                 <Text style={[styles.name, { color: colors.text }]}>{item.name}</Text>
                 <Text style={[styles.phone, { color: colors.textMuted }]}>{item.phone}</Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           )}
         />
       </View>

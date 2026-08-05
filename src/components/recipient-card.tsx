@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/animated-pressable';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
 
@@ -34,9 +35,9 @@ export function RecipientCard({ recipient, onChangePress }: { recipient: Recipie
           <Text style={{ fontSize: 16, fontFamily: font.semibold, color: colors.text }}>{recipient.name}</Text>
           <Text style={{ fontSize: 14, fontFamily: font.regular, color: colors.textMuted }}>{recipient.phone}</Text>
         </View>
-        <Pressable onPress={onChangePress} style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+        <AnimatedPressable onPress={onChangePress} pressedOpacity={0.5}>
           <Text style={{ fontSize: 14, fontFamily: font.medium, color: colors.accent }}>Change</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     </View>
   );

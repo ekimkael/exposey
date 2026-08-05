@@ -2,12 +2,15 @@ import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import { Text, View, type TextStyle } from 'react-native';
 import Animated, {
+  FadeIn,
   FadeInDown,
+  FadeOut,
   FadeOutUp,
   SlideInDown,
   SlideOutUp,
   interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSequence,
   withSpring,
@@ -64,6 +67,7 @@ export interface AmountDisplayProps {
 export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDisplayProps) {
   const { colors } = useTheme();
   const { dollars, cents } = splitAmount(amount);
+  const reducedMotion = useReducedMotion();
 
   const scale = useSharedValue(1);
   const shakeOffset = useSharedValue(0);
@@ -71,27 +75,30 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
 
   // Pulse: bounce the whole amount on every keystroke.
   useEffect(() => {
-    if (animationStyle !== 'pulse') return;
+    if (animationStyle !== 'pulse' || reducedMotion) return;
     scale.value = withSequence(
       withTiming(PULSE_PEAK_SCALE, { duration: PULSE_RISE_MS }),
       withSpring(1, { damping: 8, stiffness: 200 }),
     );
-  }, [amount, animationStyle, scale]);
+  }, [amount, animationStyle, reducedMotion, scale]);
 
   // Error feedback: cross-fade to red, shake, and buzz whenever the balance is
   // exceeded. Runs only on the `exceeded` transition (the keypad is locked
   // above the limit, so this fires once per entry into the error state).
-  // Independent of animationStyle by design.
+  // Independent of animationStyle by design. The shake (a position change) is
+  // skipped under reduced motion; the colour cross-fade and haptic stay.
   useEffect(() => {
     errorProgress.value = withTiming(exceeded ? 1 : 0, { duration: ERROR_COLOR_MS });
     if (!exceeded) return;
-    shakeOffset.value = withSequence(
-      ...SHAKE_OFFSETS.map((offset) => withTiming(offset, { duration: SHAKE_STEP_MS })),
-    );
+    if (!reducedMotion) {
+      shakeOffset.value = withSequence(
+        ...SHAKE_OFFSETS.map((offset) => withTiming(offset, { duration: SHAKE_STEP_MS })),
+      );
+    }
     if (process.env.EXPO_OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [exceeded, errorProgress, shakeOffset]);
+  }, [exceeded, reducedMotion, errorProgress, shakeOffset]);
 
   const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeOffset.value }] }));
@@ -108,16 +115,16 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
         {dollars.split('').map((digit, index) => (
           <Animated.View
             key={`dollar-${index}-${digit}`}
-            entering={FadeInDown.duration(DIGIT_FADE_MS)}
-            exiting={FadeOutUp.duration(DIGIT_FADE_MS)}>
+            entering={(reducedMotion ? FadeIn : FadeInDown).duration(DIGIT_FADE_MS)}
+            exiting={(reducedMotion ? FadeOut : FadeOutUp).duration(DIGIT_FADE_MS)}>
             <Animated.Text style={[amountTextStyle, dollarsColorStyle]}>{digit}</Animated.Text>
           </Animated.View>
         ))}
         {cents.split('').map((char, index) => (
           <Animated.View
             key={`cent-${index}-${char}`}
-            entering={FadeInDown.duration(DIGIT_FADE_MS)}
-            exiting={FadeOutUp.duration(DIGIT_FADE_MS)}>
+            entering={(reducedMotion ? FadeIn : FadeInDown).duration(DIGIT_FADE_MS)}
+            exiting={(reducedMotion ? FadeOut : FadeOutUp).duration(DIGIT_FADE_MS)}>
             <Text style={centsStyle}>{char}</Text>
           </Animated.View>
         ))}
@@ -132,8 +139,8 @@ export function AmountDisplay({ amount, exceeded, animationStyle }: AmountDispla
           {/* Remounting on `amount` change triggers the slide in/out within the clipped viewport. */}
           <Animated.View
             key={amount}
-            entering={SlideInDown.duration(FLIP_SLIDE_MS)}
-            exiting={SlideOutUp.duration(FLIP_SLIDE_MS)}
+            entering={(reducedMotion ? FadeIn : SlideInDown).duration(FLIP_SLIDE_MS)}
+            exiting={(reducedMotion ? FadeOut : SlideOutUp).duration(FLIP_SLIDE_MS)}
             style={{ flexDirection: 'row' }}>
             <Animated.Text selectable style={[amountTextStyle, dollarsColorStyle]}>${dollars}</Animated.Text>
             <Text style={centsStyle}>{cents}</Text>

@@ -4,7 +4,16 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { font } from '@/lib/fonts';
@@ -12,6 +21,16 @@ import { useTheme } from '@/theme/theme-context';
 
 /** The three phases of the confirmation flow. */
 type Phase = 'confirm' | 'authenticating' | 'success';
+
+// --- Animation tuning -------------------------------------------------------
+/** Cross-fade duration for the confirm↔success phase swap. */
+const PHASE_FADE_MS = 160;
+/** Delay before the success phase fades in, letting the confirm phase clear first. */
+const SUCCESS_FADE_DELAY_MS = 120;
+/** Duration of the success phase's own fade-in. */
+const SUCCESS_FADE_MS = 220;
+/** Delay before the checkmark starts its scale-in, after the success phase is visible. */
+const CHECKMARK_DELAY_MS = 120;
 
 /**
  * Biometric payment confirmation screen, presented as a native form sheet.
@@ -46,6 +65,23 @@ export default function ConfirmScreen() {
 
   const [phase, setPhase] = useState<Phase>('confirm');
   const [biometricLabel, setBiometricLabel] = useState<'Face ID' | 'Touch ID'>('Face ID');
+
+  const reducedMotion = useReducedMotion();
+  /** 0 = pre-entrance, 1 = settled. Drives the checkmark's scale + opacity. */
+  const checkmarkProgress = useSharedValue(0);
+
+  /** Animate the success checkmark in — scale 0.9→1, never from 0 (nothing appears from nothing). */
+  useEffect(() => {
+    if (phase !== 'success') return;
+    checkmarkProgress.value = reducedMotion
+      ? withTiming(1, { duration: CHECKMARK_DELAY_MS })
+      : withDelay(CHECKMARK_DELAY_MS, withSpring(1, { damping: 11, stiffness: 220 }));
+  }, [phase, reducedMotion, checkmarkProgress]);
+
+  const checkmarkStyle = useAnimatedStyle(() => ({
+    opacity: checkmarkProgress.value,
+    transform: [{ scale: 0.9 + checkmarkProgress.value * 0.1 }],
+  }));
 
   /** Detect the enrolled scanner type once on mount. */
   useEffect(() => {
@@ -108,8 +144,8 @@ export default function ConfirmScreen() {
       {phase !== 'success' ? (
         <Animated.View
           key="confirm"
-          entering={FadeIn.duration(160)}
-          exiting={FadeOut.duration(160)}
+          entering={FadeIn.duration(PHASE_FADE_MS)}
+          exiting={FadeOut.duration(PHASE_FADE_MS)}
           style={styles.body}>
           <View style={styles.center}>
             {/* Recipient avatar */}
@@ -149,10 +185,10 @@ export default function ConfirmScreen() {
       ) : (
         <Animated.View
           key="success"
-          entering={FadeIn.delay(120).duration(220)}
+          entering={FadeIn.delay(SUCCESS_FADE_DELAY_MS).duration(SUCCESS_FADE_MS)}
           style={styles.body}>
           <View style={styles.center}>
-            <Animated.View entering={ZoomIn.springify().damping(11).stiffness(220).delay(120)}>
+            <Animated.View style={checkmarkStyle}>
               <Image source="sf:checkmark.circle.fill" tintColor={colors.success} style={styles.checkmark} />
             </Animated.View>
             <Text style={[styles.successTitle, { color: colors.text }]}>{formatted} sent</Text>

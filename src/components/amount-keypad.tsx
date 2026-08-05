@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
+import { AnimatedPressable } from '@/components/animated-pressable';
 import { DELETE_KEY } from '@/lib/amount';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
@@ -38,17 +39,18 @@ export function AmountKeypad({ onKeyPress, locked }: AmountKeypadProps) {
         const isDisabled = locked && !isDelete;
 
         return (
-          <Pressable
+          <AnimatedPressable
             key={key}
             disabled={isDisabled}
             onPress={() => onKeyPress(key)}
-            style={({ pressed }) => ({
+            pressedOpacity={PRESSED_OPACITY}
+            style={{
               width: '33.333%',
               height: 70,
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: isDisabled ? DISABLED_OPACITY : pressed ? PRESSED_OPACITY : 1,
-            })}>
+              opacity: isDisabled ? DISABLED_OPACITY : 1,
+            }}>
             <View
               style={{
                 width: '88%',
@@ -64,7 +66,7 @@ export function AmountKeypad({ onKeyPress, locked }: AmountKeypadProps) {
                 <Text style={{ fontSize: 26, fontFamily: font.medium, color: colors.text }}>{key}</Text>
               )}
             </View>
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </View>

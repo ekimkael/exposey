@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInUp,
@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { AnimatedPressable } from '@/components/animated-pressable';
 import { font } from '@/lib/fonts';
 import { useTheme } from '@/theme/theme-context';
 
@@ -83,15 +84,13 @@ export function ActionSwapRoll({ onPress, disabled }: ActionSwapRollProps) {
   };
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={handlePress}
       disabled={loading || disabled}
-      style={({ pressed }) => [
+      pressedOpacity={0.85}
+      style={[
         styles.button,
-        {
-          backgroundColor: colors.text,
-          opacity: loading || disabled ? 0.45 : pressed ? 0.85 : 1,
-        },
+        { backgroundColor: colors.text, opacity: loading || disabled ? 0.45 : 1 },
       ]}>
       {/* overflow:hidden clips the roll to the pill bounds. */}
       <View style={styles.track}>
@@ -112,7 +111,7 @@ export function ActionSwapRoll({ onPress, disabled }: ActionSwapRollProps) {
           </Animated.View>
         )}
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
