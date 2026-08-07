@@ -15,10 +15,10 @@
  * - `:hover`/`:focus` state → press-and-hold (no hover on touch)
  * - Inner shimmer            → rotating gradient masked to a soft glow near
  *   the bottom edge
- * - Dot-grid texture         → static low-opacity dot field (ponytail: the
- *   original masks the dots into two rotating wedges via a second conic
- *   gradient; skipped as a secondary detail — add a `Mask` driven by the
- *   same sweep angle if that reveal motion is wanted)
+ * - Dot-grid texture         → dot field revealed by a rotating wedge, from
+ *   the CSS `mask-image: conic-gradient(from <angle> + 45deg, black,
+ *   transparent 10% 90%, black)`. Only the wedge is opaque, so the dots are
+ *   lit by the passing halo and the rest of the pill stays black.
  * - Text glow + breathing pulse → blurred ellipse under the label, opacity
  *   driven by press state, scale pulsing continuously via a sine wave
  */
@@ -167,6 +167,11 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
 
   const shimmerTransform = useDerivedValue(() => [{ rotate: (spinAngle.value * Math.PI) / 180 }]);
 
+  /** The dot mask's wedge leads the border sweep by 45deg, as in the CSS. */
+  const dotsMaskTransform = useDerivedValue(() => [
+    { rotate: ((spinAngle.value + 45) * Math.PI) / 180 },
+  ]);
+
   function onPressIn() {
     pressed.value = true;
     activation.value = withTiming(1, { duration: TRANSITION_MS, easing: EASING });
@@ -203,12 +208,27 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
             after the body fill — and be clipped to it.
           */}
           <Group clip={BODY_CLIP}>
-            {/* dot texture — see file header: rotating wedge reveal skipped */}
-            <Group opacity={0.35}>
-              {dots.map((d, i) => (
-                <Circle key={i} cx={d.x} cy={d.y} r={0.6} color="white" />
-              ))}
-            </Group>
+            {/* dot texture, revealed only inside the rotating wedge */}
+            <Mask
+              mode="luminance"
+              mask={
+                <Rect x={0} y={0} width={WIDTH} height={HEIGHT}>
+                  <SweepGradient
+                    c={CENTER}
+                    colors={['white', 'black', 'black', 'white']}
+                    positions={[0, 0.1, 0.9, 1]}
+                    transform={dotsMaskTransform}
+                    origin={CENTER}
+                  />
+                </Rect>
+              }
+            >
+              <Group opacity={0.4}>
+                {dots.map((d, i) => (
+                  <Circle key={i} cx={d.x} cy={d.y} r={0.6} color="white" />
+                ))}
+              </Group>
+            </Mask>
 
             {/* inner shimmer — mask rotates with the gradient, so it orbits */}
             <Group opacity={0.6} transform={shimmerTransform} origin={CENTER}>
