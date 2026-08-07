@@ -1,14 +1,15 @@
 {
   "expo": {
-    "name": "exposey",
-    "slug": "exposey",
+    "name": "Opal",
+    "slug": "opal",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "exposey",
+    "scheme": "opal",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "net.digitalekim.opal"
     },
     "android": {
       "adaptiveIcon": {
