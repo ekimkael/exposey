@@ -91,6 +91,16 @@ const SHIMMER_END = vec(
 const SHIMMER_MASK_CENTER = vec(CENTER.x, SHIMMER_Y + SHIMMER_SIZE);
 const SHIMMER_MASK_RADIUS = Math.hypot(SHIMMER_SIZE / 2, SHIMMER_SIZE);
 
+/**
+ * Text glow (`span::before`). The CSS is an *inset* `box-shadow` on a box only
+ * slightly larger than the label — a soft lift hugging the bottom of the text,
+ * not a wash over the whole pill. Kept well under full opacity and narrow
+ * enough to stay behind the label.
+ */
+const GLOW_MAX_OPACITY = 0.26;
+const GLOW_RADIUS = WIDTH * 0.15;
+const GLOW_BLUR = 18;
+
 /** Clips the pseudo-element layers to the body, so nothing leaks past the border. */
 const BODY_CLIP = rrect(
   rect(BORDER, BORDER, WIDTH - BORDER * 2, HEIGHT - BORDER * 2),
@@ -144,7 +154,7 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
     return ['transparent', HIGHLIGHT, shine, HIGHLIGHT, 'transparent'];
   });
 
-  const glowOpacity = useDerivedValue(() => activation.value);
+  const glowOpacity = useDerivedValue(() => activation.value * GLOW_MAX_OPACITY);
 
   const glowScale = useDerivedValue(() => {
     const t = breathe.value / (BASE_DURATION * 1.5);
@@ -253,8 +263,8 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
 
         <Canvas style={styles.glowCanvas} pointerEvents="none">
           <Group opacity={glowOpacity} transform={glowTransform} origin={vec(WIDTH / 2, HEIGHT)}>
-            <Circle cx={WIDTH / 2} cy={HEIGHT} r={WIDTH * 0.28} color={HIGHLIGHT}>
-              <BlurMask blur={22} style="normal" />
+            <Circle cx={WIDTH / 2} cy={HEIGHT} r={GLOW_RADIUS} color={HIGHLIGHT}>
+              <BlurMask blur={GLOW_BLUR} style="normal" />
             </Circle>
           </Group>
         </Canvas>
