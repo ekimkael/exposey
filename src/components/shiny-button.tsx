@@ -32,11 +32,13 @@ import {
   interpolateColors,
   LinearGradient,
   Mask,
+  Path,
   RadialGradient,
   Rect,
   rect,
   RoundedRect,
   rrect,
+  Skia,
   SweepGradient,
   vec,
 } from '@shopify/react-native-skia';
@@ -108,16 +110,14 @@ const BODY_CLIP = rrect(
   RADIUS - BORDER,
 );
 
-const DOTS = (() => {
-  const spacing = 8;
-  const dots: { x: number; y: number }[] = [];
-  for (let y = spacing / 2; y < HEIGHT; y += spacing) {
-    for (let x = spacing / 2; x < WIDTH; x += spacing) {
-      dots.push({ x, y });
-    }
-  }
-  return dots;
-})();
+/**
+ * Dot grid, matching the CSS `background-size: 4px` / dot radius `2px / 4`.
+ * At 8pt spacing the field covered under 2% of the pill and read as black
+ * once the wedge mask thinned it further. Built as one `Path` so the ~1300
+ * dots cost a single draw call rather than a node each.
+ */
+const DOT_SPACING = 4;
+const DOT_RADIUS = 0.5;
 
 export function ShinyButton({ label = 'Get unlimited access' }: { label?: string }) {
   const pressed = useSharedValue(false);
@@ -182,7 +182,15 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
     activation.value = withTiming(0, { duration: TRANSITION_MS, easing: EASING });
   }
 
-  const dots = useMemo(() => DOTS, []);
+  const dotPath = useMemo(() => {
+    const path = Skia.Path.Make();
+    for (let y = DOT_SPACING / 2; y < HEIGHT; y += DOT_SPACING) {
+      for (let x = DOT_SPACING / 2; x < WIDTH; x += DOT_SPACING) {
+        path.addCircle(x, y, DOT_RADIUS);
+      }
+    }
+    return path;
+  }, []);
 
   return (
     <Pressable
@@ -223,11 +231,7 @@ export function ShinyButton({ label = 'Get unlimited access' }: { label?: string
                 </Rect>
               }
             >
-              <Group opacity={0.4}>
-                {dots.map((d, i) => (
-                  <Circle key={i} cx={d.x} cy={d.y} r={0.6} color="white" />
-                ))}
-              </Group>
+              <Path path={dotPath} color="white" opacity={0.4} />
             </Mask>
 
             {/* inner shimmer — mask rotates with the gradient, so it orbits */}
