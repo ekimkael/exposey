@@ -1,54 +1,89 @@
-# Exposey
+# Opal — shiny call-to-action button
 
-Sandbox for faithfully reproducing mobile UI and animations (from a
-reference video or screenshot) using **Expo Router** and native components
-(`@expo/ui` SwiftUI / Jetpack Compose, Reanimated).
+A React Native reproduction of Ryan Mulligan's
+[Shiny call-to-action button](https://codepen.io/hexagoncircle/pen/MWMqXbK),
+rebuilt with [Skia](https://shopify.github.io/react-native-skia/) because the
+original relies on CSS features React Native has no equivalent for.
 
-Each reproduced screen/animation lives on **its own branch**, independent
-from `main` — `main` only holds the base Expo template. No branch is ever
-merged into another: each one is a standalone reproduction exercise.
+![the button at rest](docs/opal-rest.png)
 
-## Stack
+## What it demonstrates
 
-- [Expo SDK 56](https://docs.expo.dev/) + Expo Router (file-based routing)
-- React Native 0.85, React 19
-- `@expo/ui` (SwiftUI / Jetpack Compose) for native components
-- React Native Reanimated + Gesture Handler for animations/gestures
+A pill-shaped CTA with four layers of motion running at once:
 
-## Getting started
+- a **conic highlight orbiting the border**, one revolution every 3 s;
+- a **dot grid** that is only lit where the halo passes over it — everywhere
+  else the button stays black;
+- an **inner shimmer**, a soft crescent that orbits with the halo;
+- a **glow under the label** that blooms while the button is held.
+
+The original is driven by CSS `@property`-animated `conic-gradient()`. React
+Native has neither `@property` nor conic gradients, so every layer is drawn in
+a Skia canvas — `SweepGradient` being the direct native counterpart.
+
+Because touch has no hover, the CSS `:hover` / `:focus` state is mapped to
+**press-and-hold**: hold the button to widen the highlight band and raise the
+glow.
+
+## Requirements
+
+- Node 20+
+- Xcode 16+ with an iOS 18 simulator
+- macOS (the iOS target is the one that is verified)
+
+## Running it
 
 ```bash
 npm install
-npx expo start
 ```
 
-Then open it in a [development build](https://docs.expo.dev/develop/development-builds/introduction/),
-an iOS simulator, an Android emulator, or [Expo Go](https://expo.dev/go).
+```bash
+npm run ios
+```
 
-## Branches
+This is a **development build**, not Expo Go: `@shopify/react-native-skia` ships
+native code, so the app has to be compiled. `npm run ios` runs
+`expo run:ios`, which builds and installs it.
 
-| Branch | Description |
+> If CocoaPods fails with `Unicode Normalization not appropriate for ASCII-8BIT`,
+> export a UTF-8 locale first: `export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
+
+## Platform support
+
+| Platform | Status |
 |---|---|
-| [`feat/canopi-onboarding`](https://github.com/ekimkael/exposey/tree/feat/canopi-onboarding) | "Welcome to Canopi" onboarding screen ("Baobab"): dark-green gradient, a shelf of content-type cards bleeding off both edges, staggered entrance and perpetual card float. |
-| [`feat/family-morphing-sheet`](https://github.com/ekimkael/exposey/tree/feat/family-morphing-sheet) | Family wallet bottom sheet with a morphing transition, native Stack header toolbar, and Liquid Glass buttons (iOS 26), built with `@expo/ui` SwiftUI. |
-| [`feat/featured-music-ui`](https://github.com/ekimkael/exposey/tree/feat/featured-music-ui) | Featured music UI with video previews and a zoomed detail view. |
-| [`feat/gatesware-trip-detail`](https://github.com/ekimkael/exposey/tree/feat/gatesware-trip-detail) | Trip detail screen (Airbnb/Gatesware-style): trip stats, restaurant cards, Instagram/Snap-style stories, grid layouts for places/hotels. |
-| [`feat/invest-onboarding`](https://github.com/ekimkael/exposey/tree/feat/invest-onboarding) | Onboarding and authentication flow for an investment app. |
-| [`feat/magpie-explore-morph`](https://github.com/ekimkael/exposey/tree/feat/magpie-explore-morph) | Looping bookmark/explore hero animation ("Magpie", from app "Sortd."), reproduced from a single reference video. |
-| [`feat/mindfulness-morph`](https://github.com/ekimkael/exposey/tree/feat/mindfulness-morph) | Mindfulness screen with a pill-to-beach-photo morph transition and an "Apple Intelligence"-style glowing button (SVG gradient). |
-| [`feat/onboarding-carousel`](https://github.com/ekimkael/exposey/tree/feat/onboarding-carousel) | Onboarding carousel with an animated globe ("Remindo" app). |
-| [`feat/pumice-player-dock-pill`](https://github.com/ekimkael/exposey/tree/feat/pumice-player-dock-pill) | Apple-Music-style Library screen with a now-playing bar that swaps between a floating pill and a full-width docked sheet; page scrolls underneath it. |
-| [`feat/send-money-screen`](https://github.com/ekimkael/exposey/tree/feat/send-money-screen) | Send Money screen: native form sheet, numeric keypad, amount animations, biometric confirmation morphing into a success screen. |
-| [`feat/slash-login-hero-card`](https://github.com/ekimkael/exposey/tree/feat/slash-login-hero-card) | Login screen ("Onyx") with a card fan that folds into a stack on keyboard focus. |
-| [`feat/spotify-marquee-onboarding`](https://github.com/ekimkael/exposey/tree/feat/spotify-marquee-onboarding) | "Connect Your Spotify" onboarding screen ("Turaco"): gesture-driven rotary wheel of artist cards that snaps to the nearest slot like a rotary dial. |
-| [`feat/value-prop-onboarding`](https://github.com/ekimkael/exposey/tree/feat/value-prop-onboarding) | Cycling value-prop onboarding screen ("Remindo" app) with a radial gradient and a particle CTA button. |
+| iOS | Verified on the simulator (iPhone 17, iOS 18). |
+| Android | Should work — Skia and Reanimated are cross-platform and nothing here is iOS-specific — but it has not been run or verified. |
+| Web | Not supported. Skia on web needs the CanvasKit setup, which is not configured here. |
 
-Each branch usually has its own `README.md`/`AGENTS.md` detailing the
-reproduced screen, technical choices, and pitfalls encountered.
+## Known limitations
 
-## Available commands
+- The button is a **fixed 300×68 pt**. The geometry constants derive from those
+  two numbers, so it does not reflow to its label; changing the text means
+  changing `WIDTH`.
+- The glow is a blurred circle rather than the CSS inset `box-shadow`. It reads
+  the same at rest and while held, but it is an approximation, not a port.
+- **Press-and-hold is not the same as hover.** The CSS runs the active state
+  while the pointer merely rests on the button; here it needs a finger down.
+- Four lint errors are suppressed in `use-shiny-button-animation.ts`. The React
+  Compiler's `react-hooks/immutability` rule does not model Reanimated shared
+  values, which are mutable refs by design; the suppression is scoped to the two
+  press handlers and documented in place.
 
-- `/reproduce-ui` — reproduce a reference (video or image) provided as an attachment.
-- `/animation-brief` — spec out an animation via multiple-choice questions before implementation.
-- `/quality-pass` — cleanup/refactoring/documentation pass on an already-implemented branch.
-- `/social-post` — draft an announcement post for the current branch's case study.
+## Project layout
+
+```
+src/
+  app/                          expo-router routes (routes only)
+    _layout.tsx                 root stack, dark background
+    index.tsx                   the single screen
+  components/
+    shiny-button.tsx            rendering only — the Skia tree
+  hooks/
+    use-shiny-button-animation.ts   all motion: shared values, frame loop
+  constants/
+    shiny-button.ts             geometry, palette, timings
+```
+
+For the architecture, the CSS→Skia mapping and the pitfalls hit while building
+this, see [AGENTS.md](AGENTS.md).
