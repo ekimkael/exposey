@@ -63,6 +63,11 @@ native code, so the app has to be compiled. `npm run ios` runs
   changing `WIDTH`.
 - The glow is a blurred circle rather than the CSS inset `box-shadow`. It reads
   the same at rest and while held, but it is an approximation, not a port.
+- There is **one layer with no counterpart in the pen**: a blue wash inside the
+  pill that follows the halo, so the dots it passes over are actually lit. In
+  the browser that light comes from `::after`, but its mask hides it across
+  almost the whole pill; ported literally, the interior stayed flat black. See
+  `INNER_WASH_OPACITY` in the constants for the measurements behind it.
 - **Press-and-hold is not the same as hover.** The CSS runs the active state
   while the pointer merely rests on the button; here it needs a finger down.
 - Four lint errors are suppressed in `use-shiny-button-animation.ts`. The React

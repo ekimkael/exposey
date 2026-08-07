@@ -50,6 +50,9 @@ import {
   GLOW_RADIUS,
   HEIGHT,
   HIGHLIGHT,
+  INNER_WASH_FALLOFF,
+  INNER_WASH_OPACITY,
+  INNER_WASH_SCALE_X,
   RADIUS,
   SHIMMER_END,
   SHIMMER_MASK_CENTER,
@@ -135,6 +138,40 @@ export function ShinyButton({ label = 'Get unlimited access', onPress }: ShinyBu
               }
             >
               <Path path={dotPath} color="white" opacity={DOT_OPACITY} />
+            </Mask>
+
+            {/*
+              Blue wash trailing the halo, so the dots it passes over are lit.
+              Shares the border's colours, stops and rotation, so it stays in
+              phase with the halo by construction. Not in the original CSS —
+              see INNER_WASH_OPACITY for why it is needed here.
+            */}
+            <Mask
+              mode="luminance"
+              mask={
+                <Rect x={0} y={0} width={WIDTH} height={HEIGHT}>
+                  <RadialGradient
+                    c={CENTER}
+                    r={RADIUS}
+                    colors={['black', 'white']}
+                    positions={INNER_WASH_FALLOFF}
+                    transform={[{ scaleX: INNER_WASH_SCALE_X }]}
+                    origin={CENTER}
+                  />
+                </Rect>
+              }
+            >
+              <Group opacity={INNER_WASH_OPACITY}>
+                <Rect x={0} y={0} width={WIDTH} height={HEIGHT}>
+                  <SweepGradient
+                    c={CENTER}
+                    colors={borderColors}
+                    positions={borderPositions}
+                    transform={borderTransform}
+                    origin={CENTER}
+                  />
+                </Rect>
+              </Group>
             </Mask>
 
             {/* Inner shimmer: the mask spins with the gradient, so it orbits. */}

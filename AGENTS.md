@@ -33,6 +33,23 @@ naming the CSS declaration it came from. Change values there, not inline.
 | `mask-image` | `<Mask mode="luminance">` — **white reveals, black hides** |
 | `:hover` / `:focus` | `onPressIn` / `onPressOut` |
 | `isolation: isolate` + `z-index: -1` | paint order: body fill first, decorative layers after, clipped to the body |
+| *(no equivalent)* | the inner wash — see below |
+
+### The one deliberate deviation
+
+`shiny-button.tsx` paints a blue wash inside the pill that follows the halo.
+The pen has no such layer: in the browser the interior light comes from
+`::after`, but its mask — `radial-gradient(circle at bottom, transparent 40%,
+black)` — is centred *below* the pill and hides the shimmer across nearly all
+of it. Ported literally, the interior swung only 12.4 → 13.5 mean luminance
+over a full revolution, so the dots never lit up and raising the shimmer's own
+opacity changed nothing.
+
+The wash reuses the border sweep's colours, stops and rotation, so it stays in
+phase with the halo by construction. It is masked by an ellipse (dark centre,
+clear rim) because a bare sweep gradient fills its wedge down to the centre and
+reads as a cone converging on the middle of the button rather than as light
+spilling in from the border.
 
 ### The rotation model
 

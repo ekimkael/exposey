@@ -128,6 +128,39 @@ export const DOT_MASK_STOPS = [0, 0.1, 0.9, 1];
 export const DOT_MASK_LEAD_DEG = 45;
 
 /* -------------------------------------------------------------------------- */
+/* Inner halo wash — deliberate deviation from the CSS                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A blue wash inside the pill that follows the border halo, so the dots it
+ * sweeps over are actually lit.
+ *
+ * This layer has no counterpart in the pen. In the browser the interior light
+ * comes from `::after`, but its mask — `radial-gradient(circle at bottom,
+ * transparent 40%, black)` — is centred below the pill and hides the shimmer
+ * across nearly all of it: measured over a full revolution, the interior swung
+ * only 12.4 → 13.5 mean luminance, so raising the shimmer's own opacity did
+ * nothing visible.
+ *
+ * The wash reuses the border sweep's colours, stops and rotation, so it stays
+ * locked to the halo by construction and cannot drift out of phase with it.
+ */
+export const INNER_WASH_OPACITY = 0.22;
+
+/**
+ * A sweep gradient fills its whole wedge, right down to the centre, which makes
+ * the wash read as a cone converging on the middle of the pill. Masking it with
+ * an ellipse — dark at the centre, clear at the rim — turns it back into light
+ * spilling inward from the border, which is what the halo should look like.
+ *
+ * Scaling a circle of radius {@link RADIUS} by this factor gives an ellipse of
+ * exactly the pill's half-extents (150 × 34).
+ */
+export const INNER_WASH_SCALE_X = WIDTH / HEIGHT;
+/** Hidden until 25% of the way out, fully clear at the rim. */
+export const INNER_WASH_FALLOFF = [0.25, 1];
+
+/* -------------------------------------------------------------------------- */
 /* Text glow (`.shiny-cta span::before`)                                       */
 /* -------------------------------------------------------------------------- */
 
