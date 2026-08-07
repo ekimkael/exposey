@@ -12,6 +12,7 @@
       "bundleIdentifier": "net.digitalekim.opal"
     },
     "android": {
+      "package": "net.digitalekim.opal",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
